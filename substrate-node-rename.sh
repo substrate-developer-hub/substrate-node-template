@@ -58,3 +58,4 @@ replace Anonymous "$author"
 echo "Rename Complete"
 
 popd >/dev/null
+
