@@ -118,6 +118,11 @@ default_features = false
 git = 'https://github.com/paritytech/substrate.git'
 package = 'sr-version'
 rev = '3dedd246c62255ba6f9b777ecba318dfc2078d85'
+
+[dependencies.module-template]
+default_features = false
+path = 'module-template'
+
 [build-dependencies.wasm-builder-runner]
 package = 'substrate-wasm-builder-runner'
 version = '1.0.2'
@@ -127,6 +132,7 @@ authors = ['Anonymous']
 edition = '2018'
 name = 'node-template-runtime'
 version = '2.0.0'
+
 
 [features]
 default = ['std']
@@ -152,4 +158,5 @@ std = [
     'safe-mix/std',
     'offchain-primitives/std',
     'substrate-session/std',
+    'module-template/std',
 ]
