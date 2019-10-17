@@ -5,3 +5,6 @@
 **/*.rs.bk
 
 .DS_Store
+
+# IntelliJ
+.idea
