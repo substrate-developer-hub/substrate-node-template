@@ -10,7 +10,7 @@ services:
       - ".:/substrate-node-template"
       - "cargo-registry-cache:/root/.cargo/registry"
       - "cargo-git-cache:/root/.cargo/git"
-    command: bash -c "cargo run --release -- --dev"
+    command: bash -c "cargo run --release -- --dev --ws-external"
 
 volumes:
   cargo-registry-cache:

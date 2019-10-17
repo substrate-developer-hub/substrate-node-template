@@ -68,3 +68,11 @@ cargo run -- \
 ```
 
 Additional CLI usage options are available and may be shown by running `cargo run -- --help`.
+
+### Run with Docker
+
+If you prefer to use Docker, you can run following command to start a single node development chain.
+
+```bash
+./auto/dev
+```
