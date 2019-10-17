@@ -8,8 +8,10 @@ services:
       - "9944:9944"
     volumes:
       - ".:/substrate-node-template"
-      - "cargo-cache:/root/.cargo/registry"
-    command: bash -c "cargo run --release -- --dev --ws-external"
+      - "cargo-registry-cache:/root/.cargo/registry"
+      - "cargo-git-cache:/root/.cargo/git"
+    command: bash -c "cargo run --release -- --dev"
 
 volumes:
-  cargo-cache:
+  cargo-registry-cache:
+  cargo-git-cache:
