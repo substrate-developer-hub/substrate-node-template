@@ -2,14 +2,14 @@ version: "2.2"
 
 services:
   dev:
-    image: substrate-node-template:v0.3
+    image: parity/rust:nightly
     working_dir: /substrate-node-template
     ports:
       - "9944:9944"
     volumes:
       - ".:/substrate-node-template"
       - "cargo-cache:/root/.cargo/registry"
-    command: bash -c "cargo run -- --dev"
+    command: bash -c "cargo run --release -- --dev --ws-external"
 
 volumes:
   cargo-cache:
