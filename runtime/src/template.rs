@@ -6,7 +6,7 @@
 
 
 /// For more guidance on Substrate modules, see the example module
-/// https://github.com/paritytech/substrate/blob/master/srml/example/src/lib.rs
+/// https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
 
 use support::{decl_module, decl_storage, decl_event, dispatch::Result};
 use system::ensure_signed;
@@ -24,8 +24,8 @@ decl_storage! {
 	trait Store for Module<T: Trait> as TemplateModule {
 		// Just a dummy storage item.
 		// Here we are declaring a StorageValue, `Something` as a Option<u32>
-		// `get(something)` is the default getter which returns either the stored `u32` or `None` if nothing stored
-		Something get(something): Option<u32>;
+		// `get(fn something)` is the default getter which returns either the stored `u32` or `None` if nothing stored
+		Something get(fn something): Option<u32>;
 	}
 }
 
@@ -70,9 +70,9 @@ mod tests {
 	use super::*;
 
 	use primitives::H256;
-	use support::{impl_outer_origin, assert_ok, parameter_types};
-	use sr_primitives::{
-		traits::{BlakeTwo256, IdentityLookup}, testing::Header, weights::Weight, Perbill,
+	use support::{impl_outer_origin, assert_ok, parameter_types, weights::Weight};
+	use sp_runtime::{
+		traits::{BlakeTwo256, IdentityLookup}, testing::Header, Perbill,
 	};
 
 	impl_outer_origin! {
