@@ -16,33 +16,98 @@ tokio = "0.1.22"
 parking_lot = "0.9.0"
 trie-root = "0.15.2"
 ctrlc = { version = "3.1.3", features = ["termination"] }
+codec = { package = "parity-scale-codec", version = "1.0.0" }
+futures01 = { package = "futures", version = "0.1" }
 
-# substrate dependencies
+# substrate dependencies from github
 [dependencies.aura]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
 package = "sc-consensus-aura"
+
+[dependencies.sp-io]
 git = "https://github.com/paritytech/substrate.git"
 rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
 
-codec = { package = "parity-scale-codec", version = "1.0.0" }
-futures01 = { package = "futures", version = "0.1.29" }
-sp-io = { path = "../../primitives/sr-io" }
-sc-cli = { path = "../../client/cli" }
-primitives = { package = "sp-core", path = "../../primitives/core" }
-sc-executor = { path = "../../client/executor" }
-sc-service = { path = "../../client/service" }
-inherents = { package = "sp-inherents", path = "../../primitives/inherents" }
-txpool = { package = "sc-transaction-pool", path = "../../client/transaction-pool" }
-txpool-api = { package = "sp-transaction-pool-api", path = "../../primitives/transaction-pool" }
-network = { package = "sc-network", path = "../../client/network" }
-aura-primitives = { package = "sp-consensus-aura", path = "../../primitives/consensus/aura" }
-consensus-common = { package = "sp-consensus", path = "../../primitives/consensus/common" }
-grandpa = { package = "sc-finality-grandpa", path = "../../client/finality-grandpa" }
-grandpa-primitives = { package = "sp-finality-granpda", path = "../../primitives/finality-grandpa" }
-sc-client = {  path = "../../client/" }
-runtime = { package = "node-template-runtime", path = "runtime" }
-sp-runtime = { path = "../../primitives/sr-primitives" }
-basic-authorship = { package = "sc-basic-authority", path  = "../../client/basic-authorship"}
+[dependencies.sc-cli]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+
+[dependencies.primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sp-core"
+
+[dependencies.sc-executor]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+
+[dependencies.sc-service]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+
+[dependencies.inherents]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sp-inherents"
+
+[dependencies.txpool]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sc-transaction-pool"
+
+[dependencies.txpool-api]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sp-transaction-pool-api"
+
+[dependencies.network]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sc-network"
+
+[dependencies.aura-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sp-consensus-aura"
+
+[dependencies.consensus-common]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sp-consensus"
+
+[dependencies.grandpa]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sc-finality-grandpa"
+
+[dependencies.grandpa-primitives]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sp-finality-granpda"
+
+[dependencies.sc-client]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+
+[dependencies.runtime]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "node-template-runtime"
+
+[dependencies.sp-runtime]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+
+[dependencies.basic-authorship]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "sc-basic-authority"
 
 [build-dependencies]
 vergen = "3.0.4"
-build-script-utils = { package = "substrate-build-script-utils", path = "../../utils/build-script-utils" }
+
+[build-dependencies.build-script-utils]
+git = "https://github.com/paritytech/substrate.git"
+rev = "368318c9b11c07596cde5dc37220258cfa7dfa76"
+package = "substrate-build-script-utils"
