@@ -5,6 +5,3 @@
 **/*.rs.bk
 
 .DS_Store
-
-scripts/run
-.notes
