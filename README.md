@@ -88,7 +88,7 @@ version/commit, you can run the following commands:
 # git clone from the main Substrate repo
 git clone https://github.com/paritytech/substrate.git
 
-# Switch to a branch or commit of the Substrate repo here
+# Switch to a branch or commit of the Substrate repo you want your node-template based on
 # git checkout <branch/sha1>
 
 cd substrate/.maintain
