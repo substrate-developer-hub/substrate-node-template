@@ -24,7 +24,7 @@ cargo build --release
 
 ## Run
 
-### Single node development chain
+### Single Node Development Chain
 
 Purge any existing development chain state:
 
@@ -40,7 +40,7 @@ Start a development chain with:
 
 Detailed logs may be shown by running the node with the following environment variables set: `RUST_LOG=debug RUST_BACKTRACE=1 cargo run -- --dev`.
 
-### Multi-node local testnet
+### Multi-Node Local Testnet
 
 If you want to see the multi-node consensus algorithm in action locally, then you can create a local testnet with two validator nodes for Alice and Bob, who are the initial authorities of the genesis chain that have been endowed with testnet units.
 
@@ -74,3 +74,27 @@ cargo run -- \
 ```
 
 Additional CLI usage options are available and may be shown by running `cargo run -- --help`.
+
+### Generate Your Own Substrate Node Template
+
+A substrate node template is always based on a certain version of Substrate. You can inspect it by
+opening [Cargo.toml](Cargo.toml) and see the template refers to a specific Substrate commit (the
+`rev` field), branch, or version.
+
+If you want to generate your own Substrate node-template based on a particular Substrate
+version/commit, you can run the following commands:
+
+```bash
+# git clone from the main Substrate repo
+git clone https://github.com/paritytech/substrate.git
+
+# Switch to a branch or commit of the Substrate repo here
+# git checkout <branch/sha1>
+
+cd substrate/.maintain
+
+# Run the helper script to generate a node template.
+# This script compiles Substrate and takes a while to complete. It takes a relative file path
+#   from the current dir. to output the compressed template file.
+./node-template-release.sh ../../node-template.tar.gz
+```
