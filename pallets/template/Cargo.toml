@@ -1,9 +1,8 @@
 [package]
 authors = ['Anonymous']
 edition = '2018'
-name = 'runtime'
-version = '2.0.0'
-build = "./build.rs"
+name = 'pallet-template'
+version = '1.0.0'
 
 [dependencies.aura]
 default-features = false
@@ -165,12 +164,6 @@ package = 'pallet-transaction-payment'
 rev = '3e651110aa06aa835790df63410a29676243fc54'
 version = '2.0.0'
 
-[dependencies.template]
-default-features = false
-package = 'pallet-template'
-version = '1.0.0'
-path = '../pallets/template'
-
 [build-dependencies.wasm-builder-runner]
 git = 'https://github.com/paritytech/substrate.git'
 package = 'substrate-wasm-builder-runner'
@@ -205,6 +198,5 @@ std = [
     'sudo/std',
     'system/std',
     'timestamp/std',
-    'transaction-payment/std',
-    'template/std'
+    'transaction-payment/std'
 ]

@@ -37,6 +37,8 @@ pub use frame_support::{
 	weights::Weight,
 };
 
+pub use template;
+
 /// An index to a block.
 pub type BlockNumber = u32;
 
@@ -62,9 +64,6 @@ pub type Hash = sp_core::H256;
 
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
-
-/// Used for the module template in `./template.rs`
-mod template;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -235,7 +234,7 @@ impl sudo::Trait for Runtime {
 	type Proposal = Call;
 }
 
-/// Used for the module template in `./template.rs`
+/// Implement `template` pallet
 impl template::Trait for Runtime {
 	type Event = Event;
 }
@@ -254,7 +253,7 @@ construct_runtime!(
 		Balances: balances,
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo,
-		// Used for the module template in `./template.rs`
+		// Include `template` pallet in the runtime
 		TemplateModule: template::{Module, Call, Storage, Event<T>},
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
 	}

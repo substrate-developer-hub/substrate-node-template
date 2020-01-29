@@ -1,3 +1,6 @@
+// Ensure we're `no_std` when compiling for Wasm.
+#![cfg_attr(not(feature = "std"), no_std)]
+
 /// A runtime module template with necessary imports
 
 /// Feel free to remove or edit this file as needed.
@@ -10,6 +13,11 @@
 
 use frame_support::{decl_module, decl_storage, decl_event, dispatch::DispatchResult};
 use system::ensure_signed;
+
+// For testing: mock runtime setup
+mod mock;
+// For testing: actual test cases
+mod tests;
 
 /// The module's configuration trait.
 pub trait Trait: system::Trait {

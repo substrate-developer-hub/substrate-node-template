@@ -1,5 +1,8 @@
-[profile.release]
-panic = 'unwind'
+[workspace]
+members = [
+  'runtime',
+  'pallets/template'
+]
 
 [package]
 authors = ['Anonymous']
@@ -8,14 +11,9 @@ edition = '2018'
 name = 'node-template'
 version = '2.0.0'
 
-[build-dependencies]
-vergen = '3.0.4'
-
-[build-dependencies.build-script-utils]
-git = 'https://github.com/paritytech/substrate.git'
-package = 'substrate-build-script-utils'
-rev = '3e651110aa06aa835790df63410a29676243fc54'
-version = '2.0.0'
+[[bin]]
+name = 'node-template'
+path = 'src/main.rs'
 
 [dependencies]
 futures = '0.3.1'
@@ -50,6 +48,7 @@ version = '2.0.0'
 
 [dependencies.node-template-runtime]
 path = 'runtime'
+package = 'runtime'
 version = '2.0.0'
 
 [dependencies.sc-basic-authority]
@@ -126,9 +125,14 @@ git = 'https://github.com/paritytech/substrate.git'
 rev = '3e651110aa06aa835790df63410a29676243fc54'
 version = '2.0.0'
 
-[workspace]
-members = ['runtime']
+[build-dependencies]
+vergen = '3.0.4'
 
-[[bin]]
-name = 'node-template'
-path = 'src/main.rs'
+[build-dependencies.build-script-utils]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'substrate-build-script-utils'
+rev = '3e651110aa06aa835790df63410a29676243fc54'
+version = '2.0.0'
+
+[profile.release]
+panic = 'unwind'
