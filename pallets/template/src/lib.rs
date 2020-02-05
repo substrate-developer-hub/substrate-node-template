@@ -14,7 +14,10 @@
 use frame_support::{decl_module, decl_storage, decl_event, dispatch::DispatchResult};
 use system::ensure_signed;
 
-// For testing: mock runtime setup and test cases
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
 mod tests;
 
 /// The module's configuration trait.

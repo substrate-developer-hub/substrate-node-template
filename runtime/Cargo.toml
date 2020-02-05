@@ -163,7 +163,7 @@ version = '2.0.0'
 default-features = false
 package = 'pallet-template'
 version = '1.0.0'
-path = '../../pallets/template'
+path = '../pallets/template'
 
 [build-dependencies.wasm-builder-runner]
 git = 'https://github.com/paritytech/substrate.git'
