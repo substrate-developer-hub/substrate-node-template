@@ -1,0 +1,53 @@
+[package]
+name = "substratee-registry-host-calls"
+version = "0.6.0"
+authors = ["Supercomputing Systems AG <info@scs.ch>"]
+edition = "2018"
+
+[dependencies]
+sgx_types       = { rev = "v1.1.0", git = "https://github.com/apache/teaclave-sgx-sdk.git" }
+sgx_ucrypto     = { rev = "v1.1.0", git = "https://github.com/apache/teaclave-sgx-sdk.git", optional = true }
+
+base64          = { version = "0.11", optional = true }
+chrono          = { version = "0.4", optional = true }
+itertools       = { version = "0.8", optional = true }
+log             = { version = "0.4", optional = true }  # Todo: replace with runtime logger: palette-support/debug
+env_logger 		= { version = "0.6", optional = true }
+rustls          = { version = "0.16", optional = true }
+serde_json      = { version = "1.0", optional = true }
+serde_derive    = { version = "1.0", optional = true }
+webpki          = { version = "0.21", default-features = false }
+
+[dependencies.codec]
+default-features = false
+package = "parity-scale-codec"
+features = ["derive"]
+version = "1.2.0"
+
+[dependencies.runtime-interface]
+default-features = false
+package = 'sp-runtime-interface'
+version = '2.0.0-alpha.5'
+
+[dependencies.runtime-io]
+default-features = false
+version = '2.0.0-alpha.5'
+package = 'sp-io'
+features = ["disable_allocator", "disable_panic_handler", "disable_oom"]
+
+[features]
+default = ["std"]
+std = [
+    "base64",
+    "chrono",
+    "itertools",
+    "log",
+    "env_logger",
+    "rustls",
+    "serde_json",
+    "serde_derive",
+    "webpki/std",
+    "runtime-interface/std",
+    "runtime-io/std",
+    "sgx_ucrypto"
+]

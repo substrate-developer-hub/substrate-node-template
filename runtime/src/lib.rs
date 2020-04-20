@@ -1,4 +1,4 @@
-//! The Substrate Node Template runtime. This can be compiled with `#[no_std]`, ready for Wasm.
+//! The SubstraTEE Node runtime. This can be compiled with `#[no_std]`, ready for Wasm.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
@@ -37,8 +37,8 @@ pub use frame_support::{
 	weights::Weight,
 };
 
-/// Importing a template pallet
-pub use template;
+/// added by SCS
+pub use substratee_registry;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -92,11 +92,11 @@ pub mod opaque {
 
 /// This runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("node-template"),
-	impl_name: create_runtime_str!("node-template"),
+	spec_name: create_runtime_str!("substratee-node-runtime"),
+	impl_name: create_runtime_str!("substratee-node-runtime"),
 	authoring_version: 1,
 	spec_version: 1,
-	impl_version: 1,
+	impl_version: 2,
 	apis: RUNTIME_API_VERSIONS,
 };
 
@@ -221,8 +221,8 @@ impl sudo::Trait for Runtime {
 	type Call = Call;
 }
 
-/// Used for the module template in `./template.rs`
-impl template::Trait for Runtime {
+/// added by SCS
+impl substratee_registry::Trait for Runtime {
 	type Event = Event;
 }
 
@@ -240,8 +240,8 @@ construct_runtime!(
 		Balances: balances::{Module, Call, Storage, Config<T>, Event<T>},
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo::{Module, Call, Config<T>, Storage, Event<T>},
-		// Used for the module template in `./template.rs`
-		TemplateModule: template::{Module, Call, Storage, Event<T>},
+		// added by SCS
+		SubstrateeRegistry: substratee_registry::{Module, Call, Storage, Event<T>},
 	}
 );
 

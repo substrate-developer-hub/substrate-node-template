@@ -1,13 +1,13 @@
 [package]
-authors = ['Anonymous']
+authors = ["Supercomputing Systems AG <info@scs.ch>"]
 build = 'build.rs'
 description = 'Substrate Node template'
 edition = '2018'
-homepage = 'https://substrate.dev'
-license = 'Unlicense'
-name = 'node-template'
-repository = 'https://github.com/paritytech/substrate/'
-version = '2.0.0-alpha.6'
+homepage = 'https://www.scs.ch'
+license = 'Apache2'
+name = 'substratee-node'
+repository = 'https://github.com/scs/substratee-node/'
+version = '0.6.0'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
@@ -17,9 +17,13 @@ futures = '0.3.4'
 log = '0.4.8'
 structopt = '0.3.8'
 
-[dependencies.node-template-runtime]
+[dependencies.substratee-node-runtime]
 path = '../runtime'
-version = '2.0.0-alpha.6'
+version = '0.6.0'
+
+[dependencies.substratee-registry-host-calls]
+path = '../pallets/substratee-registry/host-calls'
+version = '0.6.0'
 
 [dependencies.sc-basic-authorship]
 version = '0.8.0-alpha.6'
@@ -75,4 +79,4 @@ version = '2.0.0-alpha.6'
 version = '2.0.0-alpha.6'
 
 [[bin]]
-name = 'node-template'
+name = 'substratee-node'

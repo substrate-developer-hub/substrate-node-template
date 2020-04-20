@@ -1,3 +1,15 @@
+[package]
+authors = ["Supercomputing Systems AG <info@scs.ch>"]
+edition = '2018'
+homepage = 'https://www.scs.ch'
+license = 'Apache2'
+name = 'substratee-node-runtime'
+repository = 'https://github.com/scs/substratee-node/'
+version = '0.6.0'
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
+
 [dependencies.aura]
 default-features = false
 package = 'pallet-aura'
@@ -95,11 +107,16 @@ default-features = false
 package = 'frame-system'
 version = '2.0.0-alpha.6'
 
-[dependencies.template]
+[dependencies.substratee-registry]
 default-features = false
-package = 'pallet-template'
-path = '../pallets/template'
-version = '2.0.0-alpha.6'
+package = 'pallet-substratee-registry'
+path = '../pallets/substratee-registry'
+version = '0.6.0'
+
+[dependencies.substratee-registry-host-calls]
+default-features = false
+path = '../pallets/substratee-registry/host-calls'
+version = '0.6.0'
 
 [dependencies.timestamp]
 default-features = false
@@ -114,18 +131,6 @@ version = '2.0.0-alpha.6'
 [build-dependencies.wasm-builder-runner]
 package = 'substrate-wasm-builder-runner'
 version = '1.0.5'
-
-[package]
-authors = ['Anonymous']
-edition = '2018'
-homepage = 'https://substrate.dev'
-license = 'Unlicense'
-name = 'node-template-runtime'
-repository = 'https://github.com/paritytech/substrate/'
-version = '2.0.0-alpha.6'
-
-[package.metadata.docs.rs]
-targets = ['x86_64-unknown-linux-gnu']
 
 [features]
 default = ['std']
@@ -154,5 +159,5 @@ std = [
     'system/std',
     'timestamp/std',
     'transaction-payment/std',
-    'template/std',
+    'substratee-registry/std',
 ]

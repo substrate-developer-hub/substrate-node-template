@@ -1,7 +1,8 @@
 [workspace]
 members = [
     'node',
-    'pallets/template',
+    'pallets/substratee-registry',
+    'pallets/substratee-registry/host-calls',
     'runtime',
 ]
 [profile.release]
