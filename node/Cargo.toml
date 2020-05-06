@@ -22,57 +22,86 @@ path = '../runtime'
 version = '2.0.0-alpha.6'
 
 [dependencies.sc-basic-authorship]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sc-cli]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sc-client]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sc-client-api]
-version = '2.0.0-alpha.6'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sc-consensus-aura]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sc-executor]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sc-finality-grandpa]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sc-network]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sc-service]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sc-transaction-pool]
-version = '2.0.0-alpha.6'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sp-consensus]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sp-consensus-aura]
+git = 'https://github.com/paritytech/substrate.git'
 version = '0.8.0-alpha.6'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sp-core]
-version = '2.0.0-alpha.6'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sp-finality-grandpa]
-version = '2.0.0-alpha.6'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sp-inherents]
-version = '2.0.0-alpha.6'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sp-runtime]
-version = '2.0.0-alpha.6'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.6'
 
 [dependencies.sp-transaction-pool]
-version = '2.0.0-alpha.6'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.6'
+
 [build-dependencies.substrate-build-script-utils]
-version = '2.0.0-alpha.6'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.6'
 
 [[bin]]
 name = 'node-template'
