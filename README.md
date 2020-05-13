@@ -82,7 +82,7 @@ Additional CLI usage options are available and may be shown by running `cargo ru
 
 ### Run in Docker
 
-Install Docker first, then run following command to start a single node development chain.
+Install [Docker](https://docs.docker.com/get-docker/) first, then run following command to start a single node development chain.
 
 ```bash
 ./scripts/docker_run.sh
