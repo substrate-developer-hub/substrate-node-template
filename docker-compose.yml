@@ -1,0 +1,17 @@
+version: "3.2"
+
+services:
+  dev:
+    container_name: node-template
+    image: parity/rust-builder:latest
+    working_dir: /var/www/node-template
+    ports:
+      - "9944:9944"
+    environment:
+      - CARGO_HOME=/var/www/node-template/.cargo
+    volumes:
+      - .:/var/www/node-template
+      - type: bind
+        source: ./cargo
+        target: /root/.cargo
+    command: cargo run --release -- --dev --ws-external

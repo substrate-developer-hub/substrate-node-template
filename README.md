@@ -80,6 +80,14 @@ cargo run -- \
 
 Additional CLI usage options are available and may be shown by running `cargo run -- --help`.
 
+### Run in Docker
+
+Install Docker first, then run following command to start a single node development chain.
+
+```bash
+./scripts/docker_run.sh
+```
+
 ## Advanced: Generate Your Own Substrate Node Template
 
 A substrate node template is always based on a certain version of Substrate. You can inspect it by
