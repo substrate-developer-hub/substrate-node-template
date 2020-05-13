@@ -14,4 +14,4 @@ services:
       - type: bind
         source: ./cargo
         target: /root/.cargo
-    command: cargo run --release -- --dev --ws-external
+    command: bash -c "cargo build --release && ./target/release/node-template --dev --ws-external"
