@@ -12,6 +12,6 @@ services:
     volumes:
       - .:/var/www/node-template
       - type: bind
-        source: ./cargo
-        target: /root/.cargo
+        source: ./.local
+        target: /root/.local
     command: bash -c "cargo build --release && ./target/release/node-template --dev --ws-external"

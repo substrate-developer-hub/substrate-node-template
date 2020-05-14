@@ -82,10 +82,22 @@ Additional CLI usage options are available and may be shown by running `cargo ru
 
 ### Run in Docker
 
-Install [Docker](https://docs.docker.com/get-docker/) first, then run the following command to start a single node development chain.
+Install [Docker](https://docs.docker.com/get-docker/) first, then run the following command to start a single node development chain. This command will firstly comipile your code, then start a local dev netork.
 
 ```bash
 ./scripts/docker_run.sh
+```
+
+If you just want to run the compiled binary,
+
+```bash
+./scripts/docker_run.sh ./target/release/node-template --dev --ws-external
+```
+
+You can also check whether the code is able to compile or not,
+
+```bash
+./scripts/docker_run.sh cargo check
 ```
 
 ## Advanced: Generate Your Own Substrate Node Template
