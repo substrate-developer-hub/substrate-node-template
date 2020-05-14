@@ -94,6 +94,12 @@ If you just want to run the compiled binary,
 ./scripts/docker_run.sh ./target/release/node-template --dev --ws-external
 ```
 
+Other commands are similar. Let's try purge the local dev chain here:
+
+```bash
+./scripts/docker_run.sh ./target/release/node-template purge-chain --dev
+```
+
 You can also check whether the code is able to compile or not,
 
 ```bash
