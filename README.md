@@ -82,27 +82,24 @@ Additional CLI usage options are available and may be shown by running `cargo ru
 
 ### Run in Docker
 
-Install [Docker](https://docs.docker.com/get-docker/) first, then run the following command to start a single node development chain. This command will firstly comipile your code, then start a local dev netork.
+First, install [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/).
+
+Then run the following command to start a single node development chain.
 
 ```bash
 ./scripts/docker_run.sh
 ```
 
-If you just want to run the compiled binary,
+This command will firstly compile your code, and then start a local development network. You can also replace the default command (`cargo build --release && ./target/release/node-template --dev --ws-external`) by appending your own. A few useful ones are as follow.
 
 ```bash
+# Run Substrate node without re-compiling
 ./scripts/docker_run.sh ./target/release/node-template --dev --ws-external
-```
 
-Other commands are similar. Let's try purge the local dev chain here:
-
-```bash
+# Purge the local dev chain
 ./scripts/docker_run.sh ./target/release/node-template purge-chain --dev
-```
 
-You can also check whether the code is able to compile or not,
-
-```bash
+# Check whether the code is compilable
 ./scripts/docker_run.sh cargo check
 ```
 
