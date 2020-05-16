@@ -36,11 +36,11 @@ impl system::Trait for Test {
 	type Event = ();
 	type BlockHashCount = BlockHashCount;
 	type MaximumBlockWeight = MaximumBlockWeight;
+	type DbWeight = ();
+	type BlockExecutionWeight = ();
+	type ExtrinsicBaseWeight = ();
 	type MaximumBlockLength = MaximumBlockLength;
 	type AvailableBlockRatio = AvailableBlockRatio;
-	type BlockExecutionWeight = ();
-	type DbWeight = ();
-	type ExtrinsicBaseWeight = ();
 	type Version = ();
 	type ModuleToIndex = ();
 	type AccountData = ();

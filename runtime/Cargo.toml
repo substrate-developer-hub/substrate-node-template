@@ -1,14 +1,16 @@
 [dependencies.aura]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
+git = 'https://github.com/paritytech/substrate.git'
 package = 'pallet-aura'
-tag = 'v2.0.0-alpha.7'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.balances]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
+git = 'https://github.com/paritytech/substrate.git'
 package = 'pallet-balances'
-tag = 'v2.0.0-alpha.7'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.codec]
 default-features = false
@@ -17,26 +19,30 @@ package = 'parity-scale-codec'
 version = '1.3.0'
 
 [dependencies.frame-executive]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.frame-support]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.grandpa]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
+git = 'https://github.com/paritytech/substrate.git'
 package = 'pallet-grandpa'
-tag = 'v2.0.0-alpha.7'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.randomness-collective-flip]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
+git = 'https://github.com/paritytech/substrate.git'
 package = 'pallet-randomness-collective-flip'
-tag = 'v2.0.0-alpha.7'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.serde]
 features = ['derive']
@@ -44,109 +50,125 @@ optional = true
 version = '1.0.101'
 
 [dependencies.sp-api]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-block-builder]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-consensus-aura]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-version = '0.8.0-alpha.7'
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '0.8.0-alpha.8'
 
 [dependencies.sp-core]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-inherents]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-io]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-offchain]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-runtime]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-session]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-std]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-transaction-pool]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sp-version]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
-tag = 'v2.0.0-alpha.7'
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.sudo]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
+git = 'https://github.com/paritytech/substrate.git'
 package = 'pallet-sudo'
-tag = 'v2.0.0-alpha.7'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.system]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
+git = 'https://github.com/paritytech/substrate.git'
 package = 'frame-system'
-tag = 'v2.0.0-alpha.7'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.template]
 default-features = false
 package = 'pallet-template'
 path = '../pallets/template'
-version = '2.0.0-alpha.7'
+version = '2.0.0-alpha.8'
 
 [dependencies.timestamp]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
+git = 'https://github.com/paritytech/substrate.git'
 package = 'pallet-timestamp'
-tag = 'v2.0.0-alpha.7'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [dependencies.transaction-payment]
-git = 'https://github.com/paritytech/substrate.git'
 default-features = false
+git = 'https://github.com/paritytech/substrate.git'
 package = 'pallet-transaction-payment'
-tag = 'v2.0.0-alpha.7'
+tag = 'v2.0.0-alpha.8'
+version = '2.0.0-alpha.8'
 
 [build-dependencies.wasm-builder-runner]
 git = 'https://github.com/paritytech/substrate.git'
 package = 'substrate-wasm-builder-runner'
+tag = 'v2.0.0-alpha.8'
 version = '1.0.5'
 
 [package]
-authors = ['Anonymous']
+authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
 edition = '2018'
-homepage = 'https://substrate.dev'
+homepage = 'https://substrate.io'
 license = 'Unlicense'
 name = 'node-template-runtime'
-repository = 'https://github.com/paritytech/substrate/'
-version = '2.0.0-alpha.7'
+repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
+version = '2.0.0-alpha.8'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
