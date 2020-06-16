@@ -1,0 +1,48 @@
+name: Build and Push template
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build-push-template:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build and push the node-template Docker image
+      uses: docker/build-push-action@v1 # https://github.com/docker/build-push-action
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        dockerfile: .devcontainer/Dockerfile
+        repository: jeluard/substrate-playground-template-node-template
+        tags: latest
+        add_git_labels: true
+        tag_with_ref: true
+        tag_with_sha: true
+
+    - run: echo ::set-output name=image::jeluard/substrate-playground-template-node-template:sha-${GITHUB_SHA::7}
+      id: env
+
+    - name: Update devcontainer.json
+      run: |-
+        t=$(mktemp)
+        cat .devcontainer/devcontainer.json | jq ".image = \"${{ steps.env.outputs.image }}\"" > ${t} && mv ${t} .devcontainer/devcontainer.json
+
+    - name: Commit .devcontainer.json update
+      uses: EndBug/add-and-commit@v4
+      with:
+        message: ":bookmark: update image"
+        add: ".devcontainer/devcontainer.json"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Trigger playground inclusion
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        repository: paritytech/substrate-playground
+        event-type: template-updated
+        client-payload: '{"id": "node-template", "image": "${{ steps.env.outputs.image }}"}'

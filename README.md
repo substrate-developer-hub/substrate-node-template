@@ -1,3 +1,5 @@
+[![Try on playground](https://img.shields.io/badge/Playground-node-templates-brightgreen?logo=Parity%20Substrate)](https://playground-staging.substrate.dev/?deploy=node-templates)
+
 # Substrate Node Template
 
 A new FRAME-based Substrate node, ready for hacking.
