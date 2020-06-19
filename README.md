@@ -1,4 +1,4 @@
-[![Try on playground](https://img.shields.io/badge/Playground-node-templates-brightgreen?logo=Parity%20Substrate)](https://playground-staging.substrate.dev/?deploy=node-templates)
+[![Try on playground](https://img.shields.io/badge/Playground-node_template-brightgreen?logo=Parity%20Substrate)](https://playground-staging.substrate.dev/?deploy=node-template)
 
 # Substrate Node Template
 
