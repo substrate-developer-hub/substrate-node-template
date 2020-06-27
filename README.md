@@ -19,7 +19,7 @@ curl https://getsubstrate.io -sSf | bash -s -- --fast
 
 ### Manual Method
 
-Simple steps for Linux-based systems can be found below; you can
+Manual steps for Linux-based systems can be found below; you can
 [find more information at substrate.dev](https://substrate.dev/docs/en/knowledgebase/getting-started/#manual-installation).
 
 Install Rust:
