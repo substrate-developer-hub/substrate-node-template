@@ -57,6 +57,7 @@ tag = 'v2.0.0-rc5'
 version = '2.0.0-rc5'
 
 [dependencies.serde]
+default-features = false
 features = ['derive']
 optional = true
 version = '1.0.101'
@@ -86,12 +87,6 @@ tag = 'v2.0.0-rc5'
 version = '2.0.0-rc5'
 
 [dependencies.sp-inherents]
-default-features = false
-git = 'https://github.com/paritytech/substrate.git'
-tag = 'v2.0.0-rc5'
-version = '2.0.0-rc5'
-
-[dependencies.sp-io]
 default-features = false
 git = 'https://github.com/paritytech/substrate.git'
 tag = 'v2.0.0-rc5'
@@ -183,13 +178,12 @@ std = [
     'frame-support/std',
     'grandpa/std',
     'randomness-collective-flip/std',
-    'serde',
+    'serde/std',
     'sp-api/std',
     'sp-block-builder/std',
     'sp-consensus-aura/std',
     'sp-core/std',
     'sp-inherents/std',
-    'sp-io/std',
     'sp-offchain/std',
     'sp-runtime/std',
     'sp-session/std',
