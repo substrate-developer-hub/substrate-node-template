@@ -38,7 +38,7 @@ and add additional information if you think it's relevant._
 
 **Logs, Errors or Screenshots**
 
-_Please provide the text of any logs or errors that you think may be related to the bug; if
+_Please provide the text of any logs or errors that you experienced; if
 applicable, provide screenshots to help illustrate the problem._
 
 **Additional Information**
