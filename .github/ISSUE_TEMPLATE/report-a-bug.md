@@ -34,6 +34,7 @@ and add additional information if you think it's relevant._
 
 - Operating system:
 - Template version/tag:
+- Rust version (run `rustup show`):
 
 **Logs, Errors or Screenshots**
 
