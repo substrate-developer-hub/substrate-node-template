@@ -10,7 +10,7 @@ assignees: ""
 
 _Tell us what happened. In particular, be specific about any changes you made to this template.
 Ideally, provide a link to your project's GitHub repository. Please note that we are not able to
-support any conceivable change to this template project, but the more information you are able to
+support all conceivable changes to this template project, but the more information you are able to
 provide the more equipped we will be to help._
 
 **Steps to Reproduce**
