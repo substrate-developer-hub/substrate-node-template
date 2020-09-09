@@ -1,7 +1,7 @@
 # Substrate Developer Set-Up Guide
 
 The purpose of this document is to provide developers with the information they need to set-up a Substrate development
-environment. For each operating system we support a standard Docker container exist to verify that the
+environment. For each operating system we support a standard Docker container exists to verify that the
 provided steps are sufficient to build and run the node template in this repository.
 
 ## Ubuntu
