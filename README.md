@@ -9,7 +9,7 @@ Follow these steps to prepare a local Substrate development environment :hammer_
 ### Setup
 
 Setup instructions can be found at the
-[Substrate Developer Hub](https://substrate.dev/docs/en/knowledgebase/getting-started/#manual-installation).
+[Substrate Developer Hub](https://substrate.dev/docs/en/knowledgebase/getting-started).
 
 ### Build
 
