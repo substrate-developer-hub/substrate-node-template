@@ -6,18 +6,9 @@ A new FRAME-based Substrate node, ready for hacking :rocket:
 
 Follow these steps to prepare a local Substrate development environment :hammer_and_wrench:
 
-### Simple Setup
+### Setup
 
-Install all the required dependencies with a single command (be patient, this can take up to 30
-minutes).
-
-```bash
-curl https://getsubstrate.io -sSf | bash -s -- --fast
-```
-
-### Manual Setup
-
-Find manual setup instructions at the
+Setup instructions can be found at the
 [Substrate Developer Hub](https://substrate.dev/docs/en/knowledgebase/getting-started/#manual-installation).
 
 ### Build
