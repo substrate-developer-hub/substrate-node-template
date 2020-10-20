@@ -9,6 +9,7 @@ services:
       - "9944:9944"
     environment:
       - CARGO_HOME=/var/www/node-template/.cargo
+      - WASM_BUILD_TOOLCHAIN=nightly-2020-10-05
     volumes:
       - .:/var/www/node-template
       - type: bind
