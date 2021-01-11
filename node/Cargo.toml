@@ -7,7 +7,7 @@ homepage = 'https://substrate.dev'
 license = 'Unlicense'
 name = 'node-template'
 repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
-version = '2.0.0'
+version = '2.0.1'
 
 [[bin]]
 name = 'node-template'
@@ -23,7 +23,7 @@ jsonrpc-core = '15.0.0'
 structopt = '0.3.8'
 
 # local dependencies
-node-template-runtime = { path = '../runtime', version = '2.0.0' }
+node-template-runtime = { path = '../runtime', version = '2.0.1' }
 
 # Substrate dependencies
 frame-benchmarking = '2.0.0'
