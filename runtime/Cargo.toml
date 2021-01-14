@@ -5,13 +5,13 @@ homepage = 'https://substrate.dev'
 license = 'Unlicense'
 name = 'node-template-runtime'
 repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
-version = '2.0.0'
+version = '2.0.1'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
 
 [build-dependencies]
-wasm-builder-runner = { package = 'substrate-wasm-builder-runner', version = '2.0.0' }
+wasm-builder-runner = { package = 'substrate-wasm-builder-runner', version = '1.0.5' }
 
 # alias "parity-scale-code" to "codec"
 [dependencies.codec]
@@ -22,37 +22,37 @@ version = '1.3.4'
 
 [dependencies]
 hex-literal = { optional = true, version = '0.3.1' }
-serde = { features = ['derive'], optional = true, version = '1.0.101' }
+serde = { features = ['derive'], optional = true, version = '=1.0.118' }
 
 # local dependencies
-pallet-template = { path = '../pallets/template', default-features = false, version = '2.0.0' }
+pallet-template = { path = '../pallets/template', default-features = false, version = '2.0.1' }
 
 # Substrate dependencies
-frame-benchmarking = { default-features = false, optional = true, version = '2.0.0' }
-frame-executive = { default-features = false, version = '2.0.0' }
-frame-support = { default-features = false, version = '2.0.0' }
-frame-system = { default-features = false, version = '2.0.0' }
-frame-system-benchmarking = { default-features = false, optional = true, version = '2.0.0' }
-frame-system-rpc-runtime-api = { default-features = false, version = '2.0.0' }
-pallet-aura = { default-features = false, version = '2.0.0' }
-pallet-balances = { default-features = false, version = '2.0.0' }
-pallet-grandpa = { default-features = false, version = '2.0.0' }
-pallet-randomness-collective-flip = { default-features = false, version = '2.0.0' }
-pallet-sudo = { default-features = false, version = '2.0.0' }
-pallet-timestamp = { default-features = false, version = '2.0.0' }
-pallet-transaction-payment = { default-features = false, version = '2.0.0' }
-pallet-transaction-payment-rpc-runtime-api = { default-features = false, version = '2.0.0' }
-sp-api = { default-features = false, version = '2.0.0' }
-sp-block-builder = { default-features = false, version = '2.0.0' }
-sp-consensus-aura = { default-features = false, version = '0.8.0' }
-sp-core = { default-features = false, version = '2.0.0' }
-sp-inherents = { default-features = false, version = '2.0.0' }
-sp-offchain = { default-features = false, version = '2.0.0' }
-sp-runtime = { default-features = false, version = '2.0.0' }
-sp-session = { default-features = false, version = '2.0.0' }
-sp-std = { default-features = false, version = '2.0.0' }
-sp-transaction-pool = { default-features = false, version = '2.0.0' }
-sp-version = { default-features = false, version = '2.0.0' }
+frame-benchmarking = { default-features = false, optional = true, version = '2.0.1' }
+frame-executive = { default-features = false, version = '2.0.1' }
+frame-support = { default-features = false, version = '2.0.1' }
+frame-system = { default-features = false, version = '2.0.1' }
+frame-system-benchmarking = { default-features = false, optional = true, version = '2.0.1' }
+frame-system-rpc-runtime-api = { default-features = false, version = '2.0.1' }
+pallet-aura = { default-features = false, version = '2.0.1' }
+pallet-balances = { default-features = false, version = '2.0.1' }
+pallet-grandpa = { default-features = false, version = '2.0.1' }
+pallet-randomness-collective-flip = { default-features = false, version = '2.0.1' }
+pallet-sudo = { default-features = false, version = '2.0.1' }
+pallet-timestamp = { default-features = false, version = '2.0.1' }
+pallet-transaction-payment = { default-features = false, version = '2.0.1' }
+pallet-transaction-payment-rpc-runtime-api = { default-features = false, version = '2.0.1' }
+sp-api = { default-features = false, version = '2.0.1' }
+sp-block-builder = { default-features = false, version = '2.0.1' }
+sp-consensus-aura = { default-features = false, version = '0.8.1' }
+sp-core = { default-features = false, version = '2.0.1' }
+sp-inherents = { default-features = false, version = '2.0.1' }
+sp-offchain = { default-features = false, version = '2.0.1' }
+sp-runtime = { default-features = false, version = '2.0.1' }
+sp-session = { default-features = false, version = '2.0.1' }
+sp-std = { default-features = false, version = '2.0.1' }
+sp-transaction-pool = { default-features = false, version = '2.0.1' }
+sp-version = { default-features = false, version = '2.0.1' }
 
 [features]
 default = ['std']

@@ -7,7 +7,7 @@ homepage = 'https://substrate.dev'
 license = 'Unlicense'
 name = 'node-template'
 repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
-version = '2.0.0'
+version = '2.0.1'
 
 [[bin]]
 name = 'node-template'
@@ -16,41 +16,41 @@ name = 'node-template'
 targets = ['x86_64-unknown-linux-gnu']
 
 [build-dependencies]
-substrate-build-script-utils = '2.0.0'
+substrate-build-script-utils = '2.0.1'
 
 [dependencies]
 jsonrpc-core = '15.0.0'
 structopt = '0.3.8'
 
 # local dependencies
-node-template-runtime = { path = '../runtime', version = '2.0.0' }
+node-template-runtime = { path = '../runtime', version = '2.0.1' }
 
 # Substrate dependencies
-frame-benchmarking = '2.0.0'
-frame-benchmarking-cli = '2.0.0'
-pallet-transaction-payment-rpc = '2.0.0'
-sc-basic-authorship = '0.8.0'
-sc-cli = { features = ['wasmtime'], version = '0.8.0' }
-sc-client-api = '2.0.0'
-sc-consensus = '0.8.0'
-sc-consensus-aura = '0.8.0'
-sc-executor = { features = ['wasmtime'], version = '0.8.0' }
-sc-finality-grandpa = '0.8.0'
-sc-rpc = '2.0.0'
-sc-rpc-api = '0.8.0'
-sc-service = { features = ['wasmtime'], version = '0.8.0' }
-sc-transaction-pool = '2.0.0'
-sp-api = '2.0.0'
-sp-block-builder = '2.0.0'
-sp-blockchain = '2.0.0'
-sp-consensus = '0.8.0'
-sp-consensus-aura = '0.8.0'
-sp-core = '2.0.0'
-sp-finality-grandpa = '2.0.0'
-sp-inherents = '2.0.0'
-sp-runtime = '2.0.0'
-sp-transaction-pool = '2.0.0'
-substrate-frame-rpc-system = '2.0.0'
+frame-benchmarking = '2.0.1'
+frame-benchmarking-cli = '2.0.1'
+pallet-transaction-payment-rpc = '2.0.1'
+sc-basic-authorship = '0.8.1'
+sc-cli = { features = ['wasmtime'], version = '0.8.1' }
+sc-client-api = '2.0.1'
+sc-consensus = '0.8.1'
+sc-consensus-aura = '0.8.1'
+sc-executor = { features = ['wasmtime'], version = '0.8.1' }
+sc-finality-grandpa = '0.8.1'
+sc-rpc = '2.0.1'
+sc-rpc-api = '0.8.1'
+sc-service = { features = ['wasmtime'], version = '0.8.1' }
+sc-transaction-pool = '2.0.1'
+sp-api = '2.0.1'
+sp-block-builder = '2.0.1'
+sp-blockchain = '2.0.1'
+sp-consensus = '0.8.1'
+sp-consensus-aura = '0.8.1'
+sp-core = '2.0.1'
+sp-finality-grandpa = '2.0.1'
+sp-inherents = '2.0.1'
+sp-runtime = '2.0.1'
+sp-transaction-pool = '2.0.1'
+substrate-frame-rpc-system = '2.0.1'
 
 [features]
 default = []
