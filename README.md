@@ -1,6 +1,6 @@
 # Substrate Node Template
 
-A new FRAME-based Substrate node, ready for hacking :rocket:
+A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
 
 ## Getting Started
 
@@ -8,11 +8,8 @@ This project contains some configuration files to help get started :hammer_and_w
 
 ### Rust Setup
 
-Setup instructions for working with the [Rust](https://www.rust-lang.org/) programming language can
-be found at the
-[Substrate Developer Hub](https://substrate.dev/docs/en/knowledgebase/getting-started). Follow those
-steps to install [`rustup`](https://rustup.rs/) and configure the Rust toolchain to default to the
-latest stable version.
+Follow the [Rust setup instructions](./doc/rust-setup.md) before using the included Makefile to
+build the Node Template.
 
 ### Makefile
 

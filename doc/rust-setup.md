@@ -2,12 +2,12 @@
 title: Installation
 ---
 
-This page will guide you through the steps needed to prepare a computer for Substrate development.
-Since Substrate is built with [the Rust programming language](https://www.rust-lang.org/), the first
-thing you will need to do is prepare the computer for Rust development - these steps will vary based
-on the computer's operating system. Once Rust is configured, you will use its toolchains to interact
-with Rust projects; the commands for Rust's toolchains will be the same for all supported,
-Unix-based operating systems.
+This page will guide you through the steps needed to prepare a computer for development with the
+Substrate Node Template. Since Substrate is built with
+[the Rust programming language](https://www.rust-lang.org/), the first thing you will need to do is
+prepare the computer for Rust development - these steps will vary based on the computer's operating
+system. Once Rust is configured, you will use its toolchains to interact with Rust projects; the
+commands for Rust's toolchains will be the same for all supported, Unix-based operating systems.
 
 ## Unix-Based Operating Systems
 
@@ -48,14 +48,10 @@ export OPENSSL_LIB_DIR="/usr/lib/openssl-1.0"
 export OPENSSL_INCLUDE_DIR="/usr/include/openssl-1.0"
 ```
 
-## Windows
-
-Please refer to the separate [guide for Windows users](windows-users.md).
-
 ## Rust Developer Environment
 
-This guide uses [`rustup`](https://rustup.rs/) to help manage the Rust toolchain. First install and
-configure `rustup`:
+This project uses [`rustup`](https://rustup.rs/) to help manage the Rust toolchain. First install
+and configure `rustup`:
 
 ```bash
 # Install
@@ -64,8 +60,14 @@ curl https://sh.rustup.rs -sSf | sh
 source ~/.cargo/env
 ```
 
-Configure the Rust toolchain to default to the latest stable version:
+Finally, configure the Rust toolchain to default to the latest stable version:
 
 ```bash
 rustup default stable
 ```
+
+## Build the Project
+
+Now that the standard Rust environment is configured, use the
+[included Makefile](../README.md#makefile) to install the project-specific toolchains and build the
+project.
