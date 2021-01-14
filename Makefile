@@ -4,11 +4,11 @@ init:
 
 .PHONY: check
 check:
-	SKIP_WASM_BUILD=1 cargo check
+	WASM_BUILD_TOOLCHAIN=nightly-2021-01-10 cargo check
 
 .PHONY: test
 test:
-	SKIP_WASM_BUILD=1 cargo test --all
+	WASM_BUILD_TOOLCHAIN=nightly-2021-01-10 cargo test --all
 
 .PHONY: run
 run:
