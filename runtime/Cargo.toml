@@ -11,7 +11,7 @@ version = '2.0.1'
 targets = ['x86_64-unknown-linux-gnu']
 
 [build-dependencies]
-wasm-builder-runner = { package = 'substrate-wasm-builder-runner', version = '2.0.0' }
+substrate-wasm-builder = "3.0.0"
 
 # alias "parity-scale-code" to "codec"
 [dependencies.codec]
