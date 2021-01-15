@@ -12,7 +12,7 @@ commands for Rust's toolchains will be the same for all supported, Unix-based op
 ## Unix-Based Operating Systems
 
 Substrate development is easiest on Unix-based operating systems like macOS or Linux. The examples
-in the Substrate [Tutorials](../../../../tutorials) and [Recipes](https://substrate.dev/recipes/)
+in the Substrate [Tutorials](https://substrate.dev/tutorials) and [Recipes](https://substrate.dev/recipes/)
 use Unix-style terminals to demonstrate how to interact with Substrate from the command line.
 
 ### macOS
