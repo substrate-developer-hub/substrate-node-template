@@ -94,11 +94,11 @@ pub mod opaque {
 pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("node-template"),
 	impl_name: create_runtime_str!("node-template"),
-	authoring_version: 1,
-	spec_version: 1,
-	impl_version: 1,
+	authoring_version: 100,
+	spec_version: 100,
+	impl_version: 100,
 	apis: RUNTIME_API_VERSIONS,
-	transaction_version: 1,
+	transaction_version: 100,
 };
 
 pub const MILLISECS_PER_BLOCK: u64 = 6000;
