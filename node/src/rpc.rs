@@ -52,7 +52,7 @@ pub fn create_full<C, P>(
 	);
 
 	io.extend_with(
-		TransactionPaymentApi::to_delegate(TransactionPayment::new(client.clone()))
+		TransactionPaymentApi::to_delegate(TransactionPayment::new(client))
 	);
 
 	// Extend this RPC with a custom API by using the following syntax.
