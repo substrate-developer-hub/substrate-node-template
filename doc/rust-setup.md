@@ -48,6 +48,17 @@ export OPENSSL_LIB_DIR="/usr/lib/openssl-1.0"
 export OPENSSL_INCLUDE_DIR="/usr/include/openssl-1.0"
 ```
 
+### Fedora/RHEL/CentOS
+
+Use a terminal to run the following commands:
+
+```bash
+# Update
+sudo dnf update
+# Install packages
+sudo dnf install cmake pkgconfig rocksdb rocksdb-devel llvm git libcurl libcurl-devel curl-devel clang
+```
+
 ## Rust Developer Environment
 
 This project uses [`rustup`](https://rustup.rs/) to help manage the Rust toolchain. First install
