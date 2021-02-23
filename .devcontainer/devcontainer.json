@@ -14,8 +14,8 @@
     3000,
     9944
   ],
-  "preCreateCommand": "cargo build --release && cargo check",
-  "postStartCommand": "./target/release/node-template --dev --ws-external",
+  "preCreateCommand": "cargo build && cargo check",
+  "postStartCommand": "./target/debug/node-template --dev --ws-external",
   "menuActions": [
     {"id": "polkadotjs",
      "label": "Open PolkadotJS Apps",
