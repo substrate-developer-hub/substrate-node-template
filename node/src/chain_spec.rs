@@ -182,7 +182,7 @@ fn testnet_genesis(
 			balances: endowed_accounts.iter().cloned().map(|k|(k, 1 << 60)).collect(),
 		}),
         pallet_babe: Some(BabeConfig {
-            authorities: initial_authorities.iter().map(|x| (x.3.clone(), 1)).collect(),
+            authorities: vec![], // initial_authorities.iter().map(|x| (x.3.clone(), 1)).collect(),
         }),
         pallet_im_online: Some(ImOnlineConfig {
             keys: vec![],
@@ -192,7 +192,7 @@ fn testnet_genesis(
 		}),
 		pallet_collective_Instance1: Some(Default::default()),
 		pallet_grandpa: Some(GrandpaConfig {
-			authorities: initial_authorities.iter().map(|x| (x.2.clone(), 1)).collect(),
+			authorities: vec![], // initial_authorities.iter().map(|x| (x.2.clone(), 1)).collect(),
 		}),
 		pallet_session: Some(SessionConfig {
             keys: initial_authorities

@@ -14,6 +14,8 @@ targets = ['x86_64-unknown-linux-gnu']
 substrate-wasm-builder = '4.0.0'
 
 [dependencies]
+# pallet-staking = { path = '../../../../paritytech/substrate/frame/staking', default-features = false }
+pallet-staking = { version = '3.0.0', default-features = false }
 hex-literal = { optional = true, version = '0.3.1' }
 serde = { features = ['derive'], optional = true, version = '1.0.119' }
 
@@ -39,7 +41,7 @@ pallet-indices = { version = '3.0.0', default-features = false }
 pallet-offences = { version = '3.0.0', default-features = false }
 pallet-randomness-collective-flip = { default-features = false, version = '3.0.0' }
 pallet-session = { version = '3.0.0', default-features = false }
-pallet-staking = { version = '3.0.0', default-features = false }
+# pallet-staking = { version = '3.0.0', default-features = false }
 pallet-staking-reward-curve = { version = '3.0.0', default-features = false }
 pallet-sudo = { default-features = false, version = '3.0.0' }
 pallet-timestamp = { default-features = false, version = '3.0.0' }
