@@ -1,10 +1,18 @@
-use sp_core::{Pair, Public, sr25519};
+use sp_core::{
+    crypto::{
+        UncheckedFrom,
+        UncheckedInto,
+        Wraps,
+    },
+    Pair, Public, sr25519
+};
 use node_template_runtime::{
 	constants::currency::*,
 	AccountId, AuthorityDiscoveryConfig, BabeConfig, Balance, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig, ImOnlineConfig,
 	SessionConfig, SessionKeys, StakingConfig, SudoConfig, SystemConfig, WASM_BINARY, Signature, StakerStatus
 };
 use sp_finality_grandpa::AuthorityId as GrandpaId;
+use hex_literal::hex;
 use sp_runtime::traits::{Verify, IdentifyAccount};
 pub use sp_runtime::{
     Perbill,
@@ -108,8 +116,32 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 				authority_keys_from_seed("Dave"),
 				authority_keys_from_seed("Eve"),
 				authority_keys_from_seed("Ferdie"),
-				authority_keys_from_seed("Gav"),
-				authority_keys_from_seed("Hannelore"),
+				// authority #7
+				(
+					hex!["f64bae0f8fbe2eb59ff1c0ff760a085f55d69af5909aed280ebda09dc364d443"].into(),
+					hex!["ca907b74f921b74638eb40c289e9bf1142b0afcdb25e1a50383ab8f9d515da0d"].into(),
+					hex!["6a9da05f3e07d68bc29fb6cf9377a1537d59f082f49cb27a47881aef9fbaeaee"]
+						.unchecked_into(),
+					hex!["f2bf53bfe43164d88fcb2e83891137e7cf597857810a870b4c24fb481291b43a"]
+						.unchecked_into(),
+					hex!["b8902681768fbda7a29666e1de8a18f5be3c778d92cf29139959a86e6bff13e7"]
+						.unchecked_into(),
+					hex!["aaabcb653ce5dfd63035430dba10ce9aed5d064883b9e2b19ec5d9b26a457f57"]
+						.unchecked_into(),
+				),
+				// authority #8
+				(
+					hex!["420a7b4a8c9f2388eded13c17841d2a0e08ea7c87eda84310da54f3ccecd3931"].into(),
+					hex!["ae69db7838fb139cbf4f93bf877faf5bbef242f3f5aac6eb4f111398e9385e7d"].into(),
+					hex!["9af1908ac74b042f4be713e10dcf6a2def3770cfce58951c839768e7d6bbcd8e"]
+						.unchecked_into(),
+					hex!["1e91a7902c89289f97756c4e20c0e9536f34de61c7c21af7773d670b0e644030"]
+						.unchecked_into(),
+					hex!["f4807d86cca169a81d42fcf9c7abddeff107b0a73e9e7a809257ac7e4a164741"]
+						.unchecked_into(),
+					hex!["a49ac1053a40a2c7c33ffa41cb285cef7c3bc9db7e03a16d174cc8b5b5ac0247"]
+						.unchecked_into(),
+				),
 				// get_account_id_from_seed::<sr25519::Public>("Charlie"),
 				// get_account_id_from_seed::<sr25519::Public>("Dave"),
 			],
@@ -170,6 +202,15 @@ fn testnet_genesis(
 	endowed_accounts: Vec<AccountId>,
 	_enable_println: bool,
 ) -> GenesisConfig {
+	let mut endowed_accounts: Vec<AccountId> = endowed_accounts;
+
+	// Add any authorities to the list of endowed accounts if they are missing
+	initial_authorities.iter().for_each(|x|
+		if !endowed_accounts.contains(&x.0) {
+			endowed_accounts.push(x.0.clone())
+		}
+	);
+
 	let num_endowed_accounts = endowed_accounts.len();
 
 	GenesisConfig {
@@ -186,7 +227,7 @@ fn testnet_genesis(
 			balances: endowed_accounts.iter().cloned().map(|k|(k, 1 << 60)).collect(),
 		}),
         pallet_babe: Some(BabeConfig {
-            authorities: vec![], // initial_authorities.iter().map(|x| (x.3.clone(), 1)).collect(),
+            authorities: vec![],
         }),
         pallet_im_online: Some(ImOnlineConfig {
             keys: vec![],
@@ -196,7 +237,7 @@ fn testnet_genesis(
 		}),
 		pallet_collective_Instance1: Some(Default::default()),
 		pallet_grandpa: Some(GrandpaConfig {
-			authorities: vec![], // initial_authorities.iter().map(|x| (x.2.clone(), 1)).collect(),
+			authorities: vec![],
 		}),
 		pallet_session: Some(SessionConfig {
             keys: initial_authorities
@@ -205,8 +246,10 @@ fn testnet_genesis(
                 .collect::<Vec<_>>(),
         }),
 		pallet_staking: Some(StakingConfig {
-            validator_count: 1u32 as u32,
-            minimum_validator_count: 1u32 as u32,
+			validator_count: 1u32 as u32,
+			minimum_validator_count: 1u32 as u32,
+			// validator_count: initial_authorities.len() as u32 * 2,
+			// minimum_validator_count: initial_authorities.len() as u32,
             stakers: initial_authorities
                 .iter()
                 .map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))

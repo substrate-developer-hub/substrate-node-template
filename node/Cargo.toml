@@ -23,6 +23,7 @@ vergen = '3.0.4'
 futures = { version = '0.3.9', features = ['compat'] }
 jsonrpc-core = '15.1.0'
 structopt = '0.3.8'
+hex-literal = '0.3.1'
 
 # local dependencies
 node-template-runtime = { path = '../runtime', version = '3.0.0' }
