@@ -1,53 +1,79 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use substrate_fixed::types::{
-	U16F16
+	U16F16,
+	U32F32
 };
-use frame_support::{decl_module, decl_storage, decl_event, decl_error, dispatch, dispatch::DispatchResult, traits::Get};
+use frame_support::{debug, decl_module, decl_storage, decl_event, decl_error, dispatch, dispatch::DispatchResult,
+	traits::{
+		Currency,
+		Get
+	},
+};
 use frame_system::ensure_signed;
+// FIXME - why doesn't it recognise this import even though its in Cargo.toml?
+use sp_std::{
+    convert::TryInto,
+	// prelude::*,
+};
+// FIXME - how do i access the MILLISECS_PER_BLOCK that is defined in the runtime?
+// use ???::{
+// 	constants::time::MILLISECS_PER_BLOCK,
+// };
 
 // #[cfg(test)]
 // mod tests;
 
-pub trait Config: frame_system::Config {
+pub trait Config: frame_system::Config + pallet_balances::Config + pallet_timestamp::Config {
 	type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
+	type Currency: Currency<Self::AccountId>;
 }
+
+type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 // https://substrate.dev/docs/en/knowledgebase/runtime/storage
 decl_storage! {
 	trait Store for Module<T: Config> as TemplateModule {
 		// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
-		Something get(fn something): Option<u32>;
 
-		/// Substrate-fixed accumulator, value starts at 1 (multiplicative identity)
-		FixedAccumulator get(fn fixed_value): U16F16 = U16F16::from_num(1);
+		/// Substrate-fixed, value starts at 0 (additive identity)
+		pub TotalRewardsPerDay get(fn total_rewards_daily):
+			map hasher(opaque_blake2_256) T::Moment => Option<U32F32>;
 
-		pub FixedRewardsPerDay get(fn rewards_daily):
+		/// Returns reward data that has been distributed for a given day
+		pub RewardsPerDay get(fn rewards_daily):
 			map hasher(opaque_blake2_256) T::Moment =>
+				// TODO - create and define generic struct instead of tuple to represent this reward data
 				Option<Vec<(
-					<T as frame_system::Trait>::AccountId,
-					BalanceOf<T>,
-					<T as frame_system::Trait>::BlockNumber
-				>>;
+					<T as frame_system::Config>::AccountId,
+					U32F32, // instead of BalanceOf<T>,
+					<T as frame_system::Config>::BlockNumber,
+				)>>;
 
 		/// Returns daily reward distribution block number corresponding to a given date/time
+		/// This is to simplify querying storage.
 		pub BlockRewardedForDay get(fn block_rewarded_for_day):
 			map hasher(opaque_blake2_256) T::Moment =>
-				Option<<T as frame_system::Trait>::BlockNumber>;
+				Option<<T as frame_system::Config>::BlockNumber>;
 
 		/// Returns date/time corresponding to a given daily reward distribution block number
+		/// This is to simplify querying storage.
 		pub DayRewardedForBlock get(fn day_rewarded_for_block):
-			map hasher(opaque_blake2_256) <T as frame_system::Trait>::BlockNumber =>
+			map hasher(opaque_blake2_256) <T as frame_system::Config>::BlockNumber =>
 				Option<T::Moment>;
 	}
 }
 
 // https://substrate.dev/docs/en/knowledgebase/runtime/events
 decl_event!(
-	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId {
-		SomethingStored(u32, AccountId),
-		/// Substrate-fixed accumulator has been updated.
-		FixedUpdated(U16F16, U16F16),
+	pub enum Event<T> where
+		AccountId = <T as frame_system::Config>::AccountId,
+		// BalanceOf = BalanceOf<T>,
+		<T as frame_system::Config>::BlockNumber,
+        <T as pallet_timestamp::Config>::Moment,
+	{
+		/// Substrate-fixed total rewards for a given day has been updated.
+		TotalRewardsPerDayUpdated(U32F32, Moment, BlockNumber, AccountId),
 	}
 );
 
@@ -65,20 +91,43 @@ decl_module! {
 
 		fn deposit_event() = default;
 
-		#[weight = 10_000 + T::DbWeight::get().writes(1)]
-		fn update_fixed_daily_rewards(origin, new_factor: U16F16) -> DispatchResult {
-			ensure_signed(origin)?;
+		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+		fn update_fixed_daily_rewards(origin, new_reward: U32F32) -> DispatchResult {
+			let sender = ensure_signed(origin)?;
 
-			let milliseconds_per_day = 86400000u64;
-
-			// get the current block
-
-			// get the current date/time
+			// get the current block & current date/time
+			let current_block = <frame_system::Module<T>>::block_number();
 			let timestamp_current = <pallet_timestamp::Module<T>>::get();
 
-			// convert the curreht block number to the block number at the start of the current day.
+			// convert the current date/time to the start of the current day date/time.
+			// i.e. 21 Apr @ 1420 -> 21 Apr @ 0000
+			let milliseconds_per_day = 86400000u64;
+			let timestamp_current_as_u64: u64 =
+				TryInto::<u64>::try_into(timestamp_current).ok();
+			let days_since_unix_epoch =
+				U32F32::from_num(timestamp_current_as_u64) / U32F32::from_num(milliseconds_per_day);
+			// FIXME - remove hard-coded data when get a value
+			// assert_eq!(days_since_unix_epoch.to_string(), "10.123");
+			// round down to nearest integer days (by rounding up then subtracting one)
+			let days_since_unix_epoch_ceil = days_since_unix_epoch.ceil().to_num::<u64>();
+			// FIXME - remove hard-coded data
+			// assert_eq!(days_since_unix_epoch_ceil, 10);
+			let days_since_unix_epoch_round_down = days_since_unix_epoch_ceil - 1u64;
+			// convert that value in days back to a timestamp value in milliseconds to
+			// correspond to the start of the day
+			let milliseconds_since_epoch_at_day_start_as_u64: u64 = days_since_unix_epoch_round_down * milliseconds_per_day;
+			let milliseconds_since_epoch_at_day_start =
+				TryInto::<<T as pallet_timestamp::Config>::Moment>::try_into(
+					milliseconds_since_epoch_at_day_start_as_u64
+				).ok();
 
-			// convert the current date/time to the start of the current day date/time. i.e. 21 Apr @ 1420 -> 21 Apr @ 0000
+
+			// convert the current block number to the block number at the start of the current day.
+			let block_at_day_start: u64 = milliseconds_since_epoch_at_day_start / MILLISECS_PER_BLOCK;
+			let block_at_day_start_as_blocknumber =
+				TryInto::<<T as frame_system::Config>::BlockNumber>::try_into(
+					block_at_day_start
+				).ok();
 
 			// check if the start of the current day date/time entry exists as a key for `rewards_daily`
 			//
@@ -86,52 +135,116 @@ decl_module! {
 			// i.e. (account_id, balance_rewarded, block_number), and add the new reward value to it.
 			//
 			// else just insert that as a new entry
-			//
-			// also, check if the start of the current day date/time entry exists as a key for `block_rewarded_for_day`,
-			// otherwise add it, with the block number corresponding to the start of the current day as the value
-			//
-			// repeat for `day_rewarded_for_block`
-			//
-			// lastly, update in storage the total rewards distributed so far for the current day
-			// so users may query state to get the calculated total.
 
+			let new_reward_item = (
+				sender.clone(),
+				new_reward.clone(),
+				block_at_day_start_as_blocknumber.clone(),
+			);
+			let mut new_reward_vec;
 
-			// let old_accumulated = Self::fixed_value();
+			match RewardsPerDay::get(milliseconds_since_epoch_at_day_start.clone()) {
+				None => {
+					debug::info!("Creating new reward in storage vector");
 
-			// // Multiply, handling overflow
-			// let new_product = old_accumulated.checked_mul(new_factor)
-			// 	.ok_or(Error::<T>::Overflow)?;
+					new_reward_vec = Vec::new();
+					new_reward_vec.push(new_reward_item.clone());
 
-			// // Write the new value to storage
-			// FixedAccumulator::put(new_product);
-
-			// // Emit event
-			// Self::deposit_event(RawEvent::FixedUpdated(new_factor, new_product));
-			Ok(())
-		}
-
-		#[weight = 10_000 + T::DbWeight::get().writes(1)]
-		pub fn do_something(origin, something: u32) -> dispatch::DispatchResult {
-			let who = ensure_signed(origin)?;
-
-			Something::put(something);
-
-			Self::deposit_event(RawEvent::SomethingStored(something, who));
-			Ok(())
-		}
-
-		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
-		pub fn cause_error(origin) -> dispatch::DispatchResult {
-			let _who = ensure_signed(origin)?;
-
-			match Something::get() {
-				None => Err(Error::<T>::NoneValue)?,
+					<RewardsPerDay<T>>::insert(
+						milliseconds_since_epoch_at_day_start.clone(),
+						&new_reward_vec,
+					);
+				},
 				Some(old) => {
-					let new = old.checked_add(1).ok_or(Error::<T>::Overflow)?;
-					Something::put(new);
-					Ok(())
+					debug::info!("Appending new rewards_per_day to existing storage vector");
+
+					<RewardsPerDay<T>>::mutate(
+						milliseconds_since_epoch_at_day_start.clone(),
+						|ms_since_epoch_at_day_start| {
+							if let Some(_ms_since_epoch_at_day_start) = ms_since_epoch_at_day_start {
+								_ms_since_epoch_at_day_start.push(new_reward_item.clone());
+							}
+						},
+					);
 				},
 			}
+
+			// check if the start of the current day date/time entry exists as a key for `block_rewarded_for_day`,
+			// otherwise add it, with the block number corresponding to the start of the current day as the value
+			match BlockRewardedForDay::get(milliseconds_since_epoch_at_day_start.clone()) {
+				None => {
+					debug::info!("Creating new mapping from timestamp at start of day to block number at start of day");
+
+					<RewardsPerDay<T>>::insert(
+						milliseconds_since_epoch_at_day_start.clone(),
+						&block_at_day_start_as_blocknumber.clone(),
+					);
+				},
+				Some(old) => {
+					debug::info!("BlockRewardedForDay entry mapping already exists. No further action required");
+				}
+			}
+
+			// repeat for `day_rewarded_for_block`
+			match DayRewardedForBlock::get(block_at_day_start_as_blocknumber.clone()) {
+				None => {
+					debug::info!("Creating new mapping from block number at start of day to timestamp at start of day");
+
+					<DayRewardedForBlock<T>>::insert(
+						block_at_day_start_as_blocknumber.clone(),
+						&milliseconds_since_epoch_at_day_start.clone(),
+					);
+				},
+				Some(old) => {
+					debug::info!("DayRewardedForBlock entry mapping already exists. No further action required");
+				}
+			}
+
+			// Update in storage the total rewards distributed so far for the current day
+			// so users may query state and have the latest calculated total returned.
+			match TotalRewardsPerDay::get(milliseconds_since_epoch_at_day_start.clone()) {
+				None => {
+					debug::info!("Creating new total rewards entry for a given day");
+
+					<TotalRewardsPerDay<T>>::insert(
+						milliseconds_since_epoch_at_day_start.clone(),
+						new_reward.clone(),
+					);
+
+					// Emit event
+					Self::deposit_event(Event::TotalRewardsPerDayUpdated(
+						new_reward.clone(),
+						milliseconds_since_epoch_at_day_start.clone(),
+						block_at_day_start_as_blocknumber.clone(),
+						sender.clone(),
+					));
+				},
+				Some(old_total_rewards_for_day) => {
+					debug::info!("TotalRewardsPerDay entry mapping already exists for given day. Updating...");
+
+					// Add, handling overflow
+					let new_total_rewards_for_day =
+						old_total_rewards_for_day.checked_add(new_reward.clone()).ok_or(Error::<T>::Overflow)?;
+					// Write the new value to storage
+					<TotalRewardsPerDay<T>>::mutate(
+						milliseconds_since_epoch_at_day_start.clone(),
+						|ms_since_epoch_at_day_start| {
+							if let Some(_ms_since_epoch_at_day_start) = ms_since_epoch_at_day_start {
+								*_ms_since_epoch_at_day_start = new_total_rewards_for_day.clone();
+							}
+						},
+					);
+
+					// Emit event
+					Self::deposit_event(Event::TotalRewardsPerDayUpdated(
+						new_total_rewards_for_day.clone(),
+						milliseconds_since_epoch_at_day_start.clone(),
+						block_at_day_start_as_blocknumber.clone(),
+						sender.clone(),
+					));
+				}
+			}
+			Ok(())
 		}
 	}
 }
