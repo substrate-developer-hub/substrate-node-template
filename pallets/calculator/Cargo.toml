@@ -1,0 +1,38 @@
+[package]
+authors = ['']
+description = 'Calculator based on substrate-node-template.'
+edition = '2018'
+homepage = ''
+license = 'Unlicense'
+name = 'pallet-calculator'
+repository = ''
+version = '3.0.0'
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
+
+# alias "parity-scale-code" to "codec"
+[dependencies.codec]
+default-features = false
+features = ['derive']
+package = 'parity-scale-codec'
+version = '2.0.0'
+
+[dependencies]
+frame-support = { default-features = false, version = '3.0.0' }
+frame-system = { default-features = false, version = '3.0.0' }
+substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", version = "0.5.6" }
+
+[dev-dependencies]
+serde = { version = "1.0.119" }
+sp-core = { default-features = false, version = '3.0.0' }
+sp-io = { default-features = false, version = '3.0.0' }
+sp-runtime = { default-features = false, version = '3.0.0' }
+
+[features]
+default = ['std']
+std = [
+    'codec/std',
+    'frame-support/std',
+    'frame-system/std',
+]

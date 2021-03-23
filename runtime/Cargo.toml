@@ -21,6 +21,8 @@ serde = { features = ['derive'], optional = true, version = '1.0.119' }
 
 # local dependencies
 pallet-template = { path = '../pallets/template', default-features = false, version = '3.0.0' }
+pallet-calculator = { path = '../pallets/calculator', default-features = false, version = '3.0.0' }
+
 
 # Substrate dependencies
 codec = { version = '2.0.0', package = 'parity-scale-codec', default-features = false, features = ['derive'] }
