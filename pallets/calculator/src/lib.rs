@@ -1,21 +1,20 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use substrate_fixed::types::{
-	U16F16,
 	U32F32
 };
-use frame_support::{debug, decl_module, decl_storage, decl_event, decl_error, dispatch, dispatch::DispatchResult,
+use frame_support::{debug, decl_module, decl_storage, decl_event, decl_error, dispatch,
+	dispatch::{
+		DispatchError,
+		DispatchResult,
+	},
 	traits::{
 		Currency,
 		Get
 	},
 };
 use frame_system::ensure_signed;
-// FIXME - why doesn't it recognise this import even though its in Cargo.toml?
-use sp_std::{
-    convert::TryInto,
-	// prelude::*,
-};
+use core::convert::TryInto;
 // FIXME - how do i access the MILLISECS_PER_BLOCK that is defined in the runtime?
 // use ???::{
 // 	constants::time::MILLISECS_PER_BLOCK,
@@ -102,10 +101,15 @@ decl_module! {
 			// convert the current date/time to the start of the current day date/time.
 			// i.e. 21 Apr @ 1420 -> 21 Apr @ 0000
 			let milliseconds_per_day = 86400000u64;
-			let timestamp_current_as_u64: u64 =
-				TryInto::<u64>::try_into(timestamp_current).ok();
-			let days_since_unix_epoch =
-				U32F32::from_num(timestamp_current_as_u64) / U32F32::from_num(milliseconds_per_day);
+			let timestamp_current_as_u64;
+			if let Some(_timestamp_current_as_u64) =
+				TryInto::<u64>::try_into(timestamp_current).ok() {
+				timestamp_current_as_u64 = _timestamp_current_as_u64;
+			} else {
+				return Err(DispatchError::Other("Unable to convert Moment to u64 for timestampe_current"));
+			}
+
+			let days_since_unix_epoch = U32F32::from_num(timestamp_current_as_u64 / milliseconds_per_day);
 			// FIXME - remove hard-coded data when get a value
 			// assert_eq!(days_since_unix_epoch.to_string(), "10.123");
 			// round down to nearest integer days (by rounding up then subtracting one)
@@ -115,19 +119,32 @@ decl_module! {
 			let days_since_unix_epoch_round_down = days_since_unix_epoch_ceil - 1u64;
 			// convert that value in days back to a timestamp value in milliseconds to
 			// correspond to the start of the day
-			let milliseconds_since_epoch_at_day_start_as_u64: u64 = days_since_unix_epoch_round_down * milliseconds_per_day;
-			let milliseconds_since_epoch_at_day_start =
-				TryInto::<<T as pallet_timestamp::Config>::Moment>::try_into(
-					milliseconds_since_epoch_at_day_start_as_u64
-				).ok();
-
+			let milliseconds_since_epoch_at_day_start = days_since_unix_epoch_round_down * milliseconds_per_day;
 
 			// convert the current block number to the block number at the start of the current day.
+			assert!(milliseconds_since_epoch_at_day_start % MILLISECS_PER_BLOCK == 0);
 			let block_at_day_start: u64 = milliseconds_since_epoch_at_day_start / MILLISECS_PER_BLOCK;
-			let block_at_day_start_as_blocknumber =
+			let block_at_day_start_as_blocknumber;
+			if let Some(_block_at_day_start_as_blocknumber) =
 				TryInto::<<T as frame_system::Config>::BlockNumber>::try_into(
 					block_at_day_start
-				).ok();
+				).ok() {
+
+				block_at_day_start_as_blocknumber = _block_at_day_start_as_blocknumber;
+			} else {
+				return Err(DispatchError::Other("Unable to convert u64 to BlockNumber"));
+			}
+
+			let milliseconds_since_epoch_at_day_start_as_moment;
+			if let Some(_milliseconds_since_epoch_at_day_start) =
+				TryInto::<u64>::try_into(
+					milliseconds_since_epoch_at_day_start
+				).ok() {
+
+				milliseconds_since_epoch_at_day_start_as_moment = _milliseconds_since_epoch_at_day_start;
+			} else {
+				return Err(DispatchError::Other("Unable to convert u64 to Moment"));
+			}
 
 			// check if the start of the current day date/time entry exists as a key for `rewards_daily`
 			//
@@ -143,7 +160,7 @@ decl_module! {
 			);
 			let mut new_reward_vec;
 
-			match RewardsPerDay::get(milliseconds_since_epoch_at_day_start.clone()) {
+			match RewardsPerDay::get(milliseconds_since_epoch_at_day_start_as_moment.clone()) {
 				None => {
 					debug::info!("Creating new reward in storage vector");
 
@@ -151,7 +168,7 @@ decl_module! {
 					new_reward_vec.push(new_reward_item.clone());
 
 					<RewardsPerDay<T>>::insert(
-						milliseconds_since_epoch_at_day_start.clone(),
+						milliseconds_since_epoch_at_day_start_as_moment.clone().into(),
 						&new_reward_vec,
 					);
 				},
@@ -159,7 +176,7 @@ decl_module! {
 					debug::info!("Appending new rewards_per_day to existing storage vector");
 
 					<RewardsPerDay<T>>::mutate(
-						milliseconds_since_epoch_at_day_start.clone(),
+						milliseconds_since_epoch_at_day_start_as_moment.clone().into(),
 						|ms_since_epoch_at_day_start| {
 							if let Some(_ms_since_epoch_at_day_start) = ms_since_epoch_at_day_start {
 								_ms_since_epoch_at_day_start.push(new_reward_item.clone());
@@ -171,13 +188,13 @@ decl_module! {
 
 			// check if the start of the current day date/time entry exists as a key for `block_rewarded_for_day`,
 			// otherwise add it, with the block number corresponding to the start of the current day as the value
-			match BlockRewardedForDay::get(milliseconds_since_epoch_at_day_start.clone()) {
+			match BlockRewardedForDay::get(milliseconds_since_epoch_at_day_start_as_moment.clone()) {
 				None => {
 					debug::info!("Creating new mapping from timestamp at start of day to block number at start of day");
 
-					<RewardsPerDay<T>>::insert(
-						milliseconds_since_epoch_at_day_start.clone(),
-						&block_at_day_start_as_blocknumber.clone(),
+					<BlockRewardedForDay<T>>::insert(
+						milliseconds_since_epoch_at_day_start_as_moment.clone(),
+						block_at_day_start_as_blocknumber.clone(),
 					);
 				},
 				Some(old) => {
@@ -192,7 +209,7 @@ decl_module! {
 
 					<DayRewardedForBlock<T>>::insert(
 						block_at_day_start_as_blocknumber.clone(),
-						&milliseconds_since_epoch_at_day_start.clone(),
+						milliseconds_since_epoch_at_day_start_as_moment.clone(),
 					);
 				},
 				Some(old) => {
@@ -202,19 +219,19 @@ decl_module! {
 
 			// Update in storage the total rewards distributed so far for the current day
 			// so users may query state and have the latest calculated total returned.
-			match TotalRewardsPerDay::get(milliseconds_since_epoch_at_day_start.clone()) {
+			match TotalRewardsPerDay::get(milliseconds_since_epoch_at_day_start_as_moment.clone()) {
 				None => {
 					debug::info!("Creating new total rewards entry for a given day");
 
 					<TotalRewardsPerDay<T>>::insert(
-						milliseconds_since_epoch_at_day_start.clone(),
+						milliseconds_since_epoch_at_day_start_as_moment.clone(),
 						new_reward.clone(),
 					);
 
 					// Emit event
 					Self::deposit_event(Event::TotalRewardsPerDayUpdated(
 						new_reward.clone(),
-						milliseconds_since_epoch_at_day_start.clone(),
+						milliseconds_since_epoch_at_day_start_as_moment.clone(),
 						block_at_day_start_as_blocknumber.clone(),
 						sender.clone(),
 					));
@@ -227,7 +244,7 @@ decl_module! {
 						old_total_rewards_for_day.checked_add(new_reward.clone()).ok_or(Error::<T>::Overflow)?;
 					// Write the new value to storage
 					<TotalRewardsPerDay<T>>::mutate(
-						milliseconds_since_epoch_at_day_start.clone(),
+						milliseconds_since_epoch_at_day_start_as_moment.clone(),
 						|ms_since_epoch_at_day_start| {
 							if let Some(_ms_since_epoch_at_day_start) = ms_since_epoch_at_day_start {
 								*_ms_since_epoch_at_day_start = new_total_rewards_for_day.clone();
@@ -238,7 +255,7 @@ decl_module! {
 					// Emit event
 					Self::deposit_event(Event::TotalRewardsPerDayUpdated(
 						new_total_rewards_for_day.clone(),
-						milliseconds_since_epoch_at_day_start.clone(),
+						milliseconds_since_epoch_at_day_start_as_moment.clone(),
 						block_at_day_start_as_blocknumber.clone(),
 						sender.clone(),
 					));
