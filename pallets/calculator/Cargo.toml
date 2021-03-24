@@ -1,5 +1,5 @@
 [package]
-authors = ['Luke Schoen']
+authors = ['MXC Foundation GmbH <https://t.me/mxcfoundation>', 'Luke Schoen']
 description = 'Calculator based on substrate-node-template.'
 edition = '2018'
 homepage = ''
@@ -21,6 +21,7 @@ version = '2.0.0'
 [dependencies]
 frame-support = { default-features = false, version = '3.0.0' }
 frame-system = { default-features = false, version = '3.0.0' }
+module-primitives = { version = '3.0.0', default-features = false, path = '../primitives' }
 pallet-balances = { default_features = false, version = '3.0.0' }
 pallet-timestamp = { default-features = false, version = '3.0.0' }
 substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", version = "0.5.6" }
@@ -38,6 +39,7 @@ std = [
     'codec/std',
     'frame-support/std',
     'frame-system/std',
+    'module-primitives/std',
     'pallet-balances/std',
     'pallet-timestamp/std',
     'sp-std/std',

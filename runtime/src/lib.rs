@@ -161,15 +161,15 @@ pub mod impls;
 pub use impls::Author;
 
 /// Constant values used within the runtime.
-pub mod constants;
-pub use constants::{
+pub mod module_primitives;
+pub use module_primitives::{
     currency::*,
 	time::*,
 	time::EPOCH_DURATION_IN_BLOCKS,
+	types,
+	types::*,
 };
 use sp_runtime::generic::Era;
-pub mod types;
-pub use types::*;
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]

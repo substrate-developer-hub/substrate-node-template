@@ -15,10 +15,9 @@ use frame_support::{debug, decl_module, decl_storage, decl_event, decl_error, di
 };
 use frame_system::ensure_signed;
 use core::convert::TryInto;
-// FIXME - how do i access the MILLISECS_PER_BLOCK that is defined in the runtime?
-// use ???::{
-// 	constants::time::MILLISECS_PER_BLOCK,
-// };
+use module_primitives::{
+	constants::time::MILLISECS_PER_BLOCK,
+};
 
 // #[cfg(test)]
 // mod tests;

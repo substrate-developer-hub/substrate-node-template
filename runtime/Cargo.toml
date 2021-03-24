@@ -20,9 +20,9 @@ hex-literal = { optional = true, version = '0.3.1' }
 serde = { features = ['derive'], optional = true, version = '1.0.119' }
 
 # local dependencies
+module-primitives = { version = '3.0.0', default-features = false, path = '../pallets/primitives' }
 pallet-template = { path = '../pallets/template', default-features = false, version = '3.0.0' }
 pallet-calculator = { path = '../pallets/calculator', default-features = false, version = '3.0.0' }
-
 
 # Substrate dependencies
 codec = { version = '2.0.0', package = 'parity-scale-codec', default-features = false, features = ['derive'] }
@@ -82,6 +82,7 @@ std = [
     'frame-support/std',
     'frame-system/std',
     'frame-system-rpc-runtime-api/std',
+    'module-primitives/std',
     'pallet-authorship/std',
     'pallet-authority-discovery/std',
     'pallet-babe/std',

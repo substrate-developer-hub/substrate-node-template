@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 //! A set of constant values used in runtime.
 //!
 //! Babe has slots within each epoch.

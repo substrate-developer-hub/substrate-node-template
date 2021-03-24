@@ -1,0 +1,22 @@
+[package]
+name = 'module-primitives'
+version = '3.0.0'
+authors = ['Laminar Developers <hello@laminar.one>', 'MXC Foundation GmbH <https://t.me/mxcfoundation>', 'Luke Schoen']
+edition = '2018'
+
+[dependencies]
+serde = { version = '1.0.119', optional = true, features = ['derive'] }
+codec = { package = 'parity-scale-codec', version = '2.0.0', default-features = false }
+sp-core = { default-features = false, version = '3.0.0' }
+sp-runtime = { version = '3.0.0', default-features = false }
+sp-std = { version = '3.0.0', default-features = false }
+
+[features]
+default = ['std']
+std = [
+	'codec/std',
+	'serde',
+  'sp-core/std',
+	'sp-runtime/std',
+	'sp-std/std',
+]
