@@ -31,7 +31,7 @@ type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Con
 
 // https://substrate.dev/docs/en/knowledgebase/runtime/storage
 decl_storage! {
-	trait Store for Module<T: Config> as TemplateModule {
+	trait Store for Module<T: Config> as CalculatorModule {
 		// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
 
 		/// Substrate-fixed, value starts at 0 (additive identity)
@@ -210,7 +210,7 @@ decl_module! {
 				None => {
 					debug::info!("Creating new total rewards entry for a given day");
 
-					<TotalRewardsPerDay<T>>::insert(
+					<TotalRewardsPerDay>::insert(
 						milliseconds_since_epoch_at_day_start.clone(),
 						new_reward.clone(),
 					);
@@ -230,7 +230,7 @@ decl_module! {
 					let new_total_rewards_for_day =
 						old_total_rewards_for_day.checked_add(new_reward.clone()).ok_or(Error::<T>::Overflow)?;
 					// Write the new value to storage
-					<TotalRewardsPerDay<T>>::mutate(
+					<TotalRewardsPerDay>::mutate(
 						milliseconds_since_epoch_at_day_start.clone(),
 						|ms_since_epoch_at_day_start| {
 							if let Some(_ms_since_epoch_at_day_start) = ms_since_epoch_at_day_start {
