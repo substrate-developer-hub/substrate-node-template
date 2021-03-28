@@ -5,22 +5,18 @@ edition = '2018'
 homepage = 'https://substrate.dev'
 license = 'Unlicense'
 name = 'pallet-template'
+readme = 'README.md'
 repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
 version = '3.0.0'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
 
-# alias "parity-scale-code" to "codec"
-[dependencies.codec]
-default-features = false
-features = ['derive']
-package = 'parity-scale-codec'
-version = '2.0.0'
-
 [dependencies]
-frame-support = { default-features = false, version = '3.0.0' }
+codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '2.0.0' }
 frame-system = { default-features = false, version = '3.0.0' }
+frame-support = { default-features = false, version = '3.0.0' }
+frame-benchmarking = { default-features = false, optional = true, version = '3.1.0' }
 
 [dev-dependencies]
 serde = { version = "1.0.119" }
@@ -31,7 +27,10 @@ sp-runtime = { default-features = false, version = '3.0.0' }
 [features]
 default = ['std']
 std = [
-    'codec/std',
-    'frame-support/std',
-    'frame-system/std',
+	'codec/std',
+	'frame-support/std',
+	'frame-system/std',
+	'frame-benchmarking/std',
 ]
+runtime-benchmarks = ['frame-benchmarking']
+try-runtime = ['frame-support/try-runtime']
