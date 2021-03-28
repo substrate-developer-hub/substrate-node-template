@@ -16,6 +16,7 @@ substrate-wasm-builder = '4.0.0'
 [dependencies]
 codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '2.0.0' }
 hex-literal = { optional = true, version = '0.3.1' }
+serde = { version = "1.0.119", optional = true, features = ["derive"] }
 
 # Substrate dependencies
 frame-benchmarking = { default-features = false, optional = true, version = '3.0.0' }
@@ -50,28 +51,31 @@ pallet-template = { default-features = false, path = '../pallets/template', vers
 [features]
 default = ['std']
 runtime-benchmarks = [
-    'sp-runtime/runtime-benchmarks',
     'frame-benchmarking',
     'frame-support/runtime-benchmarks',
     'frame-system-benchmarking',
-    'hex-literal',
     'frame-system/runtime-benchmarks',
+    'hex-literal',
     'pallet-balances/runtime-benchmarks',
-    'pallet-timestamp/runtime-benchmarks',
     'pallet-template/runtime-benchmarks',
+    'pallet-timestamp/runtime-benchmarks',
+    'sp-runtime/runtime-benchmarks',
 ]
 std = [
     'codec/std',
     'frame-executive/std',
     'frame-support/std',
+    'frame-system-rpc-runtime-api/std',
+    'frame-system/std',
     'pallet-aura/std',
     'pallet-balances/std',
     'pallet-grandpa/std',
     'pallet-randomness-collective-flip/std',
     'pallet-sudo/std',
+    'pallet-template/std',
     'pallet-timestamp/std',
-    'pallet-transaction-payment/std',
     'pallet-transaction-payment-rpc-runtime-api/std',
+    'pallet-transaction-payment/std',
     'serde',
     'sp-api/std',
     'sp-block-builder/std',
@@ -84,7 +88,4 @@ std = [
     'sp-std/std',
     'sp-transaction-pool/std',
     'sp-version/std',
-    'frame-system/std',
-    'frame-system-rpc-runtime-api/std',
-    'pallet-template/std',
 ]
