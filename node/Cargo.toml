@@ -22,11 +22,8 @@ substrate-build-script-utils = '3.0.0'
 jsonrpc-core = '15.1.0'
 structopt = '0.3.8'
 
-# local dependencies
-node-template-runtime = { path = '../runtime', version = '3.0.0' }
-
 # Substrate dependencies
-frame-benchmarking = '3.0.0'
+frame-benchmarking = '3.1.0'
 frame-benchmarking-cli = '3.0.0'
 pallet-transaction-payment-rpc = '3.0.0'
 sc-basic-authorship = '0.9.0'
@@ -40,6 +37,7 @@ sc-keystore = '3.0.0'
 sc-rpc = '3.0.0'
 sc-rpc-api = '0.9.0'
 sc-service = { features = ['wasmtime'], version = '0.9.0' }
+sc-telemetry = '3.0.0'
 sc-transaction-pool = '3.0.0'
 sp-api = '3.0.0'
 sp-block-builder = '3.0.0'
@@ -52,6 +50,9 @@ sp-inherents = '3.0.0'
 sp-runtime = '3.0.0'
 sp-transaction-pool = '3.0.0'
 substrate-frame-rpc-system = '3.0.0'
+
+# local dependencies
+node-template-runtime = { path = '../runtime', version = '3.0.0' }
 
 [features]
 default = []
