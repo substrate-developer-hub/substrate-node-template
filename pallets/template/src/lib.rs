@@ -37,8 +37,8 @@ decl_storage! {
 decl_event!(
 	pub enum Event<T> where AccountId = <T as frame_system::Config>::AccountId {
 		/// Event documentation should end with an array that provides descriptive names for event
-		/// parameters. [something, who]
-		SomethingStored(u32, AccountId),
+		/// parameters. [who, something]
+		SomethingStored(AccountId, u32),
 	}
 );
 
