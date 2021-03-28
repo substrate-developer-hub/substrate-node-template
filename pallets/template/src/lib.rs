@@ -76,7 +76,7 @@ decl_module! {
 			Something::put(something);
 
 			// Emit an event.
-			Self::deposit_event(RawEvent::SomethingStored(something, who));
+			Self::deposit_event(RawEvent::SomethingStored(who, something));
 			// Return a successful DispatchResult
 			Ok(())
 		}
