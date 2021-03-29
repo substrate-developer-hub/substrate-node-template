@@ -21,6 +21,8 @@ substrate-build-script-utils = '3.0.0'
 [dependencies]
 jsonrpc-core = '15.1.0'
 structopt = '0.3.8'
+pallet-contracts = '3.0.0'
+pallet-contracts-rpc = '3.0.0'
 
 # local dependencies
 node-template-runtime = { path = '../runtime', version = '3.0.0' }
