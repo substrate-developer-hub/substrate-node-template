@@ -40,5 +40,5 @@ jobs:
 
       - name: Check Build for Benchmarking
         run: >
-          pushd node
+          pushd node &&
           cargo check --features=runtime-benchmarks --release
