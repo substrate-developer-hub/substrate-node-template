@@ -3502,6 +3502,7 @@ dependencies = [
  "futures 0.3.11",
  "hex-literal",
  "jsonrpc-core",
+ "module-primitives",
  "node-template-runtime",
  "pallet-authority-discovery",
  "pallet-im-online",

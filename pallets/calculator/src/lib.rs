@@ -3,6 +3,10 @@
 use substrate_fixed::types::{
 	U32F32
 };
+use codec::{
+    Decode,
+    Encode,
+};
 use frame_support::{debug, decl_module, decl_storage, decl_event, decl_error, dispatch,
 	dispatch::{
 		DispatchError,
@@ -26,6 +30,7 @@ extern crate alloc; // Required to use Vec
 // mod tests;
 
 pub trait Config: frame_system::Config + pallet_balances::Config + pallet_timestamp::Config {
+	type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
 	type Currency: Currency<Self::AccountId>;
 }
 
@@ -33,16 +38,16 @@ type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Con
 
 #[derive(Encode, Decode, Debug, Default, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "std", derive())]
-pub struct RewardDailyData<U, W> {
+pub struct RewardDailyData<U, V, W> {
 	pub requestor_account_id: U,
 	pub total_amt: V,
     pub rewarded_block: W,
 }
 
 type DailyData<T> = RewardDailyData<
-	<T as frame_system::Trait>::AccountId,
+	<T as frame_system::Config>::AccountId,
 	BalanceOf<T>,
-    <T as frame_system::Trait>::BlockNumber,
+    <T as frame_system::Config>::BlockNumber,
 >;
 
 // https://substrate.dev/docs/en/knowledgebase/runtime/storage
@@ -60,6 +65,14 @@ decl_storage! {
 				>>>;
 	}
 }
+
+decl_event!(
+    pub enum Event<T> where
+        AccountId = <T as frame_system::Config>::AccountId,
+    {
+        Created(AccountId),
+    }
+);
 
 decl_error! {
 	pub enum Error for Module<T: Config> {

@@ -161,12 +161,23 @@ pub mod impls;
 pub use impls::Author;
 
 /// Constant values used within the runtime.
-pub mod module_primitives;
 pub use module_primitives::{
-    currency::*,
-	time::*,
-	time::EPOCH_DURATION_IN_BLOCKS,
-	types,
+	constants::currency::{
+        CENTS,
+        deposit,
+        DOLLARS,
+        MILLICENTS,
+    },
+    constants::time::{
+        DAYS,
+        EPOCH_DURATION_IN_BLOCKS,
+        EPOCH_DURATION_IN_SLOTS,
+        HOURS,
+        MILLISECS_PER_BLOCK,
+        MINUTES,
+        PRIMARY_PROBABILITY,
+        SLOT_DURATION,
+    },
 	types::*,
 };
 use sp_runtime::generic::Era;

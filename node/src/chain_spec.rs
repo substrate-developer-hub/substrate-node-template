@@ -1,3 +1,23 @@
+use sp_finality_grandpa::AuthorityId as GrandpaId;
+use hex_literal::hex;
+use module_primitives::{
+    constants::currency::{
+        DOLLARS,
+    },
+	types::{
+        AccountId,
+        Balance,
+        Signature,
+    },
+};
+use node_template_runtime::{
+	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig, ImOnlineConfig,
+	SessionConfig, SessionKeys, StakingConfig, SudoConfig, SystemConfig, WASM_BINARY, StakerStatus
+};
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use sc_service::ChainType;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{
     crypto::{
         UncheckedFrom,
@@ -6,22 +26,11 @@ use sp_core::{
     },
     Pair, Public, sr25519
 };
-use node_template_runtime::{
-	constants::currency::*,
-	AccountId, AuthorityDiscoveryConfig, BabeConfig, Balance, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig, ImOnlineConfig,
-	SessionConfig, SessionKeys, StakingConfig, SudoConfig, SystemConfig, WASM_BINARY, Signature, StakerStatus
-};
-use sp_finality_grandpa::AuthorityId as GrandpaId;
-use hex_literal::hex;
 use sp_runtime::traits::{Verify, IdentifyAccount};
 pub use sp_runtime::{
     Perbill,
     Permill,
 };
-use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
-use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
-use sc_service::ChainType;
-use sp_consensus_babe::AuthorityId as BabeId;
 
 type AccountPublic = <Signature as Verify>::Signer;
 

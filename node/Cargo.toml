@@ -31,6 +31,7 @@ node-template-runtime = { path = '../runtime', version = '3.0.0' }
 # Substrate dependencies
 frame-benchmarking = '3.0.0'
 frame-benchmarking-cli = '3.0.0'
+module-primitives = { version = '3.0.0', default-features = false, path = '../pallets/primitives' }
 pallet-authority-discovery = '3.0.0'
 pallet-im-online = '3.0.0'
 pallet-transaction-payment-rpc = '3.0.0'

@@ -25,13 +25,13 @@ module-primitives = { version = '3.0.0', default-features = false, path = '../pr
 pallet-balances = { default_features = false, version = '3.0.0' }
 pallet-timestamp = { default-features = false, version = '3.0.0' }
 substrate-fixed = { git = "https://github.com/encointer/substrate-fixed", version = "0.5.6" }
-
-[dev-dependencies]
 serde = { version = "1.0.119" }
 sp-core = { default-features = false, version = '3.0.0' }
 sp-io = { default-features = false, version = '3.0.0' }
 sp-runtime = { default-features = false, version = '3.0.0' }
 sp-std = { default_features = false, version = '3.0.0' }
+
+[dev-dependencies]
 
 [features]
 default = ['std']
