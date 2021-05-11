@@ -16,7 +16,7 @@ and play experience for setting up the development environment. To get all the c
 
 ### Rust Setup
 
-First, complete the [basic Rust setup instructions](./doc/rust-setup.md).
+First, complete the [basic Rust setup instructions](./docs/rust-setup.md).
 
 ### Run
 
