@@ -6,7 +6,7 @@ A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacki
 
 ## Getting Started
 
-Follow the steps below to get started with the Node Template, or get it up and running right from your browser 
+Follow the steps below to get started with the Node Template, or get it up and running right from your browser
 in just a few clicks using [Playground](https://playground.substrate.dev/) :hammer_and_wrench:
 
 ### Using Nix
@@ -68,6 +68,19 @@ Start the development chain with detailed logging:
 
 ```bash
 RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/node-template -lruntime=debug --dev
+```
+
+### Connect with Polkadot-JS Apps Front-end
+
+Once the node template is running locally, you can connect it with **Polkadot-JS Apps** front-end
+to interact with your chain. [Click here](https://polkadot.js.org/apps/#/explorer?rpc=ws://localhost:9944) connecting the Apps to your local node template.
+
+Due to recent Substrate upgrade, paste the following custom types JSON in **Setting** > **Developer**
+
+```json
+{
+  "AccountInfo": "AccountInfoWithDualRefCount"
+}
 ```
 
 ### Multi-Node Local Testnet
