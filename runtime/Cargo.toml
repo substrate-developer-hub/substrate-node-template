@@ -48,6 +48,7 @@ sp-version = {default-features = false, version = '3.0.0', git = 'https://github
 # local dependencies
 pallet-template = {default-features = false, version = '3.0.0', path = '../pallets/template'}
 pallet-credential = {default-features = false, path = '../pallets/credential', version = '3.0.0'}
+pallet-token = {default-features = false, path = '../pallets/token', version = '3.0.0'}
 
 [features]
 default = ['std']
@@ -76,6 +77,7 @@ std = [
 	'pallet-sudo/std',
 	'pallet-template/std',
 	'pallet-credential/std',
+	'pallet-token/std',
 	'pallet-timestamp/std',
 	'pallet-transaction-payment-rpc-runtime-api/std',
 	'pallet-transaction-payment/std',
