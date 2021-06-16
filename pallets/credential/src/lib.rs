@@ -72,8 +72,8 @@ pub mod pallet {
                 }
             }
 
-            ensure!(!flag, Error::<T>::PlatformNotExist);
-            
+            ensure!(flag, Error::<T>::PlatformNotExist);
+                        
             match CredentialByPeople::<T>::get(people_id.clone()) {
                 None => {},
                 Some(credential) => {
