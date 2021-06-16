@@ -55,7 +55,11 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-        pub fn add_credential(origin: OriginFor<T>, people_id: Vec<u8>, platform: Vec<u8>) -> DispatchResult {
+        pub fn add_credential(
+            origin: OriginFor<T>, 
+            people_id: Vec<u8>, 
+            platform: Vec<u8>
+        ) -> DispatchResult {
             let creator = ensure_signed(origin)?;
             let platforms: Vec<Vec<u8>> = vec![
                 "twitter".as_bytes().to_vec(),

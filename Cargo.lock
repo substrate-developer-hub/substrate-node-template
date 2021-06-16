@@ -3722,6 +3722,7 @@ dependencies = [
  "pallet-balances",
  "pallet-credential",
  "pallet-grandpa",
+ "pallet-post",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
  "pallet-template",
@@ -3980,6 +3981,21 @@ dependencies = [
  "sp-session",
  "sp-staking",
  "sp-std 3.0.0 (git+https://github.com/paritytech/substrate.git?tag=monthly-2021-05)",
+]
+
+[[package]]
+name = "pallet-post"
+version = "3.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
