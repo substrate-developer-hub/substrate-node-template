@@ -33,8 +33,8 @@ pub mod pallet {
     pub struct Pallet<T>(_);
 
     #[pallet::storage]
-    #[pallet::getter(fn token_by_rpc)]
-    pub(super) type TokenByRPC<T: Config> = StorageMap<_, Blake2_128Concat, Vec<u8>, Token>;
+    #[pallet::getter(fn token_by_id)]
+    pub(super) type TokenById<T: Config> = StorageMap<_, Blake2_128Concat, Vec<u8>, Token>;
 
     #[pallet::storage]
     #[pallet::getter(fn tokens)]
@@ -65,7 +65,7 @@ pub mod pallet {
 
             let mut flag = true;
 
-            match TokenByRPC::<T>::get(token_rpc_address.clone()) {
+            match TokenById::<T>::get(token_id.clone()) {
                 None => {
                     flag = false
                 },
@@ -80,7 +80,7 @@ pub mod pallet {
 
             Tokens::<T>::insert("tokens".as_bytes(), tokens);
 
-            TokenByRPC::<T>::insert(token_rpc_address.clone(), new_token.clone());
+            TokenById::<T>::insert(token_id.clone(), new_token.clone());
 
             Self::deposit_event(Event::TokenCreated(new_token));
 
