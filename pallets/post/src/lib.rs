@@ -20,145 +20,278 @@ pub mod pallet {
     #[pallet::metadata(T::AccountId = "AccountId")]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        PostCreated(T::AccountId, Post<AccountIdOf<T>>),
+		CreateNewPost(T::AccountId, Post<AccountIdOf<T>>),
     }
 
     #[pallet::error]
     pub enum Error<T> {
-        SomethingError
+        PostNotBelongToYou,
+        BalanceNotBelongToYou
     }
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(_);
 
+    pub type FreeBalanceOf = FreeBalance;
     pub type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
-    pub type BalanceOf = Balance;
+
+    #[pallet::storage]
+    #[pallet::getter(fn post_by_people)]
+    pub(super) type PostByPeople<T: Config> = StorageMap<_, Blake2_128Concat, Vec<u8>, Vec<Post<AccountIdOf<T>>>>;
+
+    #[pallet::storage] 
+	#[pallet::getter(fn post_by_id)]
+    pub(super) type PostById<T: Config> = StorageMap<_, Blake2_128Concat, Vec<u8>, Post<AccountIdOf<T>>>;
+
+    #[pallet::storage]
+    #[pallet::getter(fn person_balance)]
+    pub(super) type PersonBalance<T: Config> = StorageMap<_, Blake2_128Concat, Vec<u8>, Person<AccountIdOf<T>>>;
 
     #[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-    #[pallet::storage]
-    #[pallet::getter(fn post_by_people)]
-    pub(super) type PostsByPeople<T: Config> = StorageMap<_, Blake2_128Concat, Vec<u8>, Vec<Post<AccountIdOf<T>>>>;
-
-    #[pallet::storage]
-    #[pallet::getter(fn post_by_id)]
-    pub(super) type PostById<T: Config> = StorageMap<_, Blake2_128Concat, AccountIdOf<T>, Post<AccountIdOf<T>>>;
-
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-        pub fn add_post(
+        #[pallet::weight(10_000)]
+        pub fn insert_post(
             origin: OriginFor<T>, 
-            people_id: Vec<u8>, 
-            platform: Vec<u8>, 
-            token_id: Vec<u8>, 
-            balance: u32
-        ) -> DispatchResult {
-            let creator = ensure_signed(origin)?;            
-            let created_post = Self::create_post(
-                &creator, 
-                &people_id, 
-                &platform, 
-                &balance, 
-                &token_id
-            );
-
-            Self::create_people_post(&created_post);
-
-            Ok(().into())
-        }
-    }
-
-    impl<T: Config> Pallet<T> {
-        pub fn create_post(
-            post_id: &T::AccountId,
-            people_id: &Vec<u8>,
-            platform: &Vec<u8>,
-            balance: &u32,
-            token_id: &Vec<u8>,
-        ) -> Post<AccountIdOf<T>> {
-            let new_post: Post<AccountIdOf<T>>;
-            
-            match PostById::<T>::get(&post_id) {
-                None => {
-                    new_post = Post::new(
-                        post_id.clone(),
-                        people_id.clone(), 
-                        platform.clone(), 
-                        token_id.clone(),
-                        balance.clone()
-                    );
-                },
-                Some(post) => {
-                    let current_balance: u32;
-                    if  post.token_id == token_id.clone() {
-                        let previous_balance = post.balance.balance;
-                        current_balance = balance.clone() + previous_balance;
-                    } else {
-                        current_balance = post.balance.balance;
-                    }
-
-                    new_post = Post::new(
-                        post_id.clone(),
-                        post.people_id,
-                        post.platform,
-                        token_id.clone(),
-                        current_balance
-                    );
-                }
-            }
-
-            PostById::<T>::insert(post_id, &new_post);
-
-            Self::deposit_event(Event::PostCreated(post_id.clone(), new_post.clone()));
-
-            new_post
-        }
-
-        pub fn create_people_post(post: &Post<AccountIdOf<T>>) {
-            let mut new_posts: Vec<Post<AccountIdOf<T>>> = Vec::new(); 
-            let posts = Self::post_by_people(&post.people_id).unwrap_or(Vec::new());
-            
-            for pst in posts {
-                if pst.post_id == post.post_id {
-                    new_posts.push(post.clone());
-                } else {
-                    new_posts.push(pst);
-                }
-            }
-
-            PostsByPeople::<T>::insert(&post.people_id, new_posts);
-        }
-    }
-
-    #[derive(Encode, Decode, Clone, Default, RuntimeDebug, PartialEq, Eq)]
-    pub struct Post<AccountId> {
-        post_id: AccountId,
-        people_id: Vec<u8>,
-        platform: Vec<u8>,
-        token_id: Vec<u8>,
-        balance: Balance
-    }
-
-    #[derive(Encode, Decode, Clone, Default, RuntimeDebug, PartialEq, Eq)]
-    pub struct Balance {
-        balance: u32
-    }
-
-    impl <AccountId>Post<AccountId> {
-        pub fn new(
-            post_id: AccountId,
+            post_id: Vec<u8>,
             people_id: Vec<u8>,
             platform: Vec<u8>,
             token_id: Vec<u8>,
-            balance: u32
-        ) -> Self {
-            Self {post_id, people_id, platform, token_id, balance: Balance {
-                balance
-            }}
+            free: u32 
+        ) -> DispatchResult {
+			let creator = ensure_signed(origin)?;
+
+            match Self::create_post(
+                &creator, 
+                &post_id, 
+                &people_id, 
+                &platform, 
+                &token_id, 
+                free
+            ) {
+                None => {
+                    let flag = true;
+                    ensure!(flag == false, Error::<T>::PostNotBelongToYou);
+                }
+                Some(new_post) => {
+                    let new_people_post = Self::create_people_post(people_id.clone(), new_post.clone());
+                    <PostById<T>>::insert(post_id.clone(), new_post.clone());
+                    <PostByPeople<T>>::insert(people_id.clone(), new_people_post.clone());
+
+                    
+			        Self::deposit_event(Event::CreateNewPost(creator.clone(), new_post.clone()));
+                }
+            }
+
+			Ok(())
+		}
+
+        #[pallet::weight(10_000)]
+        pub fn insert_balance(
+            origin: OriginFor<T>,
+            people_id: Vec<u8>, 
+            post_id: Vec<u8>,
+            platform: Vec<u8>,
+            token_id: Vec<u8>,
+            free: u32, 
+        ) -> DispatchResult {
+            let creator = ensure_signed(origin)?;
+
+            match Self::create_post(
+                &creator, 
+                &post_id, 
+                &people_id, 
+                &platform, 
+                &token_id, 
+                free
+            ) {
+                None => {ensure!(false, Error::<T>::PostNotBelongToYou)}
+                Some(new_post) => {
+                    <PostById<T>>::insert(post_id.clone(), new_post.clone());
+
+			        Self::deposit_event(Event::CreateNewPost(creator.clone(), new_post.clone()));
+                }
+            }
+            
+            let person_balance: Person<AccountIdOf<T>>;
+
+            match PersonBalance::<T>::get(people_id.clone()) {
+                None => {
+                    let mut balances:Vec<FreeBalance> = Vec::new();
+
+                    let free_balance = FreeBalance {
+                        free: free,
+                        token_id: token_id.clone()
+                    };
+
+                    balances.push(free_balance);
+
+                    person_balance = Person {
+                        owner_id: creator.clone(),
+                        people_id: people_id.clone(),
+                        platform: platform.clone(),
+                        balances
+                    };
+                },
+                Some(person) => {
+                    ensure!(person.people_id == people_id.clone(), Error::<T>::BalanceNotBelongToYou);
+                    ensure!(person.platform == platform.clone(), Error::<T>::BalanceNotBelongToYou);
+
+                    let mut filter_balance: Vec<FreeBalance> = person.balances
+                        .iter()
+                        .filter(|balance| balance.token_id != token_id.clone())
+                        .cloned()
+                        .collect(); 
+
+                    let balance = Self::recalculate_balance(person.balances.clone(), token_id.clone(), free);
+                    
+                    filter_balance.push(balance);
+
+                    person_balance = Person {
+                        owner_id: creator.clone(),
+                        people_id: people_id.clone(),
+                        platform: platform.clone(),
+                        balances: filter_balance
+                    }
+                }
+            }
+
+            <PersonBalance<T>>::insert(people_id, person_balance);
+            
+            Ok(())
         }
     }
 
+    impl <T: Config> Pallet <T> {
+        pub fn create_post(
+            creator: &T::AccountId, 
+            post_id: &Vec<u8>,
+            people_id: &Vec<u8>,
+            platform: &Vec<u8>,
+            token_id: &Vec<u8>,
+            free: u32 
+        ) -> Option<Post<AccountIdOf<T>>> {
+            let new_post: Post<AccountIdOf<T>>;
+
+            match PostById::<T>::get(post_id.clone()) {
+                None => {
+                    let mut balances:Vec<FreeBalance> = Vec::new();
+
+                    let free_balance = FreeBalance {
+                        free: free,
+                        token_id: token_id.clone()
+                    };
+
+                    balances.push(free_balance);
+
+                    new_post = Post {
+                        owner_id: creator.clone(),
+                        post_id: post_id.clone(),
+                        people_id: people_id.clone(),
+                        platform: platform.clone(),
+                        balances
+                    };
+                },
+                Some(post) => {
+                    if post.people_id != people_id.clone() {
+                        return None;
+                    }
+
+                    if post.platform != platform.clone() {
+                        return None;
+                    }
+
+                    let mut filter_balance: Vec<FreeBalance> = post.balances
+                        .iter()
+                        .filter(|balance| balance.token_id != token_id.clone())
+                        .cloned()
+                        .collect(); 
+
+                    let balance = Self::recalculate_balance(post.balances.clone(), token_id.clone(), free);
+                    
+                    filter_balance.push(balance);
+
+                    new_post = Post {
+                        owner_id: creator.clone(),
+                        post_id: post_id.clone(),
+                        people_id: people_id.clone(),
+                        platform: platform.clone(),
+                        balances: filter_balance
+                    }
+                }
+            }
+
+            Some(new_post)
+        }
+
+        pub fn create_people_post(
+            people_id: Vec<u8>, 
+            new_post: Post<AccountIdOf<T>>
+        ) -> Vec<Post<AccountIdOf<T>>> {
+            let mut filter_posts: Vec<Post<AccountIdOf<T>>> = Vec::new();
+
+            match PostByPeople::<T>::get(people_id.clone()) {
+                None => {
+                    filter_posts.push(new_post);
+                },
+                Some(posts) => {
+                    filter_posts = posts
+                        .iter()
+                        .filter(|post| post.post_id != new_post.post_id.clone())
+                        .cloned()
+                        .collect();
+
+                    filter_posts.push(new_post);
+                }
+            }
+
+            filter_posts
+        }
+
+        pub fn recalculate_balance(balances: Vec<FreeBalance>, token_id: Vec<u8>, free: u32) -> FreeBalance {
+            let mut free_balance = FreeBalance {
+                token_id: token_id.clone(),
+                free: free
+            };
+
+            for (_, e) in balances.iter().enumerate() {
+                if e.token_id == token_id.clone() {
+                    free_balance = FreeBalance {
+                        token_id: token_id.clone(),
+                        free: e.free + free
+                    };
+                    
+                    break;
+                }
+            }
+
+            free_balance
+        }
+    }
+
+    #[derive(Encode, Decode, Clone, Default, RuntimeDebug, PartialEq, Eq)]
+    pub struct Person<AccountId> {
+        owner_id: AccountId,
+        people_id: Vec<u8>,
+        platform: Vec<u8>,
+        balances: Vec<FreeBalance>
+    }
+
+    #[derive(Encode, Decode, Clone, Default, RuntimeDebug, PartialEq, Eq)]
+    pub struct FreeBalance {
+        free: u32,
+        token_id: Vec<u8>
+    }
+
+    #[derive(Encode, Decode, Clone, Default, RuntimeDebug, PartialEq, Eq)]
+    pub struct Post <AccountId> {
+        owner_id: AccountId,
+        post_id: Vec<u8>,
+        people_id: Vec<u8>,
+        platform: Vec<u8>,
+        balances: Vec<FreeBalance>
+    }
 }

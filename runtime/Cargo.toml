@@ -62,6 +62,7 @@ runtime-benchmarks = [
 	'pallet-balances/runtime-benchmarks',
 	'pallet-template/runtime-benchmarks',
 	'pallet-credential/runtime-benchmarks',
+	'pallet-post/runtime-benchmarks',
 	'pallet-timestamp/runtime-benchmarks',
 	'sp-runtime/runtime-benchmarks',
 ]
