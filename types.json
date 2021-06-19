@@ -1,0 +1,36 @@
+{
+    "AccountInfo": "AccountInfoWithDualRefCount",
+    "Address": "MultiAddress",
+    "LookupSource": "MultiAddress",
+    "AccountIdOf": "AccountId",
+    "Credential": {
+      "user_id": "AccountId",
+      "people_id": "PeopleId",
+      "platform": "Text"
+    },
+    "Token": {
+      "id": "Text",
+      "name": "Text",
+      "decimal": "Text",
+      "address_format": "Text",
+      "rpc_address": "Text"
+    },
+    "FreeBalance": {
+      "free": "u32",
+      "token_id": "Text"
+    },
+    "Post": {
+      "owner_id": "AccountId",
+      "post_id": "Text",
+      "people_id": "Text",
+      "platform": "Text",
+      "balances": "Vec<FreeBalance>"
+    },
+    "FreeBalanceOf": "FreeBalance",
+    "Person": {
+      "owner_id": "AccountId",
+      "people_id": "Text",
+      "platform": "Text",
+      "balances": "Vec<FreeBalance>"
+    }
+}

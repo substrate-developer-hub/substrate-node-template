@@ -1,0 +1,21 @@
+{
+    "FreeBalance": {
+        "free": "u32",
+        "token_id": "Text"
+    },
+    "Post": {
+        "owner_id": "AccountId",
+        "post_id": "Text",
+        "people_id": "Text",
+        "platform": "Text",
+        "balances": "Vec<FreeBalance>"
+    },
+    "Person": {
+        "owner_id": "AccountId",
+        "people_id": "Text",
+        "platform": "Text",
+        "balances": "Vec<FreeBalance>"
+    },
+    "FreeBalanceOf": "FreeBalance",
+    "AccountIdOf": "AccountId"
+}

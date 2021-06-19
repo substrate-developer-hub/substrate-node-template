@@ -1,0 +1,9 @@
+{
+    "Token": {
+        "id": "Text",
+        "name": "Text",
+        "decimal": "Text",
+        "address_format": "Text",
+        "rpc_address": "Text"
+    }
+}
