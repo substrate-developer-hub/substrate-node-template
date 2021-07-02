@@ -2,8 +2,10 @@
 default = []
 runtime-benchmarks = ['node-template-runtime/runtime-benchmarks']
 
-[[bin]]
-name = 'node-template'
+[build-dependencies.substrate-build-script-utils]
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'monthly-2021-07'
+version = '3.0.0'
 
 [package]
 authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
@@ -24,12 +26,12 @@ structopt = '0.3.8'
 
 [dependencies.frame-benchmarking]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.1.0'
 
 [dependencies.frame-benchmarking-cli]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.node-template-runtime]
@@ -38,137 +40,136 @@ version = '3.0.0'
 
 [dependencies.pallet-transaction-payment-rpc]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sc-basic-authorship]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sc-cli]
 features = ['wasmtime']
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sc-client-api]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sc-consensus]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sc-consensus-aura]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sc-executor]
 features = ['wasmtime']
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sc-finality-grandpa]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sc-keystore]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sc-rpc]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sc-rpc-api]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sc-service]
 features = ['wasmtime']
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sc-telemetry]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sc-transaction-pool]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sp-api]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sp-block-builder]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sp-blockchain]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sp-consensus]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sp-consensus-aura]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '0.9.0'
 
 [dependencies.sp-core]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sp-finality-grandpa]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sp-inherents]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sp-runtime]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sp-timestamp]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.sp-transaction-pool]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
 
 [dependencies.substrate-frame-rpc-system]
 git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
+tag = 'monthly-2021-07'
 version = '3.0.0'
-[build-dependencies.substrate-build-script-utils]
-git = 'https://github.com/paritytech/substrate.git'
-rev = 'd6c33e7ec313f9bd5e319dc0a5a3ace5543f9617'
-version = '3.0.0'
+
+[[bin]]
+name = 'node-template'
