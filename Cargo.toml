@@ -1,10 +1,12 @@
-[profile.release]
-panic = 'unwind'
-
 [workspace]
 members = [
     'node',
-    'pallets/*',
+    'pallets/template',
     'runtime',
 ]
+
 librocksdb-sys = "6.17.3"
+
+[profile.release]
+panic = 'unwind'
+
