@@ -39,6 +39,11 @@ pub mod pallet {
 	// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
 	pub type Something<T> = StorageValue<_, u32>;
 
+	// StorageMap Example
+	#[pallet::storage]
+	#[pallet::getter(fn when_last_something_done)]
+	pub type WhenLastSomethingDone<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, T::BlockNumber, ValueQuery>;
+
 	// Pallets use events to inform users when important changes are made.
 	// https://substrate.dev/docs/en/knowledgebase/runtime/events
 	#[pallet::event]
@@ -66,15 +71,17 @@ pub mod pallet {
 	impl<T:Config> Pallet<T> {
 		/// An example dispatchable that takes a singles value as a parameter, writes the value to
 		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(10_000 + T::DbWeight::get().writes(2))]
 		pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://substrate.dev/docs/en/knowledgebase/runtime/origin
 			let who = ensure_signed(origin)?;
-
+			let now = frame_system::Pallet::<T>::block_number();
+			
 			// Update storage.
 			<Something<T>>::put(something);
+			<WhenLastSomethingDone<T>>::insert(&who, now);
 
 			// Emit an event.
 			Self::deposit_event(Event::SomethingStored(something, who));
