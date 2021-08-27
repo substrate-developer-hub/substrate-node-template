@@ -194,58 +194,6 @@ pub mod pallet {
 		}
 	}
 
-	// Private functions
-
-	impl<T: Config> Pallet<T> {
-		fn convert_moment_to_u64_in_milliseconds(date: T::Moment) -> Result<u64, DispatchError> {
-			let date_as_u64_millis;
-			if let Some(_date_as_u64) = TryInto::<u64>::try_into(date).ok() {
-				date_as_u64_millis = _date_as_u64;
-			} else {
-				return Err(DispatchError::Other("Unable to convert Moment to i64 for date"));
-			}
-			return Ok(date_as_u64_millis);
-		}
-
-		fn convert_u64_in_milliseconds_to_start_of_date(date_as_u64_millis: u64) -> Result<Date, DispatchError> {
-			let date_as_u64_secs = date_as_u64_millis.clone() / 1000u64;
-			// https://docs.rs/chrono/0.4.6/chrono/naive/struct.NaiveDateTime.html#method.from_timestamp
-			let date = NaiveDateTime::from_timestamp(i64::try_from(date_as_u64_secs).unwrap(), 0).date();
-			log::info!("date_as_u64_secs: {:?}", date_as_u64_secs.clone());
-
-			let date_start_millis = date.and_hms(0, 0, 0).timestamp() * 1000;
-			log::info!("date_start_millis: {:?}", date_start_millis.clone());
-			log::info!("Timestamp requested Date: {:?}", date);
-			return Ok(date_start_millis);
-		}
-
-		fn convert_balance_to_u128(balance: BalanceOf<T>) -> Result<u128, DispatchError> {
-			let balance_as_u128;
-
-			if let Some(_balance_as_u128) = TryInto::<u128>::try_into(balance).ok() {
-				balance_as_u128 = _balance_as_u128;
-			} else {
-				return Err(DispatchError::Other("Unable to convert Balance to u128 for balance"));
-			}
-			log::info!("balance_as_u128: {:?}", balance_as_u128.clone());
-
-			return Ok(balance_as_u128);
-		}
-
-		fn convert_u128_to_balance(balance_as_u128: u128) -> Result<BalanceOf<T>, DispatchError> {
-			let balance;
-
-			if let Some(_balance) = TryInto::<BalanceOf<T>>::try_into(balance_as_u128).ok() {
-				balance = _balance;
-			} else {
-				return Err(DispatchError::Other("Unable to convert u128 to Balance for balance"));
-			}
-			log::info!("balance: {:?}", balance.clone());
-
-			return Ok(balance);
-		}
-	}
-
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
 	// These functions materialize as "extrinsics", which are often compared to transactions.
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
@@ -384,6 +332,58 @@ pub mod pallet {
 					Ok(())
 				},
 			}
+		}
+	}
+
+	// Private functions
+
+	impl<T: Config> Pallet<T> {
+		fn convert_moment_to_u64_in_milliseconds(date: T::Moment) -> Result<u64, DispatchError> {
+			let date_as_u64_millis;
+			if let Some(_date_as_u64) = TryInto::<u64>::try_into(date).ok() {
+				date_as_u64_millis = _date_as_u64;
+			} else {
+				return Err(DispatchError::Other("Unable to convert Moment to i64 for date"));
+			}
+			return Ok(date_as_u64_millis);
+		}
+
+		fn convert_u64_in_milliseconds_to_start_of_date(date_as_u64_millis: u64) -> Result<Date, DispatchError> {
+			let date_as_u64_secs = date_as_u64_millis.clone() / 1000u64;
+			// https://docs.rs/chrono/0.4.6/chrono/naive/struct.NaiveDateTime.html#method.from_timestamp
+			let date = NaiveDateTime::from_timestamp(i64::try_from(date_as_u64_secs).unwrap(), 0).date();
+			log::info!("date_as_u64_secs: {:?}", date_as_u64_secs.clone());
+
+			let date_start_millis = date.and_hms(0, 0, 0).timestamp() * 1000;
+			log::info!("date_start_millis: {:?}", date_start_millis.clone());
+			log::info!("Timestamp requested Date: {:?}", date);
+			return Ok(date_start_millis);
+		}
+
+		fn convert_balance_to_u128(balance: BalanceOf<T>) -> Result<u128, DispatchError> {
+			let balance_as_u128;
+
+			if let Some(_balance_as_u128) = TryInto::<u128>::try_into(balance).ok() {
+				balance_as_u128 = _balance_as_u128;
+			} else {
+				return Err(DispatchError::Other("Unable to convert Balance to u128 for balance"));
+			}
+			log::info!("balance_as_u128: {:?}", balance_as_u128.clone());
+
+			return Ok(balance_as_u128);
+		}
+
+		fn convert_u128_to_balance(balance_as_u128: u128) -> Result<BalanceOf<T>, DispatchError> {
+			let balance;
+
+			if let Some(_balance) = TryInto::<BalanceOf<T>>::try_into(balance_as_u128).ok() {
+				balance = _balance;
+			} else {
+				return Err(DispatchError::Other("Unable to convert u128 to Balance for balance"));
+			}
+			log::info!("balance: {:?}", balance.clone());
+
+			return Ok(balance);
 		}
 	}
 }

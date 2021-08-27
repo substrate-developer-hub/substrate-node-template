@@ -172,7 +172,25 @@ mod tests {
 	fn integration_test() {
 		new_test_ext().execute_with(|| {
 
-			// TODO
+			System::set_block_number(1);
+
+            // 27th August 2021 @ ~7am is 1630049371000
+            // where milliseconds/day         86400000
+			// 27th August 2021 @ 12am is 1630022400000 (start of day)
+            Timestamp::set_timestamp(1630049371000u64);
+
+			assert_ok!(TemplateModule::set_rewards_allowance_dhx_current(
+				Origin::signed(0),
+				5000
+			));
+
+			// Verify Storage
+			assert_eq!(TemplateModule::rewards_allowance_dhx_current(), 5000);
+
+			assert_ok!(TemplateModule::set_rewards_allowance_dhx_for_date(
+				Origin::signed(0),
+				5000
+			));
 		});
 	}
 }
