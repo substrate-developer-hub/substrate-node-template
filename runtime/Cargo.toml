@@ -22,6 +22,10 @@ git = 'https://github.com/paritytech/substrate.git'
 tag = 'monthly-2021-08'
 version = '5.0.0-dev'
 
+[dependencies.chrono]
+default_features = false
+version = '0.4.19'
+
 [dependencies.codec]
 default-features = false
 features = ['derive']
@@ -148,6 +152,12 @@ git = 'https://github.com/paritytech/substrate.git'
 tag = 'monthly-2021-08'
 version = '4.0.0-dev'
 
+[dependencies.sp-io]
+default-features = false
+git = 'https://github.com/paritytech/substrate.git'
+tag = 'monthly-2021-08'
+version = '4.0.0-dev'
+
 [dependencies.sp-offchain]
 default-features = false
 git = 'https://github.com/paritytech/substrate.git'
@@ -198,6 +208,7 @@ runtime-benchmarks = [
     'sp-runtime/runtime-benchmarks',
 ]
 std = [
+	'chrono/std',
     'codec/std',
     'frame-executive/std',
     'frame-support/std',
@@ -217,6 +228,7 @@ std = [
     'sp-consensus-aura/std',
     'sp-core/std',
     'sp-inherents/std',
+	'sp-io/std',
     'sp-offchain/std',
     'sp-runtime/std',
     'sp-session/std',

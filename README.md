@@ -1,5 +1,23 @@
 # Substrate Node Template
 
+## Quickstart
+
+```
+cargo test -p node-template-runtime
+
+rm -rf /tmp/polkadot-chains
+
+cargo build --release
+
+RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/node-template \
+  --base-path /tmp/polkadot-chains/alice \
+  --name "Development Chain" \
+  --dev \
+  --telemetry-url "wss://telemetry.polkadot.io/submit/ 0" \
+  -lruntime=debug
+```
+
+## Intro
 [![Try on playground](https://img.shields.io/badge/Playground-Node_Template-brightgreen?logo=Parity%20Substrate)](https://playground.substrate.dev/?deploy=node-template) [![Matrix](https://img.shields.io/matrix/substrate-technical:matrix.org)](https://matrix.to/#/#substrate-technical:matrix.org)
 
 A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
