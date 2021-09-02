@@ -40,9 +40,9 @@ use pallet_transaction_payment::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
+pub use pallet_kitties;
 /// Import the template pallet.
 pub use pallet_template;
-pub use pallet_kitties;
 
 /// An index to a block.
 pub type BlockNumber = u32;
