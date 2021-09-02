@@ -3921,7 +3921,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-kitties"
-version = "3.0.0"
+version = "3.0.0-monthly-2021-08"
 dependencies = [
  "frame-benchmarking",
  "frame-support",

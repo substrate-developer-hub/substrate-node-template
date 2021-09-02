@@ -43,8 +43,8 @@ version = '2.0.0'
 [dependencies.frame-benchmarking]
 default-features = false
 git = 'https://github.com/paritytech/substrate.git'
-optional = true
 tag = 'monthly-2021-08'
+optional = true
 version = '4.0.0-dev'
 
 [dependencies.frame-support]

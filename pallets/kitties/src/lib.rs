@@ -14,7 +14,6 @@ pub mod pallet {
 		traits::{Currency, ExistenceRequirement, Randomness},
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_core::H256;
 
 	// Struct for holding Kitty information.
 	#[derive(Clone, Encode, Decode, Default, PartialEq)]
@@ -49,7 +48,7 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
 		/// The type of Random we want to specify for runtime.
-		type KittyRandomness: Randomness<H256>;
+		type KittyRandomness: Randomness<Self::Hash, Self::BlockNumber>;
 	}
 
 	// Errors.
@@ -141,7 +140,7 @@ pub mod pallet {
 			for &(ref acct, hash, balance) in &self.kitties {
 				let k = Kitty { id: hash, dna: hash, price: balance, gender: Gender::Male };
 
-				let _ = <Module<T>>::mint(acct.clone(), hash, k);
+				let _ = <Pallet<T>>::mint(acct.clone(), hash, k);
 			}
 		}
 	}

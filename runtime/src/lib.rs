@@ -272,7 +272,7 @@ impl pallet_template::Config for Runtime {
 }
 
 /// Configure the pallet-kitties in pallets/kitties.
-impl pallet_template::Config for Runtime {
+impl pallet_kitties::Config for Runtime {
 	type Event = Event;
 	type KittyRandomness = RandomnessCollectiveFlip;
 }
@@ -294,7 +294,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template::{Pallet, Call, Storage, Event<T>},
-		SubstrateKitties: pallet_kitties::{Module, Call, Config<T>, Storage, Event<T>},
+		Kitties: pallet_kitties::{Pallet, Call, Config<T>, Storage, Event<T>},
 	}
 );
 
