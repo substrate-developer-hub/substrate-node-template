@@ -23,8 +23,6 @@ sp-std = { default-features = false, git = 'https://github.com/paritytech/substr
 pallet-randomness-collective-flip = { default-features = false, git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-08', version = '4.0.0-dev' }
 pallet-balances = { default-features = false, git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-08', version = '4.0.0-dev' }
 sp-core = { default-features = false, git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-08', version = '4.0.0-dev' }
-
-[dev-dependencies]
 sp-io = { default-features = false, git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-08', version = '4.0.0-dev' }
 sp-runtime = { default-features = false, git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-08', version = '4.0.0-dev' }
 
