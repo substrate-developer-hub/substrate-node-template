@@ -271,14 +271,15 @@ impl pallet_template::Config for Runtime {
 	type Event = Event;
 }
 
-/// Configure the pallet-kitties in pallets/kitties.
 parameter_types! {
 	// One can owned at most 9,999 Kitties
 	pub const MaxKittyOwned: u32 = 9999;
 }
+
+/// Configure the pallet-kitties in pallets/kitties.
 impl pallet_kitties::Config for Runtime {
 	type Event = Event;
-	type Balance = Balance;
+	type Currency = Balances;
 	type KittyRandomness = RandomnessCollectiveFlip;
 	type MaxKittyOwned = MaxKittyOwned;
 }
