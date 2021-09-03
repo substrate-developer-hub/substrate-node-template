@@ -1,6 +1,7 @@
-use super::*;
-use crate::substratekitties;
-use frame_support::{assert_noop, assert_ok, parameter_types};
+#![cfg(test)]
+
+use crate as pallet_kitties;
+use frame_support::parameter_types;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -18,9 +19,10 @@ frame_support::construct_runtime!(
 		NodeBlock = Block,
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
-		System: frame_system::{Module, Call, Config, Storage, Event<T>},
-		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-		Substratekitties: substratekitties::{Module, Call, Storage, Config<T>, Event<T>},
+		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
+		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage},
+		Kitties: pallet_kitties::{Pallet, Call, Storage, Config<T>, Event<T>},
 	}
 );
 
@@ -32,7 +34,7 @@ parameter_types! {
 impl frame_system::Config for Test {
 	type AccountData = pallet_balances::AccountData<u64>;
 	type AccountId = u64;
-	type BaseCallFilter = ();
+	type BaseCallFilter = frame_support::traits::AllowAll;
 	type BlockHashCount = BlockHashCount;
 	type BlockLength = ();
 	type BlockNumber = u64;
@@ -47,9 +49,10 @@ impl frame_system::Config for Test {
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type OnKilledAccount = ();
 	type OnNewAccount = ();
+	type OnSetCode = ();
 	type Origin = Origin;
 	type PalletInfo = PalletInfo;
-	type SS58Prefix = ();
+	type SS58Prefix = SS58Prefix;
 	type SystemWeightInfo = ();
 	type Version = ();
 }
@@ -59,29 +62,40 @@ parameter_types! {
 }
 
 impl pallet_balances::Config for Test {
-	type MaxLocks = ();
+	type AccountStore = System;
 	type Balance = u64;
 	type DustRemoval = ();
 	type Event = Event;
 	type ExistentialDeposit = ExistentialDeposit;
-	type AccountStore = System;
+	type MaxLocks = ();
+	type MaxReserves = ();
+	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 }
 
-impl super::Config for Test {
-	type Event = Event;
+parameter_types! {
+	// One can owned at most 9,999 Kitties
+	pub const MaxKittyOwned: u32 = 9999;
 }
 
-type Kitties = super::Module<Test>;
+impl pallet_kitties::Config for Test {
+	type Event = Event;
+	type Currency = Balances;
+	type KittyRandomness = RandomnessCollectiveFlip;
+	type MaxKittyOwned = MaxKittyOwned;
+}
+
+impl pallet_randomness_collective_flip::Config for Test {}
 
 pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
-	let mut t = frame_system::GenesisConfig::default()
-		.build_storage::<Test>()
-		.unwrap();
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 	GenesisConfig {
-		pallet_kitties: Some(SubstratekittiesConfig {
-			kitties: vec![(0, H256::random(), 50), (1, H256::zero(), 100)],
-		}),
+		balances: BalancesConfig {
+			balances: vec![(1,  10), (2,  10)]
+		},
+		kitties: KittiesConfig {
+			kitties: vec![1, 2]
+		},
 		..Default::default()
 	}
 	.assimilate_storage(&mut t)

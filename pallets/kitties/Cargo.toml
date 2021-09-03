@@ -31,14 +31,15 @@ sp-runtime = { default-features = false, git = 'https://github.com/paritytech/su
 default = ['std']
 std = [
 	'codec/std',
+	'log/std',
+	'frame-benchmarking/std',
 	'frame-support/std',
 	'frame-system/std',
-	'frame-benchmarking/std',
-	'sp-std/std',
+	'pallet-balances/std',
 	'pallet-randomness-collective-flip/std',
-	'sp-core/std',
 	'serde/std',
-	'log/std',
+	'sp-core/std',
+	'sp-std/std',
 ]
 runtime-benchmarks = [
 	'frame-benchmarking',
