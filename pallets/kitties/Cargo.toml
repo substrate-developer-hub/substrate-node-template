@@ -15,6 +15,7 @@ targets = ['x86_64-unknown-linux-gnu']
 [dependencies]
 codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '2.0.0' }
 serde = { version = "1.0.119" }
+log = { version = "0.4.14", default-features = false }
 
 frame-system = { default-features = false, git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-08', version = '4.0.0-dev' }
 frame-support = { default-features = false, git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-08', version = '4.0.0-dev' }
@@ -37,6 +38,7 @@ std = [
 	'pallet-randomness-collective-flip/std',
 	'sp-core/std',
 	'serde/std',
+	'log/std',
 ]
 runtime-benchmarks = [
 	'frame-benchmarking',

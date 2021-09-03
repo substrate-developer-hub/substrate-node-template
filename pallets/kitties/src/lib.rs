@@ -62,7 +62,7 @@ pub mod pallet {
 		KittyNotExist,
 		NotKittyOwner,
 		KittyNotOnSale,
-		KittyAskPriceTooLow,
+		KittyBidPriceTooLow,
 		NotEnoughBalance,
 		KittyNotFound,
 	}
@@ -127,6 +127,13 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+		#[pallet::weight(1)]
+		pub fn hello_world(origin: OriginFor<T>) -> DispatchResult {
+			let sender = ensure_signed(origin)?;
+			log::info!("Hello World! Transaction received from: {}", sender);
+			Ok(())
+		}
+
 		/// Create a new unique kitty.
 		///
 		/// Provides the new Kitty details to the 'mint()'
@@ -152,19 +159,16 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::weight(100)]
-		pub fn set_price(
-			origin: OriginFor<T>,
-			kitty_id: T::Hash,
-			new_price: Option<BalanceOf<T>>,
-		) -> DispatchResult {
+		pub fn set_price(origin: OriginFor<T>, kitty_id: T::Hash, new_price: Option<BalanceOf<T>>)
+			-> DispatchResult
+		{
 			let sender = ensure_signed(origin)?;
 
 			// Make sure the owner matches the corresponding owner.
 			// Also check if kitty exists.
 			ensure!(Self::is_kitty_owner(&kitty_id, &sender)?, <Error<T>>::NotKittyOwner);
 
-			let mut kitty = <Kitties<T>>::try_get(&kitty_id)
-				.map_err(|_| <Error<T>>::KittyNotFound)?;
+			let mut kitty = Self::kitties(&kitty_id).ok_or(<Error<T>>::KittyNotExist)?;
 
 			kitty.price = new_price.clone();
 			<Kitties<T>>::insert(&kitty_id, kitty);
@@ -181,11 +185,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::weight(100)]
-		pub fn transfer(
-			origin: OriginFor<T>,
-			to: T::AccountId,
-			kitty_id: T::Hash,
-		) -> DispatchResult {
+		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, kitty_id: T::Hash) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 
 			// Make sure the Kitty exists.
@@ -211,26 +211,19 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::weight(100)]
-		pub fn buy_kitty(
-			origin: OriginFor<T>,
-			kitty_id: T::Hash,
-			bid_price: BalanceOf<T>,
-		) -> DispatchResult {
+		pub fn buy_kitty(origin: OriginFor<T>, kitty_id: T::Hash, bid_price: BalanceOf<T>)
+			-> DispatchResult
+		{
 			let sender = ensure_signed(origin)?;
 
-			// Make sure the Kitty exists.
-			// Verify Kitty owner: must be the account invoking this transaction.
-			ensure!(Self::is_kitty_owner(&kitty_id, &sender)?, <Error<T>>::NotKittyOwner);
-
 			// Check: Buyer is not current kitty owner
-			let kitty = <Kitties<T>>::try_get(&kitty_id)
-				.map_err(|_| <Error<T>>::KittyNotFound)?;
+			let kitty = Self::kitties(&kitty_id).ok_or(<Error<T>>::KittyNotExist)?;
 
 			ensure!(kitty.owner != sender, <Error<T>>::BuyerIsKittyOwner);
 
-			// Check: Kitty is on sale and the kitty.price <= ask_price
+			// Check: Kitty is on sale and the kitty ask price <= bid_price
 			if let Some(ask_price) = kitty.price {
-				ensure!(ask_price <= bid_price, <Error<T>>::KittyAskPriceTooLow);
+				ensure!(ask_price <= bid_price, <Error<T>>::KittyBidPriceTooLow);
 			} else {
 				Err(<Error<T>>::KittyNotOnSale)?;
 			}
@@ -262,18 +255,14 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::weight(100)]
-		pub fn breed_kitty(
-			origin: OriginFor<T>,
-			kitty_id_1: T::Hash,
-			kitty_id_2: T::Hash,
-		) -> DispatchResult {
+		pub fn breed_kitty(origin: OriginFor<T>, kid1: T::Hash, kid2: T::Hash) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 
 			// Check: Verify `sender` owns both kitties (and both kitties exist).
-			ensure!(Self::is_kitty_owner(&kitty_id_1, &sender)?, <Error<T>>::NotKittyOwner);
-			ensure!(Self::is_kitty_owner(&kitty_id_2, &sender)?, <Error<T>>::NotKittyOwner);
+			ensure!(Self::is_kitty_owner(&kid1, &sender)?, <Error<T>>::NotKittyOwner);
+			ensure!(Self::is_kitty_owner(&kid2, &sender)?, <Error<T>>::NotKittyOwner);
 
-			let new_dna = Self::breed_dna(&kitty_id_1, &kitty_id_2)?;
+			let new_dna = Self::breed_dna(&kid1, &kid2)?;
 			Self::mint(&sender, Some(new_dna))?;
 
 			Ok(())
@@ -354,8 +343,7 @@ pub mod pallet {
 			to: &T::AccountId,
 			reset_price: bool,
 		) -> Result<(), Error<T>> {
-			let mut kitty = <Kitties<T>>::try_get(kitty_id)
-				.map_err(|_| <Error<T>>::KittyNotExist)?;
+			let mut kitty = Self::kitties(&kitty_id).ok_or(<Error<T>>::KittyNotExist)?;
 
 			let prev_owner = kitty.owner.clone();
 
