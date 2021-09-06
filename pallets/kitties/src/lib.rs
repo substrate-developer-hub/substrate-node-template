@@ -18,6 +18,9 @@ pub mod pallet {
 	};
 	use sp_io::hashing::blake2_128;
 
+	#[cfg(feature = "std")]
+	use serde::{Deserialize, Serialize};
+
 	type AccountOf<T> = <T as frame_system::Config>::AccountId;
 	type BalanceOf<T> =
 		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -25,14 +28,15 @@ pub mod pallet {
 	// Struct for holding Kitty information.
 	#[derive(Clone, Encode, Decode, PartialEq)]
 	pub struct Kitty<T: Config> {
-		dna: [u8; 16],   // Using 16 bytes to represent a kitty DNA
-		price: Option<BalanceOf<T>>,
-		gender: Gender,
-		owner: AccountOf<T>,
+		pub dna: [u8; 16],   // Using 16 bytes to represent a kitty DNA
+		pub price: Option<BalanceOf<T>>,
+		pub gender: Gender,
+		pub owner: AccountOf<T>,
 	}
 
 	// Set Gender type in Kitty struct.
 	#[derive(Encode, Decode, Debug, Clone, PartialEq)]
+	#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 	pub enum Gender {
 		Male,
 		Female,
@@ -101,22 +105,24 @@ pub mod pallet {
 	// Our pallet's genesis configuration.
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
-		pub kitties: Vec<T::AccountId>,
+		pub genesis: Vec<(T::AccountId, [u8; 16], Gender)>,
 	}
 
 	// Required to implement default for GenesisConfig.
 	#[cfg(feature = "std")]
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> GenesisConfig<T> {
-			GenesisConfig { kitties: vec![] }
+			GenesisConfig { genesis: vec![] }
 		}
 	}
 
 	#[pallet::genesis_build]
 	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
 		fn build(&self) {
-			for acct in &self.kitties {
-				let _ = <Pallet<T>>::mint(acct, None);
+			// When building a kitty from genesis config, we require the dna and gender to be supplied
+			//   because we cannot call RandomnessCollectiveFlip at block number = 0
+			for (acct, dna, gender) in &self.genesis {
+				let _ = <Pallet<T>>::mint(acct, Some(dna.clone()), Some(gender.clone()));
 			}
 		}
 	}
@@ -133,7 +139,7 @@ pub mod pallet {
 		#[pallet::weight(1)]
 		pub fn hello_world(origin: OriginFor<T>) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
-			log::info!("Hello World! Transaction received from: {}", sender);
+			log::info!("Hello World! Transaction received from: {:?}", sender);
 			Ok(())
 		}
 
@@ -149,7 +155,7 @@ pub mod pallet {
 		pub fn create_kitty(origin: OriginFor<T>) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 
-			let kitty_id = Self::mint(&sender, None)?;
+			let kitty_id = Self::mint(&sender, None, None)?;
 
 			// Deposit our "Created" event.
 			Self::deposit_event(Event::Created(sender, kitty_id));
@@ -266,7 +272,7 @@ pub mod pallet {
 			ensure!(Self::is_kitty_owner(&kid2, &sender)?, <Error<T>>::NotKittyOwner);
 
 			let new_dna = Self::breed_dna(&kid1, &kid2)?;
-			Self::mint(&sender, Some(new_dna))?;
+			Self::mint(&sender, Some(new_dna), None)?;
 
 			Ok(())
 		}
@@ -292,7 +298,6 @@ pub mod pallet {
 		}
 
 		fn breed_dna(kid1: &T::Hash, kid2: &T::Hash) -> Result<[u8; 16], Error<T>> {
-			// let random_hash = Self::random_hash(&sender);
 			let dna1 = Self::kitties(kid1).ok_or(<Error<T>>::KittyNotExist)?.dna;
 			let dna2 = Self::kitties(kid2).ok_or(<Error<T>>::KittyNotExist)?.dna;
 
@@ -304,17 +309,15 @@ pub mod pallet {
 		}
 
 		// Helper to mint a Kitty.
-		fn mint(owner: &T::AccountId, dna_opt: Option<[u8; 16]>) -> Result<T::Hash, Error<T>> {
-
-			let dna = match dna_opt {
-				Some(dna) => dna,
-				None => Self::gen_dna(),
-			};
-
+		fn mint(
+			owner: &T::AccountId,
+			dna: Option<[u8; 16]>,
+			gender: Option<Gender>,
+		) -> Result<T::Hash, Error<T>> {
 			let kitty = Kitty::<T> {
-				dna,
+				dna: dna.unwrap_or_else(Self::gen_dna),
 				price: None,
-				gender: Self::gen_gender(),
+				gender: gender.unwrap_or_else(Self::gen_gender),
 				owner: owner.clone(),
 			};
 

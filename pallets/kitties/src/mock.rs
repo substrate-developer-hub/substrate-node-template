@@ -1,6 +1,7 @@
 #![cfg(test)]
 
 use crate as pallet_kitties;
+use pallet_kitties::Gender;
 use frame_support::parameter_types;
 use sp_core::H256;
 use sp_runtime::{
@@ -94,11 +95,17 @@ pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
 			balances: vec![(1,  10), (2,  10)]
 		},
 		kitties: KittiesConfig {
-			kitties: vec![1, 2]
+			genesis: vec![
+				(1, *b"1234567890123456", Gender::Female),
+				(2, *b"123456789012345a", Gender::Male)
+			]
 		},
 		..Default::default()
 	}
-	.assimilate_storage(&mut t)
-	.unwrap();
-	t.into()
+		.assimilate_storage(&mut t)
+		.unwrap();
+
+	let mut ext = sp_io::TestExternalities::new(t);
+	ext.execute_with(|| System::set_block_number(1));
+	ext
 }
