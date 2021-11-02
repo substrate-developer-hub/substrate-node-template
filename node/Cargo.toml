@@ -1,6 +1,6 @@
 [package]
 name = 'node-template'
-version = '3.0.0-monthly-2021-10'
+version = '4.0.0-dev'
 description = 'A fresh FRAME-based Substrate node, ready for hacking.'
 authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
 homepage = 'https://substrate.io/'
@@ -18,12 +18,12 @@ targets = ['x86_64-unknown-linux-gnu']
 
 [build-dependencies.substrate-build-script-utils]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '3.0.0'
 
 [dependencies.node-template-runtime]
 path = '../runtime'
-version = '3.0.0-monthly-2021-10'
+version = '4.0.0-dev'
 
 [dependencies]
 jsonrpc-core = '18.0.0'
@@ -31,140 +31,140 @@ structopt = '0.3.8'
 
 [dependencies.frame-benchmarking]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.frame-benchmarking-cli]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.pallet-transaction-payment-rpc]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sc-basic-authorship]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sc-cli]
 features = ['wasmtime']
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sc-client-api]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sc-consensus]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sc-consensus-aura]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sc-executor]
 features = ['wasmtime']
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sc-finality-grandpa]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sc-keystore]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sc-rpc]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sc-rpc-api]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sc-service]
 features = ['wasmtime']
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sc-telemetry]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sc-transaction-pool]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sc-transaction-pool-api]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sp-api]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sp-block-builder]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sp-blockchain]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sp-consensus]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sp-consensus-aura]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '0.10.0-dev'
 
 [dependencies.sp-core]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sp-finality-grandpa]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sp-runtime]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.sp-timestamp]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [dependencies.substrate-frame-rpc-system]
 git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+tag = 'monthly-2021-11'
 version = '4.0.0-dev'
 
 [features]
