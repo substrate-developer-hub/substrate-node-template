@@ -1,6 +1,7 @@
 [workspace]
 members = [
     'node',
+    'pallets/poe',
     'pallets/template',
     'runtime',
 ]
