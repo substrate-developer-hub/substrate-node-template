@@ -31,6 +31,7 @@ pub struct ProofInfo<AccountId, Balance, BlockNumber, BoundedString> {
 	pub name: BoundedString,
 }
 pub type CID = Vec<u8>;
+pub const MAX_IPFS_CID_LEN = 200 as usize;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -131,6 +132,7 @@ pub mod pallet {
 		//	The sender does not have enough balance to take order
 		NoProofImported
 		//	The sender has not uploaded a proof of ownership via offchain worker 
+		MAX_IPFS_CID_LEN,
 	}
 	impl<T: Config> Printable for Error<T> { 
 		fn print(&self) { 
@@ -153,6 +155,23 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		
+		#[pallet::weight(1_000)]
+		pub fn create_class(
+			origin: OriginFor<T>,
+			metadata: CID,
+		) -> DispatchResultWithPostInfo { 
+
+			let sender = ensure_sender(origin)?;
+			ensure!(metadata.len() <  MAX_IPFS_CID_LEN, Error::<T>::MAX_IPFS_CID_LEN);
+			let next_id = orml_nft::Pallet::<T>::next_class_id();
+			let class_id = orml_nft::<T>::create_
+
+
+
+		}
+
+
+
 		#[pallet::weight(10_000)]
  		pub fn mint_proof(
 			origin: OriginFor<T>,
