@@ -298,7 +298,7 @@ pub mod pallet {
 //	Internal functions of the pallet 
 impl<T: Config> Pallet<T> {
 	//	This function should increase the balance of an account stored on chain 
-	fn increase_balance(acc: &T::AccountId, amount: T::Balance) -> book { 
+	fn increase_balance(acc: &T::AccountId, amount: T::Balance) -> bool { 
 
 		Accounts::<T>::mutate(&acc, |bal| { 
 			let created = *bal == &Zero::zero();

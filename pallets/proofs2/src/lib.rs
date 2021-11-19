@@ -16,27 +16,41 @@ mod benchmarking;
 
 pub type CID = Vec<u8>;
 
-//	Type of NFT
+
+//	This Struct is for setting custom classes for NFT
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
-pub struct ProofInfo<Balance, AccountId, BoundedString> { 
-	pub owner: AccountId,
-	pub issuer: AccountId,
-	pub freezer: AccountId,
-	pub supply: u32,
-	pub is_frozen: bool,
-	pub is_transferable: bool,
-	pub is_burnable: bool,
-	//	Metadata
-	//	pub metadata: ProofInfo<BoundedString>
+pub struct ProofInfo<AccountId, BoundedString> { 
+	pub class_name: BoundedString,
+	pub class_creator: AccountId,
+	pub metadata: ProofInfoMetaData<BoundedString>
 }
-//	MetaData of NFT 
+//	This struct is for storing the metadata of NFT
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
-pub struct ProofMetaData<BoundedString> { 
-	pub name: BoundedString, 
-	pub nick_name: BoundedString,
-	pub collection: BoundedString,
+pub struct ProofMetaData<AccountId, ProofIdOf<T>, BoundedString, ClassidOf<T>> { 
+	pub symbol: BoundedString,
+	//	Name to represent NFT on marketplaces 
+	pub image: BoundedString,
+	//	The URL linking to the NFT artwork's image file
+	pub name: BoundedString,
+	//	Name of the art work 
 	pub description: BoundedString,
-	pub external_link: CID, 
+	//	Description for NFT
+	pub animation_url: BoundedString,
+	//	URL linking to the animation 
+	pub copyright_transfer: bool,
+	//	Whether the copyright is transferred to the buyer
+	pub tokenid: ProofIdOf<T>,
+	//	Token address on the chain 
+	pub resellable: bool,
+	//	Whether the artwork can be sold 
+	pub original_creator: AccountId,
+	//	NFT creator's address on chain 
+	pub edition_number: u8,
+	//	Edition number of the artwork 
+	pub class_category: ClassIdOf<T>,
+	//	Class id of the Artwork 
+	pub edition_total: u32
+	//	Total number of editions of the artwork 
 }
 
 //	Set default values if no ProofInfo is found 
@@ -49,7 +63,7 @@ pub type BalanceOf<T> = <<T as Config>::Currency as Currency<AccountIdOf<T>>>::B
 //	Type to call AccountId
 pub type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
 
-pub type ProofInfoOf<T> = ProofInfo<T::Balance, T::AccountId>;
+
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -76,63 +90,58 @@ pub mod pallet {
 		#[pallet::constant]
 		type MaxSupplyAllowed: Get<u32>;
 	}
-
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);
 
-	//	Proof info Class Storage of Proof 
+	//	Class_id 
+	//	Keys: AccountId, Value: Class id
+	//	Return None if there no Class Id made by user 
 	#[pallet::storage]
-	#[pallet::getter(fn something)]
+	#[pallet::getter(fn class_id)]
+	pub type ClassId<T: Config> = StorageMap<
+		_,
+		Blake2_128Concant, 
+		T::AccountId, 
+		ClassIdOf<T>,
+		OptionQuery,
+	>;
+
+	//	Proof info Class Storage: keys: Class_id => val: Class_info struct 
+	#[pallet::storage]
+	#[pallet::getter(fn info)]
 	pub type ProofInfoStorage<T: Config> = StorageMap<
 		_, 
 		Blake2_128Concat, 
 		ClassIdOf<T>,
-		ProofInfoOf<T>,
-		OptionQuery
+		ProofInfo<T::AccountId, BoundedVec<u8, T::StringLimit>>,
+		ValueQuery,
 	>;
-	//	Proof MetaData Storage 
-	// #[pallet::storage]
-	// pub type MetaData<T: Config> = StorageMap<
-	// 	_,
-	// 	Blake2_128Concat,
-	// 	ClassIdOf<T>,
-	// 	ProofMetaData<BoundedVec<u8, T::StringLimit>>,
-	// 	ValueQuery,
-	// >;
-
-
-	//	token id and class id => metadata of nft
-	#[pallet::pallet]
-	#[pallet::generate_store(pub(super) trait Store)]
-	pub type ProofMetaDataStorage<T: Config> = StorageDoubleMap<
+	//	Proof MetaData Storage: keys: [class_id], [accountId] => val: metadata
+	#[pallet::storage]
+	#[pallet::getter(fn metadata)]
+	pub type MetaData<T: Config> = StorageMap<
 		_,
 		Blake2_128Concat,
-		T::AccountId,
-		Blake2_128Concat,
 		ClassIdOf<T>,
-		ProofMetaData<T::StringLimit, T::Depositbalance>,
+		Blake2_128Concat, 
+		T::AccountId,
+		ProofMetaData<BoundedVec<u8, T::StringLimit>>,
 		ValueQuery,
 	>;
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {}
 
-
 	#[pallet::event]
 	#[pallet::metadata(T::AccountId = "AccountId")]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		ClassDefined(T::AccountId, ProofIdOf<T>),
-
 		Minted(T::AccountId, T::AccountId, ClassIdOf<T>, u32),
-
 		NewMetaData(T::AccoundId, ClassIdOf<T>),
-		
 		Transferred(T::AccountId, T::AccountId, ProofIdOf<T>, ClassIdOf<T>, u32),
-
 		Burned(T::AccountId, ClassIdOf<T>, ProofIdOf<T>),
-
 		Frozen(T::AccountId, ClassIdOf<T>, ProofIdOf<T>),
 	}
 
@@ -158,38 +167,25 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::class_create())]
 		pub fn class_create(
 			origin: OriginFor<T>,
-			beneficiary: <T as StaticLookup>::Source,
-			is_frozen: bool,
-			is_burnable: bool,
-			is_transferable: bool,
-			supply: u32,
-			freezer: <T as StaticLookup>::Source,
-			issuer: <T as StaticLookup>::Source,
-
+			class_name: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			
 			let sender = ensure_origin(origin)?;
-			let owner = T::Lookup::lookup(beneficiary)?;
-			let freeze_account_id = T::Lookup::lookup(freezer)?;
-			let issue_account_id = T::Lookup::lookup(issuer)?; 
-			let metadata = CID;
 			
-			//	Create a new class
-			ensure!(supply < MaxSupplyAllowed, Error::<T>::MaxSupplyExceeded)?; 
-			let class_id = orml_nft::Pallet::<T>::next_class_id();			
-			let info = ProofInfo { 
-				owner,
-				issuer, 
-				freezer: freeze_account.clone(),
-				supply,
-				is_frozen,
-				is_transferable,
-				is_burnable,
-			};
-			orml_nft::Pallet::<T>::create_class(&sender, CID, info)?;
-			<ProofInfoStorage<T>>::insert(class_id, info);
+			let bounded_name: BoundedVec<u8, T::StringLimit> = 
+				name.clone().try_into().map_err(|_| Error::<T>::BadMetaData)?;
 
-			Self::deposit_event(Event::ClassDefined(sender, metadata, class_id));
+			let info = ProofInfo { 
+				class_name: bounded_name,
+				class_creator: sender.clone(),
+				_,
+				//	No Metadata Set into Place 
+			};
+			let class_id = orml_nft::Pallet::<T>::create_class(&sender, _, info);
+			//	Insert ClassId under AccountId 
+			ClassId::<T>::insert(&sender, class_id);
+			//	Storage Associated CLassid with Class Information 
+			ProofInfoStorage::<T>::insert(&class_id, info);
+			Self::deposit_event(Event::ClassDefined(sender, _, class_id));
 
 			Ok(().into())
 		}
@@ -197,39 +193,52 @@ pub mod pallet {
 		//	NFT metadata is temporarily stored on chain 
 		//	'external_link' is to be provided by the user which is generated using IPFS
 		//	'class_id' is created by the user
-	
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn set_metadata(
 			origin: OriginFor<T>, 
-			name: Vec<u8>, 
-			nick_name: Vec<u8>,
-			collection: Vec<u8>, 
-			external_link: Vec<u8>,
-			class_id: ClassIdOf<T>,
+			symbol: Vec<u8>,
+			image: Vec<u8>,
+			name: Vec<u8>,
+			description: Vec<u8>
+			animation_url: Vec<u8>,
+			copyright_transfer: bool,
+			resellable: bool,
+			original_creator: <T::Lookup as StaticLookup>::Source,
+			edition_total: u32,
 		) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
-
-			ensure!(<ProofInfoStorage<T>>::contains_key(&class_id), Error::<T>::NoneValue); 
-
+			//	Get class_id assciated to the user 
+			let class_id = ClassId::<T>::take(sender);
+			let creator = T::Lookup::lookup(original_creator);
 			let bounded_name: BoundedVec<u8, T::StringLimit> = 
 				name.clone().try_into().map_err(|_| Error::<T>::BadMetaData)?;
-			let bounded_nick: BoundedVec<u8, T::StringLimit> = 
+			
+			let bounded_symbol: BoundedVec<u8, T::StringLimit> = 
 				name.clone().try_into().map_err(|_| Error::<T>::BadMetaData)?;
-				
-			//	ensure we are setting metadatas based on their respective classes 
-			//	Store Proof Metadata using Sender and Class Id created from the previous function 
-			ProofMetaDataStorage::<T>::insert(&sender, class_id, |proof_metadata| { 
-				*proof_metadata = ProofMetaData { 
-					name: bounded_name,
-					nick_name: bounded_nick,
-					collection: bounded_name, 
-					external_link: bounded_name,
-				};
-			});
+			
+			let bounded_description: BoundedVec<u8, T::StringLimit> = 
+				name.clone().try_into().map_err(|_| Error::<T>::BadMetaData)?;
+
+			let metadata = ProofInfo { 
+				symbol: bounded_symbol,
+				image,
+				name: bounded_name,
+				description: bounded_description,
+				animation_url,
+				copyright_transfer,
+				token_id: (),
+				resellable,
+				original_creator: creator,
+				edition_number: class_id,
+				class_category: class_id,
+				edition_total,
+			};
+			//	Insert into onchain storage
+			Metadata::<T>::insert(class_id, sender, metadata);
+			
 			Self::deposit_event(Event::NewMetaData(sender.clone(), class_id));
 			Ok(().into())
-		}
-		
+
 		//	Issue specified NFT class tokens here 
 
 		//	Paremeters:
@@ -240,35 +249,19 @@ pub mod pallet {
 		//	Emit 'Minted' event when successfull 
 		pub fn mint(
 			origin: OriginFor<T>,
-			beneficiary: <T as StaticLookup>::Source,
-			class_id: ClassIdOf<T>,
 		) -> DispatchResultWithInfo {
 			let sender = ensure_origin(origin);
-			let owner = T::Lookup::lookup(beneficiary)?;
-			
-			ensure!(
-				<ProofInfoStorage<T>>::contains_key(&sender, &class_id),
-				Error::<T>::NoneValue
-			);
-			//	Class Id value
-			let proof_specification = <ProofInfoStorage<T>>::try_get(class_id);
-			//	Metadata for Class id value 
-			let proof_metadata = <ProofMetaDataStorage<T>>::try_get(&sender, &class_id);
-			//	Mint NFTs according to the specified supply in class id 
-			for quantity in 0..proof_specification.supply { 
-				orml_nft::Pallet::<T>::mint(
-					sender.clone(),
-					class_id.clone(),
-					proof_metadata,
-					proof_specification);
-			}
-			//	transfer tokens to benfiticary  
-			//	Proof Info MetaData Storage
-			
-			//	Generate the token id 
+			let class_id = ClassId::<T>::take(sender);
+			//	Get Storage items
+			let metadata = Metadata::<T>::get(&class_id, &sender);
 
-			//	transfer to the original sender with no fees 
-
+			//	ORML Mint  
+			let token_id = orml_nft::<T>::mint(
+				&sender,
+				class_id,
+				_,
+				metadata
+			);	
 
 			Self::deposit_event(Event::Minted(sender, class_id));
 
