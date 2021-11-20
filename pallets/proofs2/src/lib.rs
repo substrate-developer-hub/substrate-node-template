@@ -346,7 +346,7 @@ pub mod pallet {
 			token_id: ProofIdOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let owner = ensure_signed(origin)?;
-
+			//	let class_id = ClassId::<T>::get(owner);
 			let class_info = orml_nft::Pallet::<T>::classes(class_id);
 			let token_info = orml_nft::Pallet::<T>::tokens(token_id);
 			
