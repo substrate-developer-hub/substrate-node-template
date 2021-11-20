@@ -14,15 +14,12 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-pub type CID = Vec<u8>;
-
 
 //	This Struct is for setting custom classes for NFT
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 pub struct ProofInfo<AccountId, BoundedString> { 
 	pub class_name: BoundedString,
 	pub class_creator: AccountId,
-	pub metadata: ProofInfoMetaData<BoundedString>
 }
 //	This struct is for storing the metadata of NFT
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
@@ -62,8 +59,6 @@ pub type ClassIdOf<T> = <T as orml_nft::Config>::ClassId;
 pub type BalanceOf<T> = <<T as Config>::Currency as Currency<AccountIdOf<T>>>::Balance;
 //	Type to call AccountId
 pub type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
-
-
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -120,12 +115,12 @@ pub mod pallet {
 	//	Proof MetaData Storage: keys: [class_id], [accountId] => val: metadata
 	#[pallet::storage]
 	#[pallet::getter(fn metadata)]
-	pub type MetaData<T: Config> = StorageMap<
+	pub type MetaData<T: Config> = StorageDoubleMap<
 		_,
 		Blake2_128Concat,
-		ClassIdOf<T>,
+		ClassIdOf<T>, // Class Id of NFT
 		Blake2_128Concat, 
-		T::AccountId,
+		T::AccountId,	// User Account 
 		ProofMetaData<BoundedVec<u8, T::StringLimit>>,
 		ValueQuery,
 	>;
@@ -133,22 +128,67 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {}
 
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config> { 
+		//	Genesis Classes [Accounts, BoundedVec]
+		pub class_type: Vec<(T::AccountId, Vec<u8>)>,
+		//	Genesis Metadata [Accounts, token id, BoundedVec, classid ]
+		pub metadata: Vec<(T::AccountId, ProofIdOf<T>, Vec<u8>, ClassIdOf<T>)>,
+	}
+	#[cfg(feature = "std")]
+	impl<T: Config> Default for GenesisConfig<T> { 
+		fn default() -> Self { 
+			Self {
+				class_type: Default::default(),
+				metadata: Default::default(),
+			}
+		}
+	}
+	//	Todo
+	#[pallet::genesis_build]
+	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> { 
+		fn build(&self) {}
+	}
+
 	#[pallet::event]
 	#[pallet::metadata(T::AccountId = "AccountId")]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		ClassDefined(T::AccountId, ProofIdOf<T>),
-		Minted(T::AccountId, T::AccountId, ClassIdOf<T>, u32),
-		NewMetaData(T::AccoundId, ClassIdOf<T>),
-		Transferred(T::AccountId, T::AccountId, ProofIdOf<T>, ClassIdOf<T>, u32),
-		Burned(T::AccountId, ClassIdOf<T>, ProofIdOf<T>),
-		Frozen(T::AccountId, ClassIdOf<T>, ProofIdOf<T>),
+		//	User created a unique class id 
+		ClassDefined { T::AccountId, ProofIdOf<T> },
+		//	Minted using class_id and metadata specified by the user 
+		Minted {
+			T::AccountId, 
+			T::AccountId, 
+			ClassIdOf<T>, 
+			u32
+		},
+		//	User Created a Metadata
+		NewMetaData	{ T::AccoundId, ClassIdOf<T>},
+		Transferred {
+			from: T::AccountId, 
+			to: T::AccountId, 
+			id: ProofIdOf<T>, 
+			class: ClassIdOf<T>, 
+		},
+		Burned {
+			executed_by: T::AccountId,
+			class_id : ClassIdOf<T>, 
+			id: ProofIdOf<T>
+		},
+		Frozen { T::AccountId, ClassIdOf<T>, ProofIdOf<T>},
+		//	Metadata has been clearead for an asset class 
+		ClassMetadataCleared {
+			class: ClassIdOf<T>,
+		}
+
 	}
 
 	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T> {
 		BadMetaData,
+		//	Bad Metadata added
 		MaxSupplyExceeded,
 	}
 
@@ -170,15 +210,12 @@ pub mod pallet {
 			class_name: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			let sender = ensure_origin(origin)?;
-			
 			let bounded_name: BoundedVec<u8, T::StringLimit> = 
 				name.clone().try_into().map_err(|_| Error::<T>::BadMetaData)?;
 
 			let info = ProofInfo { 
 				class_name: bounded_name,
 				class_creator: sender.clone(),
-				_,
-				//	No Metadata Set into Place 
 			};
 			let class_id = orml_nft::Pallet::<T>::create_class(&sender, _, info);
 			//	Insert ClassId under AccountId 
@@ -235,43 +272,94 @@ pub mod pallet {
 			};
 			//	Insert into onchain storage
 			Metadata::<T>::insert(class_id, sender, metadata);
-			
+
 			Self::deposit_event(Event::NewMetaData(sender.clone(), class_id));
 			Ok(().into())
-
+		}
 		//	Issue specified NFT class tokens here 
 
-		//	Paremeters:
+		//	Parameters:
 		//	'class_id' the type of NFT to be minted => ProofInfo Struct 
 		//	'quantity' of tokens to be supplied to the beneficiary
-		//	'beneficiary' is the amount to be credited with the minted assets 
 		//	'metadata' get from fn set_metadata()		
 		//	Emit 'Minted' event when successfull 
+		#[pallet::weight(10_000)]
 		pub fn mint(
 			origin: OriginFor<T>,
 		) -> DispatchResultWithInfo {
 			let sender = ensure_origin(origin);
 			let class_id = ClassId::<T>::take(sender);
 			//	Get Storage items
-			let metadata = Metadata::<T>::get(&class_id, &sender);
-			//	ORML Mint  
-			let token_id = orml_nft::<T>::mint(
-				&sender,
-				class_id,
-				_,
-				metadata
-			);	
+			let metadata = Metadata::<T>::try_get(&class_id, &sender);
+			
+			for _ in metadata.edition_total { 
+				let token_id = orml_nft::Pallet::<T>::mint(&sender, class_id, _ , metadata.clone());
 
+			}
 			Self::deposit_event(Event::Minted(sender, class_id));
 			Ok(().into())
 		}
-		
-		
-		
-		
-		pub fn clear_metadata() -> DispatchResultWithPostInfo {}
-		pub fn transfer() -> DispatchResultWithPostInfo {}
+		//	Input
+		#[pallet::weight(10_000)]
+		pub fn transfer(
+			origin: OriginFor<T>,
+			to: <T::Lookup as StaticLookup>::Source,
+			#[pallet::compact] id: ProofIndex<T> 
+		) -> DispatchResultWithPostInfo {
+			let sender = ensure_signed(origin)?;
+			let to = T::Lookup::lookup(to)?;
+	
+			let class_id = ClassIdOf::<T>::take(sender);
+			let metadata = Metadata::<T>::get(class_id, sender);
 
+			let token = (class_id, );
 
+			orml_nft::Pallet::<T>::transfer(&sender, &to, )?;
+
+			Self::deposit_event(Event::Transferred(sender, to, id, class_id));
+
+			Ok(().into())
+		}
+		//	Clear Metadata for users without destroying class_ids from onchain storage 
+		//	Parameters:
+		//	- Get 'class_id' associated under account on chain storage 
+		//	- Use 'class_id' to remove the metadata on the storage NOT on the NFT itself 
+
+		#[pallet::weight(10_000)]
+		pub fn clear_metadata(
+			origin: OriginFor<T>,
+		) -> DispatchResultWithPostInfo {
+			let owner = ensure_signed(origin)?;
+			let class_id = ClassIdOf::<T>::get(owner);
+			Metadata::<T>::remove_prefix(&class_id);
+
+			Self::deposit_event(Event::ClassMetadataCleared(class_id));
+			Ok(().into())	
+		}
+		//	Burn without destroying class_id stored within onchain data storage 
+		//	This one probably doesn't work properly 
+		#[pallet::weight(10_000)]
+		pub fn burn(
+			origin: OriginFor<T>,
+			class_id: ClassIdOf<T>, 
+			token_id: ProofIdOf<T>,
+		) -> DispatchResultWithPostInfo {
+			let owner = ensure_signed(origin)?;
+
+			let class_info = orml_nft::Pallet::<T>::classes(class_id);
+			let token_info = orml_nft::Pallet::<T>::tokens(token_id);
+			
+			let token = (class_info, token_info);
+			//	Burn tokens
+			orml_nft::Pallet::<T>::burn(&owner, token)?;
+			
+			Self::deposit_event(Event::Burned());
+
+			Ok(().into())
+		} 
 	}
 }
+
+
+
+
