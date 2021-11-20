@@ -304,6 +304,7 @@ pub mod pallet {
 		pub fn transfer(
 			origin: OriginFor<T>,
 			to: <T::Lookup as StaticLookup>::Source,
+			token_id: ProofIdOf<T>,
 			#[pallet::compact] id: ProofIndex<T> 
 		) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
@@ -312,9 +313,9 @@ pub mod pallet {
 			let class_id = ClassIdOf::<T>::take(sender);
 			let metadata = Metadata::<T>::get(class_id, sender);
 
-			let token = (class_id, );
+			let token = (class_id, token_id);
 
-			orml_nft::Pallet::<T>::transfer(&sender, &to, )?;
+			orml_nft::Pallet::<T>::transfer(&sender, &to, token )?;
 
 			Self::deposit_event(Event::Transferred(sender, to, id, class_id));
 
