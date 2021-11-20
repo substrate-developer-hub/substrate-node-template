@@ -102,6 +102,16 @@ pub mod pallet {
 		OptionQuery,
 	>;
 
+	//	ProofIDStorage
+	#[pallet::storage]
+	#[pallet::getter(fn proof_id)]
+	pub type ProofId<T: Config> = StorageMap<
+		_,
+		Blake2_128Concant, 
+		T::AccountId, 
+		ProofIdOf<T>,
+		OptionQuery,
+	>;
 	//	Proof info Class Storage: keys: Class_id => val: Class_info struct 
 	#[pallet::storage]
 	#[pallet::getter(fn info)]
@@ -294,7 +304,7 @@ pub mod pallet {
 			
 			for _ in metadata.edition_total { 
 				let token_id = orml_nft::Pallet::<T>::mint(&sender, class_id, _ , metadata.clone());
-
+				ProofId::<T>::insert(sender, token_id);
 			}
 			Self::deposit_event(Event::Minted(sender, class_id));
 			Ok(().into())
@@ -304,18 +314,16 @@ pub mod pallet {
 		pub fn transfer(
 			origin: OriginFor<T>,
 			to: <T::Lookup as StaticLookup>::Source,
-			token_id: ProofIdOf<T>,
 			#[pallet::compact] id: ProofIndex<T> 
 		) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
 			let to = T::Lookup::lookup(to)?;
 	
-			let class_id = ClassIdOf::<T>::take(sender);
-			let metadata = Metadata::<T>::get(class_id, sender);
+			let class_id = ClassIdOf::<T>::get(sender);
+			let token_info = ProofId::<T>::get(owner);
+			let token = (class_id, token_info);
 
-			let token = (class_id, token_id);
-
-			orml_nft::Pallet::<T>::transfer(&sender, &to, token )?;
+			orml_nft::Pallet::<T>::transfer(&sender, &to, token)?;
 
 			Self::deposit_event(Event::Transferred(sender, to, id, class_id));
 
@@ -342,13 +350,12 @@ pub mod pallet {
 		#[pallet::weight(10_000)]
 		pub fn burn(
 			origin: OriginFor<T>,
-			class_id: ClassIdOf<T>, 
-			token_id: ProofIdOf<T>,
+			
 		) -> DispatchResultWithPostInfo {
 			let owner = ensure_signed(origin)?;
 			//	let class_id = ClassId::<T>::get(owner);
-			let class_info = orml_nft::Pallet::<T>::classes(class_id);
-			let token_info = orml_nft::Pallet::<T>::tokens(token_id);
+			let class_info = ClassId::<T>::get(owner);
+			let token_info = ProofId::<T>::get(owner);
 			
 			let token = (class_info, token_info);
 			//	Burn tokens
