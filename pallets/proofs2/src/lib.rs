@@ -254,7 +254,6 @@ pub mod pallet {
 			let class_id = ClassId::<T>::take(sender);
 			//	Get Storage items
 			let metadata = Metadata::<T>::get(&class_id, &sender);
-
 			//	ORML Mint  
 			let token_id = orml_nft::<T>::mint(
 				&sender,
@@ -264,7 +263,6 @@ pub mod pallet {
 			);	
 
 			Self::deposit_event(Event::Minted(sender, class_id));
-
 			Ok(().into())
 		}
 		
