@@ -5,6 +5,6 @@ panic = 'unwind'
 members = [
     'node',
     'pallets/template',
-    #'pallets/proofs',
+  'pallets/SubstrateZombies',
     'runtime',
 ]

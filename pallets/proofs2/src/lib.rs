@@ -273,7 +273,7 @@ pub mod pallet {
 				description: bounded_description,
 				animation_url,
 				copyright_transfer,
-				token_id: (),
+				token_id: ProofIdOf<T>,
 				resellable,
 				original_creator: creator,
 				edition_number: class_id,

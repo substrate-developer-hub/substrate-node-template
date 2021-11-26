@@ -1,5 +1,5 @@
 [package]
-name = 'pallet-template'
+name = 'pallet-subscription'
 version = '3.0.0-monthly-2021-10'
 description = 'FRAME pallet template for defining custom runtime logic.'
 authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
@@ -59,6 +59,8 @@ default-features = false
 git = 'https://github.com/paritytech/substrate.git'
 tag = 'monthly-2021-10'
 version = '4.0.0-dev'
+
+sp-std = { default-features = false, version = '3.0.0' }
 
 [features]
 default = ['std']
