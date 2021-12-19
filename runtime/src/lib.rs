@@ -279,6 +279,16 @@ impl pallet_template::Config for Runtime {
 	type Event = Event;
 }
 
+parameter_types! {
+	pub const MaxClaimLength: u32 = 256;
+}
+
+/// Configure the pallet-poe in pallets/poe.
+impl pallet_poe::Config for Runtime {
+	type Event = Event;
+	type MaxClaimLength = MaxClaimLength;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -296,6 +306,8 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		// Include the custom logic from the pallet-poe in the runtime.
+		PoeModule: pallet_poe,
 	}
 );
 

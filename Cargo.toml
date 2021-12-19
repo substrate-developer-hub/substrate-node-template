@@ -1,7 +1,8 @@
 [workspace]
 members = [
     'node',
-    'pallets/template',
+	'pallets/template',
+	'pallets/poe',
     'runtime',
 ]
 [profile.release]
