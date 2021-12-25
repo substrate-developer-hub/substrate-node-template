@@ -14,3 +14,22 @@
 
 # direnv cache
 .direnv
+.idea/codeStyles/codeStyleConfig.xml
+.idea/codeStyles/Project.xml
+.idea/modules.xml
+.idea/sonarlint/issuestore/1/9/1994f1f2392ac3b6e1470e9c7228618acb2b3695
+.idea/sonarlint/issuestore/6/5/65f2b16290036193ae5cc9c4af885c87b29dbfd9
+.idea/sonarlint/issuestore/6/d/6dff4587e839df5e10c4d989b232de51e464085e
+.idea/sonarlint/issuestore/7/5/750c01deb2b56517d2ba306e36024b2c0397d7e5
+.idea/sonarlint/issuestore/8/9/897b08e77d7aeabce2def7be74a2d4a34c475f16
+.idea/sonarlint/issuestore/8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
+.idea/sonarlint/issuestore/9/9/9996bcbde516d6d39bf2b5b13a601359a152eb38
+.idea/sonarlint/issuestore/e/2/e22974be7d116f5d718950707385ae0ca09b43fd
+.idea/sonarlint/issuestore/f/1/f1c2d83c31c23454c3a56b5991fa5ea56858f181
+.idea/sonarlint/issuestore/f/4/f48208db467195d417a6eacb46365d03a13f8dcd
+.idea/sonarlint/issuestore/index.pb
+.idea/substrate-node-template.iml
+.idea/vcs.xml
+Cargo.lock
+Cargo.lock
+*.lock
