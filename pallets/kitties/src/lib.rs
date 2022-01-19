@@ -311,13 +311,21 @@ pub mod pallet {
 			payload.using_encoded(blake2_128)
 		}
 
-		pub fn breed_dna(kid1: &T::Hash, kid2: &T::Hash) -> Result<[u8; 16], Error<T>> {
-			let dna1 = Self::kitties(kid1).ok_or(<Error<T>>::KittyNotExist)?.dna;
-			let dna2 = Self::kitties(kid2).ok_or(<Error<T>>::KittyNotExist)?.dna;
+		fn mutate_dna_fragment(dna_fragment1: u8, dna_fragment2: u8, new_dna_fragment: u8) -> u8 {
+			if new_dna_fragment % 2 == 0 {
+				dna_fragment1
+			} else {
+				dna_fragment2
+			}
+		}
+
+		pub fn breed_dna(parent1: &T::Hash, parent2: &T::Hash) -> Result<[u8; 16], Error<T>> {
+			let dna1 = Self::kitties(parent1).ok_or(<Error<T>>::KittyNotExist)?.dna;
+			let dna2 = Self::kitties(parent2).ok_or(<Error<T>>::KittyNotExist)?.dna;
 
 			let mut new_dna = Self::gen_dna();
 			for i in 0..new_dna.len() {
-				new_dna[i] = (new_dna[i] & dna1[i]) | (!new_dna[i] & dna2[i]);
+				new_dna[i] = Self::mutate_dna_fragment(dna1[i], dna2[1], new_dna[i])
 			}
 			Ok(new_dna)
 		}
