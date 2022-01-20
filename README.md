@@ -74,9 +74,9 @@ RUST_BACKTRACE=1 ./target/release/node-template -ldebug --dev
 ```
 
 > Development chain means that the state of our chain will be in a tmp folder while the nodes are
->   running. Also, **alice** account will be authority and sudo account as declared in the [genesis
-> state](https://github.com/substrate-developer-hub/substrate-node-template/blob/main/node/src/
-chain_spec.rs#L49). At the same time the following accounts will be prefunded:
+> running. Also, **alice** account will be authority and sudo account as declared in the
+> [genesis state](https://github.com/substrate-developer-hub/substrate-node-template/blob/main/node/src/chain_spec.rs#L49).
+> At the same time the following accounts will be pre-funded:
 > - Alice
 > - Bob 
 > - Alice//stash
