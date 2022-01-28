@@ -1,3 +1,4 @@
+cargo-features = ["edition2021"]
 [package]
 name = "node-template"
 version = "4.0.0-dev"

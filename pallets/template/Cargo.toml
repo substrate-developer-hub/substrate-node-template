@@ -1,3 +1,4 @@
+cargo-features = ["edition2021"]
 [package]
 name = "pallet-template"
 version = "4.0.0-dev"
