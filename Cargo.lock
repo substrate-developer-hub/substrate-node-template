@@ -3292,6 +3292,7 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-grandpa",
+ "pallet-multisig",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
  "pallet-template",
@@ -3550,6 +3551,20 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-multisig"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?tag=devhub/latest#e6fbbd5cdf72a5ed7fd65138072ed1f8a320a33d"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-io",
+ "sp-runtime",
  "sp-std",
 ]
 

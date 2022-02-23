@@ -279,6 +279,27 @@ impl pallet_template::Config for Runtime {
 	type Event = Event;
 }
 
+// Multisig
+parameter_types! {
+	pub const MultisigDepositBase: Balance = 100;
+	pub const MultisigDepositFactor: Balance = 10;
+	pub const MaxSignatories: u16 = 10;
+}
+
+impl pallet_multisig::Config for Runtime {
+	type Event = Event;
+	type Call = Call;
+	type Currency = Balances;
+	// The base amount of currency needed to reserve for creating a multisig execution
+	type DepositBase = MultisigDepositBase;
+	// The amount of currency needed per unit threshold when creating a multisig execution.
+	type DepositFactor = MultisigDepositFactor;
+	// The maximum amount of signatories allowed in the multisig.
+	type MaxSignatories = MaxSignatories;
+	// Weight information for extrinsics in this pallet.
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -296,6 +317,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		Multisig: pallet_multisig
 	}
 );
 
