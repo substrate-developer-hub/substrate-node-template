@@ -21,8 +21,8 @@ clap = { version = "3.0", features = ["derive"] }
 
 sc-cli = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest", features = ["wasmtime"] }
 sp-core = { version = "5.0.0", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
-sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
-sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
+sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest", features = ["wasmtime"]  }
+sc-service = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest", features = ["wasmtime"]  }
 sc-telemetry = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
 sc-keystore = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
 sc-transaction-pool = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
