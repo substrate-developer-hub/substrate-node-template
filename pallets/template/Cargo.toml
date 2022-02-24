@@ -22,9 +22,9 @@ frame-system = { default-features = false, version = "4.0.0-dev", git = "https:/
 frame-benchmarking = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest", optional = true }
 
 [dev-dependencies]
-sp-core = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
-sp-io = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
-sp-runtime = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
+sp-core = { default-features = false, version = "5.0.0", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
+sp-io = { default-features = false, version = "5.0.0", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
+sp-runtime = { default-features = false, version = "5.0.0", git = "https://github.com/paritytech/substrate.git", tag = "devhub/latest" }
 
 [features]
 default = ["std"]
