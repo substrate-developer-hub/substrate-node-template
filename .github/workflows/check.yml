@@ -23,11 +23,11 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Set-Up
-        run: sudo apt install -y cmake pkg-config libssl-dev git build-essential clang libclang-dev curl
+        run: sudo apt install -y git clang curl libssl-dev llvm libudev-dev
 
       - name: Install Rustup
         run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
           source ~/.cargo/env
           rustup default stable
           rustup update nightly
