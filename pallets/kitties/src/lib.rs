@@ -286,16 +286,16 @@ pub mod pallet {
 				// Males are identified by having a even leading byte
 				(hash, Gender::Male)
 			} else {
-            	// Females are identified by having a odd leading byte
+				// Females are identified by having a odd leading byte
 				(hash, Gender::Female)
 			}
 		}
 
 		// Picks from existing DNA
 		fn mutate_dna_fragment(dna_fragment1: u8, dna_fragment2: u8, random_value: u8) -> u8 {
-			// Given some random u8 
+			// Given some random u8
 			if random_value % 2 == 0 {
-				// either return `dna_fragment1` if its an even value 
+				// either return `dna_fragment1` if its an even value
 				dna_fragment1
 			} else {
 				// or return `dna_fragment2` if its an odd value
@@ -305,8 +305,7 @@ pub mod pallet {
 
 		// Generates a new kitty using existing kitties
 		pub fn breed_dna(parent1: &[u8; 16], parent2: &[u8; 16]) -> ([u8; 16], Gender) {
-			
-			// Call `gen_dna` to generate random kitty DNA 
+			// Call `gen_dna` to generate random kitty DNA
 			// We don't know what Gender this kitty is yet
 			let (mut new_dna, new_gender) = Self::gen_dna();
 
@@ -317,7 +316,7 @@ pub mod pallet {
 				new_dna[i] = Self::mutate_dna_fragment(parent1[i], parent2[i], new_dna[i])
 			}
 			// return new DNA and gender
-			(new_dna, new_gender)	
+			(new_dna, new_gender)
 		}
 
 		// Helper to mint a kitty
@@ -368,7 +367,7 @@ pub mod pallet {
 			if let Some(ind) = from_owned.iter().position(|&id| id == kitty_id) {
 				from_owned.swap_remove(ind);
 			} else {
-				return Err(Error::<T>::NoKitty.into())
+				return Err(Error::<T>::NoKitty.into());
 			}
 
 			// Add kitty to the list of owned kitties.
@@ -376,21 +375,25 @@ pub mod pallet {
 			to_owned.try_push(kitty_id).map_err(|()| Error::<T>::TooManyOwned)?;
 
 			// Mutating state here via a balance transfer, so nothing is allowed to fail after this.
+			// The buyer will always be charged the actual price: bid_price protects them from the
+			// seller being able to set a price higher than what the buyer is willing to pay in a front-running
+			// attack.
 			if let Some(bid_price) = maybe_bid_price {
-				// Current kitty price 
+				// Current kitty price if for sale
 				if let Some(price) = kitty.price {
 					ensure!(bid_price >= price, Error::<T>::BidPriceTooLow);
 					// Transfer the amount from buyer to seller
-					T::Currency::transfer(&to, &from, bid_price, ExistenceRequirement::KeepAlive)?;
+					T::Currency::transfer(&to, &from, price, ExistenceRequirement::KeepAlive)?;
 					// Deposit sold event
 					Self::deposit_event(Event::Sold {
 						seller: from.clone(),
 						buyer: to.clone(),
 						kitty: kitty_id,
-						price: bid_price,
+						price,
 					});
 				} else {
-					return Err(Error::<T>::NotForSale.into())
+					// Kitty price is set to `None` and is not for sale
+					return Err(Error::<T>::NotForSale.into());
 				}
 			}
 
