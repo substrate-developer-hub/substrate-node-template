@@ -296,6 +296,7 @@ fn buy_kitty_works() {
 	new_test_ext(vec![
 		(1, *b"1234567890123456", Gender::Female),
 		(2, *b"123456789012345a", Gender::Male),
+		(3, *b"1234567890123451", Gender::Male),
 	])
 	.execute_with(|| {
 		// Check buy_kitty works as expected
@@ -326,8 +327,11 @@ fn buy_kitty_works() {
 		);
 
 		// Check buy_kitty fails when balance is too low
-		// First reset the price to make it sellable
-		assert_ok!(SubstrateKitties::set_price(Origin::signed(1), id, Some(set_price)));
+		// Get the balance of account 3
+		let balance_3 = Balances::free_balance(&3);
+
+		// Reset the price to something higher than account 3's balance
+		assert_ok!(SubstrateKitties::set_price(Origin::signed(1), id, Some(balance_3*10)));
 
 		// Account 3 can't buy with insufficient funds
 		assert_noop!(
