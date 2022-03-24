@@ -125,37 +125,6 @@ fn transfer_kitty_should_work() {
 }
 
 #[test]
-fn balance_transfer_works() {
-	new_test_ext(vec![
-		(1, *b"1234567890123456", Gender::Female),
-		(2, *b"123456789012345a", Gender::Male),
-	])
-	.execute_with(|| {
-
-		// Check buy_kitty transfers the right amount
-		// First get the balances of each account
-		let balance_1_before = Balances::free_balance(&1);
-		let balance_2_before = Balances::free_balance(&2);
-
-		// Account #2 sets new price to 4
-		let id = KittiesOwned::<Test>::get(2)[0];
-		let set_price = 4;
-		assert_ok!(SubstrateKitties::set_price(Origin::signed(2), id, Some(set_price)));
-
-		// Account #1 sets their limit price to buy a kitty from account #2
-		assert_ok!(SubstrateKitties::buy_kitty(Origin::signed(1), id, set_price * 2));
-
-		// Check that balance transfer works as expected
-		let balance_1_after = Balances::free_balance(&1);
-		let balance_2_after = Balances::free_balance(&2);
-
-		// The amount transferred should be the original kitty price 
-		assert!(balance_1_before - set_price == balance_1_after);
-		assert!(balance_2_before + set_price == balance_2_after);
-	});
-}
-
-#[test]
 fn transfer_kitty_should_fail() {
 	new_test_ext(vec![
 		(1, *b"1234567890123456", Gender::Female),
@@ -329,7 +298,7 @@ fn buy_kitty_works() {
 		// Account #2 sets a price of 4 for their kitty
 		assert_ok!(SubstrateKitties::set_price(Origin::signed(2), id, Some(set_price)));
 
-		// Account #1 can buy account #2's kitty at some limit_price
+		// Account #1 can buy account #2's kitty, specifying some limit_price
 		let limit_price = 6;
 		assert_ok!(SubstrateKitties::buy_kitty(Origin::signed(1), id, limit_price));
 
@@ -338,8 +307,8 @@ fn buy_kitty_works() {
 		let balance_2_after = Balances::free_balance(&2);
 
 		// We use set_price as this is the amount actually being charged
-		assert!(balance_1_before - set_price == balance_1_after);
-		assert!(balance_2_before + set_price == balance_2_after);
+		assert_eq!(balance_1_before - set_price, balance_1_after);
+		assert_eq!(balance_2_before + set_price, balance_2_after);
 
 		// Now this kitty is not for sale, even from an account who can afford it
 		assert_noop!(
