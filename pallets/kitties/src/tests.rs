@@ -53,16 +53,13 @@ fn should_build_genesis_kitties() {
 
 #[test]
 fn create_kitty_should_work() {
-	new_test_ext(vec![
-		(1, *b"1234567890123456", Gender::Female),
-		(2, *b"123456789012345a", Gender::Male),
-	])
+	new_test_ext(vec![])
 	.execute_with(|| {
 		// Create a kitty with account #10
 		assert_ok!(SubstrateKitties::create_kitty(Origin::signed(10)));
 
-		// Check that now 3 kitties exists (together with the 2 from genesis)
-		assert_eq!(CountForKitties::<Test>::get(), 3);
+		// Check that now 3 kitties exists
+		assert_eq!(CountForKitties::<Test>::get(), 1);
 
 		// Check that account #10 owns 1 kitty
 		let kitties_owned = KittiesOwned::<Test>::get(10);
