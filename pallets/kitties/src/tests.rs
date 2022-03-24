@@ -77,10 +77,7 @@ fn create_kitty_should_work() {
 #[test]
 fn create_kitty_fails() {
 	// Check that create_kitty fails when user owns too many kitties.
-	new_test_ext(vec![
-		(1, *b"1234567890123456", Gender::Female),
-		(2, *b"123456789012345a", Gender::Male),
-	])
+	new_test_ext(vec![])
 	.execute_with(|| {
 		// Create `MaxKittiesOwned` kitties with account #10
 		for _i in 0..<Test as Config>::MaxKittiesOwned::get() {
