@@ -3,9 +3,6 @@
 use crate::{mock::*, pallet::Error, *};
 use frame_support::{assert_noop, assert_ok};
 
-// In mock.rs, we've created 2 kitties in genesis:
-// a Female and Male owned by account 1 and 2, respectively.
-
 // This function checks that kitty ownership is set correctly in storage.
 // This will panic if things are not correct.
 fn assert_ownership(owner: u64, kitty_id: [u8; 16]) {
@@ -244,6 +241,7 @@ fn breed_kitty_fails() {
 			System::set_block_number(System::block_number() + 1);
 		}
 		
+		// Breed should fail if breeder has reached MaxKittiesOwned
 		assert_noop!(
 			SubstrateKitties::breed_kitty(Origin::signed(3), kitty_1, kitty_3),
 			Error::<Test>::TooManyOwned
