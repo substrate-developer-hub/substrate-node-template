@@ -106,10 +106,7 @@ fn create_kitty_fails() {
 
 #[test]
 fn transfer_kitty_should_work() {
-	new_test_ext(vec![
-		(1, *b"1234567890123456", Gender::Female),
-		(2, *b"123456789012345a", Gender::Male),
-	])
+	new_test_ext(vec![])
 	.execute_with(|| {
 		// Account 10 creates a kitty
 		assert_ok!(SubstrateKitties::create_kitty(Origin::signed(10)));
@@ -207,7 +204,6 @@ fn transfer_kitty_should_fail() {
 fn breed_kitty_works() {
 	// Check that breed kitty works as expected.
 	new_test_ext(vec![
-		(1, *b"1234567890123456", Gender::Female),
 		(2, *b"123456789012345a", Gender::Male),
 	])
 	.execute_with(|| {
@@ -223,7 +219,7 @@ fn breed_kitty_works() {
 		assert_ok!(SubstrateKitties::breed_kitty(Origin::signed(1), mom, dad));
 
 		// Check the new kitty exists and DNA is from the mom and dad
-		let new_dna = KittiesOwned::<Test>::get(1)[3];
+		let new_dna = KittiesOwned::<Test>::get(1)[2];
 		for &i in new_dna.iter() {
 			assert!(i == 0u8 || i == 1u8)
 		}
@@ -251,10 +247,7 @@ fn breed_kitty_works() {
 
 #[test]
 fn breed_kitty_fails() {
-	new_test_ext(vec![
-		(1, *b"1234567890123456", Gender::Female),
-		(2, *b"123456789012345a", Gender::Male),
-	])
+	new_test_ext(vec![])
 	.execute_with(|| {
 		// Check that breed_kitty checks opposite gender
 		let kitty_1 = [1u8; 16];
