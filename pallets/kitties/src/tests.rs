@@ -262,6 +262,27 @@ fn breed_kitty_fails() {
 		(2, *b"123456789012345a", Gender::Male),
 	])
 	.execute_with(|| {
+		// Check that breed_kitty checks opposite gender
+		let kitty_1 = [1u8; 16];
+		let kitty_2 = [3u8; 16];
+
+		// Mint two Female kitties
+		assert_ok!(SubstrateKitties::mint(&3, kitty_1, Gender::Female));
+		assert_ok!(SubstrateKitties::mint(&3, kitty_2, Gender::Female));
+
+		// Same gender kitty can't breed
+		assert_noop!(
+			SubstrateKitties::breed_kitty(Origin::signed(3), kitty_1, kitty_2),
+			Error::<Test>::CantBreed
+		);
+	});
+}
+
+
+#[test]
+fn dna_helpers_work_as_expected() {
+	new_test_ext(vec![])
+	.execute_with(|| {
 		// Test gen_dna and other dna functions behave as expected
 		// Get two kitty dnas
 		let dna_1 = [1u8; 16];
@@ -284,20 +305,6 @@ fn breed_kitty_fails() {
 
 		// Random values should not be equal
 		assert_ne!(random_dna_1, random_dna_2);
-
-		// Check that breed_kitty checks opposite gender
-		let kitty_1 = [1u8; 16];
-		let kitty_2 = [3u8; 16];
-
-		// Mint two Female kitties
-		assert_ok!(SubstrateKitties::mint(&3, kitty_1, Gender::Female));
-		assert_ok!(SubstrateKitties::mint(&3, kitty_2, Gender::Female));
-
-		// Same gender kitty can't breed
-		assert_noop!(
-			SubstrateKitties::breed_kitty(Origin::signed(3), kitty_1, kitty_2),
-			Error::<Test>::CantBreed
-		);
 	});
 }
 
