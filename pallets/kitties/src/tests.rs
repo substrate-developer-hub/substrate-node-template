@@ -141,7 +141,7 @@ fn balance_transfer_works() {
 	])
 	.execute_with(|| {
 
-		// Check buy_kitty transfers the right amount for a higher bid price
+		// Check buy_kitty transfers the right amount
 		// First get the balances of each account
 		let balance_1_before = Balances::free_balance(&1);
 		let balance_2_before = Balances::free_balance(&2);
@@ -151,7 +151,7 @@ fn balance_transfer_works() {
 		let set_price = 4;
 		assert_ok!(SubstrateKitties::set_price(Origin::signed(2), id, Some(set_price)));
 
-		// Account #1 bids to buy kitty at 2x the price
+		// Account #1 sets their limit price to buy a kitty from account #2
 		assert_ok!(SubstrateKitties::buy_kitty(Origin::signed(1), id, set_price * 2));
 
 		// Check that balance transfer works as expected
@@ -163,7 +163,6 @@ fn balance_transfer_works() {
 		assert!(balance_2_before + set_price == balance_2_after);
 	});
 }
-
 
 #[test]
 fn transfer_kitty_should_fail() {
@@ -319,9 +318,9 @@ fn buy_kitty_works() {
 		// Account #2 sets a price of 4 for their kitty
 		assert_ok!(SubstrateKitties::set_price(Origin::signed(2), id, Some(set_price)));
 
-		// Account #1 can buy account #2's kitty at some bid_price
-		let bid_price = 6;
-		assert_ok!(SubstrateKitties::buy_kitty(Origin::signed(1), id, bid_price));
+		// Account #1 can buy account #2's kitty at some limit_price
+		let limit_price = 6;
+		assert_ok!(SubstrateKitties::buy_kitty(Origin::signed(1), id, limit_price));
 
 		// Check balance transfer works as expected
 		let balance_1_after = Balances::free_balance(&1);
@@ -331,9 +330,9 @@ fn buy_kitty_works() {
 		assert!(balance_1_before - set_price == balance_1_after);
 		assert!(balance_2_before + set_price == balance_2_after);
 
-		// Now this kitty is not for sale
+		// Now this kitty is not for sale, even from an account who can afford it
 		assert_noop!(
-			SubstrateKitties::buy_kitty(Origin::signed(10), id, set_price),
+			SubstrateKitties::buy_kitty(Origin::signed(3), id, set_price),
 			Error::<Test>::NotForSale
 		);
 
@@ -344,9 +343,9 @@ fn buy_kitty_works() {
 		// Reset the price to something higher than account 3's balance
 		assert_ok!(SubstrateKitties::set_price(Origin::signed(1), id, Some(balance_3*10)));
 
-		// Account 3 can't buy with insufficient funds
+		// Account 3 can't buy a kitty they can't afford
 		assert_noop!(
-			SubstrateKitties::buy_kitty(Origin::signed(3), id, u64::MAX),
+			SubstrateKitties::buy_kitty(Origin::signed(3), id, balance_3*10),
 			pallet_balances::Error::<Test>::InsufficientBalance
 		);
 	});
@@ -357,6 +356,7 @@ fn buy_kitty_fails() {
 	new_test_ext(vec![
 		(1, *b"1234567890123456", Gender::Female),
 		(2, *b"123456789012345a", Gender::Male),
+		(10, *b"1234567890123410", Gender::Male),
 	])
 	.execute_with(|| {
 		// Check buy_kitty fails when kitty is not for sale
@@ -373,7 +373,7 @@ fn buy_kitty_fails() {
 		let set_price = 4;
 		assert_ok!(SubstrateKitties::set_price(Origin::signed(2), id, Some(set_price)));
 
-		// Account #10 cant buy this kitty for half the asking price
+		// Account #10 can't buy this kitty for half the asking price
 		assert_noop!(
 			SubstrateKitties::buy_kitty(Origin::signed(10), id, set_price / 2),
 			Error::<Test>::BidPriceTooLow
