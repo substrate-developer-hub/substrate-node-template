@@ -315,19 +315,6 @@ fn buy_kitty_works() {
 			SubstrateKitties::buy_kitty(Origin::signed(3), id, set_price),
 			Error::<Test>::NotForSale
 		);
-
-		// Check buy_kitty fails when balance is too low
-		// Get the balance of account 3
-		let balance_3 = Balances::free_balance(&3);
-
-		// Reset the price to something higher than account 3's balance
-		assert_ok!(SubstrateKitties::set_price(Origin::signed(1), id, Some(balance_3*10)));
-
-		// Account 3 can't buy a kitty they can't afford
-		assert_noop!(
-			SubstrateKitties::buy_kitty(Origin::signed(3), id, balance_3*10),
-			pallet_balances::Error::<Test>::InsufficientBalance
-		);
 	});
 }
 
@@ -357,6 +344,19 @@ fn buy_kitty_fails() {
 		assert_noop!(
 			SubstrateKitties::buy_kitty(Origin::signed(10), id, set_price / 2),
 			Error::<Test>::BidPriceTooLow
+		);
+
+		// Check buy_kitty fails when balance is too low
+		// Get the balance of account 10
+		let balance_of_account_10 = Balances::free_balance(&10);
+
+		// Reset the price to something higher than account 10's balance
+		assert_ok!(SubstrateKitties::set_price(Origin::signed(2), id, Some(balance_of_account_10*10)));
+
+		// Account 10 can't buy a kitty they can't afford
+		assert_noop!(
+			SubstrateKitties::buy_kitty(Origin::signed(10), id, balance_of_account_10*10),
+			pallet_balances::Error::<Test>::InsufficientBalance
 		);
 	});
 }
