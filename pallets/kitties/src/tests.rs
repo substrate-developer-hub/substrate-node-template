@@ -130,6 +130,16 @@ fn transfer_kitty_should_work() {
 		// but account 3 does
 		assert_eq!(KittiesOwned::<Test>::get(3).len(), 1);
 		assert_ownership(3, id);
+	});
+}
+
+#[test]
+fn balance_transfer_works() {
+	new_test_ext(vec![
+		(1, *b"1234567890123456", Gender::Female),
+		(2, *b"123456789012345a", Gender::Male),
+	])
+	.execute_with(|| {
 
 		// Check buy_kitty transfers the right amount for a higher bid price
 		// First get the balances of each account
@@ -153,6 +163,7 @@ fn transfer_kitty_should_work() {
 		assert!(balance_2_before + set_price == balance_2_after);
 	});
 }
+
 
 #[test]
 fn transfer_kitty_should_fail() {
