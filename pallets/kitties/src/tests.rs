@@ -257,10 +257,27 @@ fn breed_kitty_fails() {
 		assert_ok!(SubstrateKitties::mint(&3, kitty_1, Gender::Female));
 		assert_ok!(SubstrateKitties::mint(&3, kitty_2, Gender::Female));
 
+		// And a male kitty
+		let kitty_3 = [4u8; 16];
+		assert_ok!(SubstrateKitties::mint(&3, kitty_3, Gender::Male));
+
 		// Same gender kitty can't breed
 		assert_noop!(
 			SubstrateKitties::breed_kitty(Origin::signed(3), kitty_1, kitty_2),
 			Error::<Test>::CantBreed
+		);
+
+		// Check that breed kitty fails with too many kitties
+		// Account 3 already has 3 kitties so we subtract that from our max 
+		for _i in 0..<Test as Config>::MaxKittiesOwned::get() - 3 {
+			assert_ok!(SubstrateKitties::create_kitty(Origin::signed(3)));
+			// We do this to avoid getting a `DuplicateKitty` error
+			System::set_block_number(System::block_number() + 1);
+		}
+		
+		assert_noop!(
+			SubstrateKitties::breed_kitty(Origin::signed(3), kitty_1, kitty_3),
+			Error::<Test>::TooManyOwned
 		);
 	});
 }
