@@ -12,10 +12,9 @@ the [Substrate Playground](https://docs.substrate.io/playground/) :hammer_and_wr
 
 ### Using Nix
 
-Install [nix](https://nixos.org/) and optionally [direnv](https://github.com/direnv/direnv) and
-[lorri](https://github.com/target/lorri) for a fully plug and play experience for setting up the
-development environment. To get all the correct dependencies activate direnv `direnv allow` and
-lorri `lorri shell`.
+Install [nix](https://nixos.org/) making sure to enable [flakes](https://nixos.wiki/wiki/Flakes)
+and optionally [direnv](https://github.com/direnv/direnv) for a fully plug and play experience
+for setting up the development environment. To get all the correct dependencies activate direnv `direnv allow`.
 
 ### Rust Setup
 
