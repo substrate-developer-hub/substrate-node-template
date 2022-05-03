@@ -1,5 +1,5 @@
 {
-  description = "A devShell example";
+  description = "A new FRAME-based Substrate node, ready for hacking.";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
