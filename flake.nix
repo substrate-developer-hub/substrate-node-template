@@ -12,17 +12,18 @@
       let
         overlays = [ (import rust-overlay) ];
         pkgs = import nixpkgs { inherit system overlays; };
+        rust = pkgs.rust-bin.selectLatestNightlyWith (toolchain:
+          toolchain.default.override {
+            extensions = [ "rust-src" ];
+            targets = [ "wasm32-unknown-unknown" ];
+          });
       in with pkgs; {
         devShell = mkShell {
           buildInputs = [
             clang
             pkg-config
 
-            (rust-bin.selectLatestNightlyWith (toolchain:
-              toolchain.default.override {
-                extensions = [ "rust-src" ];
-                targets = [ "wasm32-unknown-unknown" ];
-              }))
+            rust
 
           ] ++ lib.optional stdenv.isDarwin
             [ darwin.apple_sdk.frameworks.Security ];
