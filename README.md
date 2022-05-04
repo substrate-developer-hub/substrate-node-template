@@ -16,6 +16,9 @@ Install [nix](https://nixos.org/) making sure to enable [flakes](https://nixos.w
 and optionally [direnv](https://github.com/direnv/direnv) for a fully plug and play experience
 for setting up the development environment. To get all the correct dependencies activate direnv `direnv allow`.
 
+This support is backwards compatible and will work with `lorri` or plain `nix-shell` if the
+experimental feature of `flakes` is not enabled.
+
 ### Rust Setup
 
 First, complete the [basic Rust setup instructions](./docs/rust-setup.md).
