@@ -5,6 +5,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
     flake-utils.url = "github:numtide/flake-utils";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, rust-overlay, flake-utils, ... }:
@@ -18,7 +22,7 @@
             targets = [ "wasm32-unknown-unknown" ];
           });
       in with pkgs; {
-        devShell = mkShell {
+        devShells.default = mkShell {
           buildInputs = [
             clang
             pkg-config
