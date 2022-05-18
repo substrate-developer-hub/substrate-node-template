@@ -57,17 +57,17 @@ frame-benchmarking = { version = "4.0.0-dev", git = "https://github.com/parityte
 frame-benchmarking-cli = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.20" }
 
 # Local Dependencies
-node-template-runtime = { version = "4.0.0-dev", path = "../runtime" }
+node-template-runtime = { package = "frameless-runtime", path = "../frameless-runtime" }
 
 # CLI-specific dependencies
-try-runtime-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.20" }
+#try-runtime-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.20" }
 
 [build-dependencies]
 substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.20" }
 
 [features]
 default = []
-runtime-benchmarks = ["node-template-runtime/runtime-benchmarks"]
+#runtime-benchmarks = ["node-template-runtime/runtime-benchmarks"]
 # Enable features that allow the runtime to be tried and debugged. Name might be subject to change
 # in the near future.
-try-runtime = ["node-template-runtime/try-runtime", "try-runtime-cli"]
+#try-runtime = ["node-template-runtime/try-runtime", "try-runtime-cli"]
