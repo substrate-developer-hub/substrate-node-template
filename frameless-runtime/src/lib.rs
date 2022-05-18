@@ -8,6 +8,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use parity_scale_codec::{Decode, Encode};
+use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 
 use sp_std::if_std;
 use sp_std::prelude::*;
@@ -271,6 +272,50 @@ impl_runtime_apis! {
 		fn decode_session_keys(
 			_encoded: Vec<u8>,
 		) -> Option<Vec<(Vec<u8>, sp_core::crypto::KeyTypeId)>> {
+			None
+		}
+	}
+
+	// Here is the Aura API for the sake of making this runtime work with the node template node
+	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
+		fn slot_duration() -> sp_consensus_aura::SlotDuration {
+			// Three-second blocks
+			sp_consensus_aura::SlotDuration::from_millis(3000)
+		}
+
+		fn authorities() -> Vec<AuraId> {
+			// The only authority is Alice. This makes things work nicely in `--dev` mode
+			use sp_application_crypto::ByteArray;
+
+			vec![
+				AuraId::from_slice(&hex_literal::hex!("d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d").to_vec()).unwrap()
+			]
+		}
+	}
+
+	impl sp_finality_grandpa::GrandpaApi<Block> for Runtime {
+		fn grandpa_authorities() -> sp_finality_grandpa::AuthorityList {
+			Vec::new()
+		}
+
+		fn current_set_id() -> sp_finality_grandpa::SetId {
+			0u64
+		}
+
+		fn submit_report_equivocation_unsigned_extrinsic(
+			_equivocation_proof: sp_finality_grandpa::EquivocationProof<
+				<Block as BlockT>::Hash,
+				sp_runtime::traits::NumberFor<Block>,
+			>,
+			_key_owner_proof: sp_finality_grandpa::OpaqueKeyOwnershipProof,
+		) -> Option<()> {
+			None
+		}
+
+		fn generate_key_ownership_proof(
+			_set_id: sp_finality_grandpa::SetId,
+			_authority_id: sp_finality_grandpa::AuthorityId,
+		) -> Option<sp_finality_grandpa::OpaqueKeyOwnershipProof> {
 			None
 		}
 	}

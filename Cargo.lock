@@ -1763,12 +1763,16 @@ dependencies = [
 name = "frameless-runtime"
 version = "1.0.0-dev"
 dependencies = [
+ "hex-literal",
  "parity-scale-codec",
  "parity-util-mem",
  "serde",
  "sp-api",
+ "sp-application-crypto",
  "sp-block-builder",
+ "sp-consensus-aura",
  "sp-core",
+ "sp-finality-grandpa",
  "sp-inherents",
  "sp-io",
  "sp-offchain",
