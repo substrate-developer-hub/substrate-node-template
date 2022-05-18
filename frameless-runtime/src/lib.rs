@@ -295,7 +295,13 @@ impl_runtime_apis! {
 
 	impl sp_finality_grandpa::GrandpaApi<Block> for Runtime {
 		fn grandpa_authorities() -> sp_finality_grandpa::AuthorityList {
-			Vec::new()
+			use sp_application_crypto::ByteArray;
+			vec![
+				(
+					sp_finality_grandpa::AuthorityId::from_slice(&hex_literal::hex!("88dc3417d5058ec4b4503e0c12ea1a0a89be200fe98922423d4334014fa6b0ee").to_vec()).unwrap(),
+					1
+				)
+			]
 		}
 
 		fn current_set_id() -> sp_finality_grandpa::SetId {
