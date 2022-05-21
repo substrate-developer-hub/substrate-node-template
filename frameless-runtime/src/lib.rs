@@ -110,7 +110,10 @@ pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, FramelessTransaction>;
 
+// 626F6F6C65616E raw storage key
 pub const BOOLEAN_KEY: [u8; 7] = *b"boolean";
+
+// 686561646572 raw storage key
 pub const HEADER_KEY: [u8; 6] = *b"header";
 
 type Nonce = u8;
