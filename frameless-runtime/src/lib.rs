@@ -118,15 +118,15 @@ pub const BOOLEAN_KEY: [u8; 7] = *b"boolean";
 // 686561646572 raw storage key
 pub const HEADER_KEY: [u8; 6] = *b"header";
 
-type Nonce = u8;
+type Salt = u8;
 
 /// The Extrinsic type for this runtime. Currently extrinsics are unsigned.
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, parity_util_mem::MallocSizeOf))]
 #[derive(Encode, Decode, Debug, PartialEq, Eq, Clone)]
 pub enum FramelessTransaction {
-	Set(Nonce),
-	Clear(Nonce),
-	Toggle(Nonce),
+	Set(Salt),
+	Clear(Salt),
+	Toggle(Salt),
 }
 
 impl Extrinsic for FramelessTransaction {
