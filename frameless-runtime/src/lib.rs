@@ -10,6 +10,8 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 use parity_scale_codec::{Decode, Encode};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 
+use log::info;
+
 use sp_std::if_std;
 use sp_std::prelude::*;
 use sp_api::impl_runtime_apis;
@@ -147,9 +149,8 @@ impl_runtime_apis! {
 		}
 
 		fn execute_block(block: Block) {
-			if_std!{
-				println!("Entering execute_block with {:?}", block);
-			}
+			info!(target: "frameless", "⛔🖼️ Entering execute_block. block: {:?}", block);
+
 			Self::initialize_block(&block.header);
 
 			for transaction in block.extrinsics {
@@ -169,9 +170,7 @@ impl_runtime_apis! {
 		}
 
 		fn initialize_block(header: &<Block as BlockT>::Header) {
-			if_std!{
-				println!("Entering initialize_block with {:?}", header);
-			}
+			info!(target: "frameless", "⛔🖼️ Entering initialize_block. header: {:?}", header);
 			// Store the header info we're given for later use when finalizing block.
 			sp_io::storage::set(&HEADER_KEY, &header.encode());
 		}
@@ -180,9 +179,7 @@ impl_runtime_apis! {
 	// https://substrate.dev/rustdocs/master/sc_block_builder/trait.BlockBuilderApi.html
 	impl sp_block_builder::BlockBuilder<Block> for Runtime {
 		fn apply_extrinsic(extrinsic: <Block as BlockT>::Extrinsic) -> ApplyExtrinsicResult {
-			if_std!{
-				println!("Entering apply_extrinsic");
-			}
+			info!(target: "frameless", "⛔🖼️ Entering apply_extrinsic: {:?}", extrinsic);
 
 			let previous_state = sp_io::storage::get(&BOOLEAN_KEY)
 				.map(|bytes| <bool as Decode>::decode(&mut &*bytes).unwrap_or(false))
@@ -199,9 +196,7 @@ impl_runtime_apis! {
 		}
 
 		fn finalize_block() -> <Block as BlockT>::Header {
-			if_std!{
-				println!("Entering finalize_block");
-			}
+			info!(target: "frameless", "⛔🖼️ Entering finalize block.");
 			// https://substrate.dev/rustdocs/master/sp_runtime/generic/struct.Header.html
 			let raw_header = sp_io::storage::get(&HEADER_KEY)
 				.expect("We initialized with header, it never got mutated, qed");
@@ -219,25 +214,29 @@ impl_runtime_apis! {
 		}
 
 		// This runtime does not expect any inherents so it does not insert any into blocks it builds.
-		fn inherent_extrinsics(_data: sp_inherents::InherentData) -> Vec<<Block as BlockT>::Extrinsic> {
+		fn inherent_extrinsics(data: sp_inherents::InherentData) -> Vec<<Block as BlockT>::Extrinsic> {
+			info!(target: "frameless", "⛔🖼️ Entering inherent_extrinsics.");
 			Vec::new()
 		}
 
 		// This runtime does not expect any inherents, so it does not do any inherent checking.
 		fn check_inherents(
-			_block: Block,
-			_data: sp_inherents::InherentData
+			block: Block,
+			data: sp_inherents::InherentData
 		) -> sp_inherents::CheckInherentsResult {
+			info!(target: "frameless", "⛔🖼️ Entering check_inherents. block: {:?}", block);
 			sp_inherents::CheckInherentsResult::default()
 		}
 	}
 
 	impl sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block> for Runtime {
 		fn validate_transaction(
-			_source: TransactionSource,
-			_tx: <Block as BlockT>::Extrinsic,
-			_block_hash: <Block as BlockT>::Hash,
+			source: TransactionSource,
+			tx: <Block as BlockT>::Extrinsic,
+			block_hash: <Block as BlockT>::Hash,
 		) -> TransactionValidity {
+			info!(target: "frameless", "⛔🖼️ Entering validate_transaction. source: {:?}, tx: {:?}, block hash: {:?}", source, tx, block_hash);
+
 			// Any transaction of the correct type is valid
 			Ok(ValidTransaction{
 				priority: 1u64,
@@ -269,6 +268,7 @@ impl_runtime_apis! {
 
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
+			info!(target: "frameless", "⛔🖼️ Entering generate_session_keys. seed: {:?}", seed);
 			seed.unwrap_or_else(|| vec![0])
 		}
 

@@ -1713,6 +1713,7 @@ name = "frameless-runtime"
 version = "1.0.0-dev"
 dependencies = [
  "hex-literal",
+ "log",
  "parity-scale-codec",
  "parity-util-mem",
  "serde",
