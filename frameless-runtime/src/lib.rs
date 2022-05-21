@@ -123,18 +123,30 @@ type Salt = u8;
 /// The Extrinsic type for this runtime. Currently extrinsics are unsigned.
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, parity_util_mem::MallocSizeOf))]
 #[derive(Encode, Decode, Debug, PartialEq, Eq, Clone)]
-pub enum FramelessTransaction {
-	Set(Salt),
-	Clear(Salt),
-	Toggle(Salt),
+pub enum FramelessCall {
+	Set,
+	Clear,
+	Toggle,
+}
+
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, parity_util_mem::MallocSizeOf))]
+#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone)]
+pub struct FramelessTransaction {
+	call: FramelessCall,
+	salt: Salt,
 }
 
 impl Extrinsic for FramelessTransaction {
-	type Call = FramelessTransaction;
-	type SignaturePayload = ();
+	type Call = FramelessCall;
+	type SignaturePayload = Salt; // For now we directly store the salt here. Later it will also contain a signature.
 
-	fn new(call: Self::Call, _signed_data: Option<Self::SignaturePayload>) -> Option<Self> {
-		Some(call)
+	fn new(call: Self::Call, salt: Option<Self::SignaturePayload>) -> Option<Self> {
+		Some(
+			Self {
+				call,
+				salt: salt.unwrap_or(0),
+			}
+		)
 	}
 }
 
@@ -187,10 +199,10 @@ impl_runtime_apis! {
 
 			info!(target: "frameless", "🖼️ Previous stored state was: {:?}", previous_state);
 
-			let next_state = match (previous_state, extrinsic) {
-				(_, FramelessTransaction::Set(_)) => true,
-				(_, FramelessTransaction::Clear(_)) => false,
-				(prev_state, FramelessTransaction::Toggle(_)) => !prev_state,
+			let next_state = match (previous_state, extrinsic.call) {
+				(_, FramelessCall::Set) => true,
+				(_, FramelessCall::Clear) => false,
+				(prev_state, FramelessCall::Toggle) => !prev_state,
 			};
 
 			info!(target: "frameless", "🖼️ Newly stored state is: {:?}", next_state);
@@ -245,13 +257,8 @@ impl_runtime_apis! {
 			Ok(ValidTransaction{
 				priority: 1u64,
 				requires: Vec::new(),
-				// This hach was necessary to make the node accept any transactions at all
-				// When I was setting provides to an empty vec, submiting a transaction failed
-				// the RPC responded {"code":-32603,"message":"Unknown error occurred","data":"Pool(NoTagsProvided)"}
-				// Adding this provides tag solved that. Solutions moving forward:
-				// 1. Require a nonce with each transaction
-				// 2. Try to relax the TxPool's requirement that every transaction provide some tag
-				provides: vec![vec![0]],
+				// Every transaction must provide _some_ tag to de-duplicate it in the pool
+				provides: vec![tx.encode()],
 				longevity: TransactionLongevity::max_value(),
 				propagate: true,
 			})
