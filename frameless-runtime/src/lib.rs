@@ -230,7 +230,7 @@ impl_runtime_apis! {
 		}
 
 		// This runtime does not expect any inherents so it does not insert any into blocks it builds.
-		fn inherent_extrinsics(data: sp_inherents::InherentData) -> Vec<<Block as BlockT>::Extrinsic> {
+		fn inherent_extrinsics(_data: sp_inherents::InherentData) -> Vec<<Block as BlockT>::Extrinsic> {
 			info!(target: "frameless", "🖼️ Entering inherent_extrinsics.");
 			Vec::new()
 		}
@@ -238,7 +238,7 @@ impl_runtime_apis! {
 		// This runtime does not expect any inherents, so it does not do any inherent checking.
 		fn check_inherents(
 			block: Block,
-			data: sp_inherents::InherentData
+			_data: sp_inherents::InherentData
 		) -> sp_inherents::CheckInherentsResult {
 			info!(target: "frameless", "🖼️ Entering check_inherents. block: {:?}", block);
 			sp_inherents::CheckInherentsResult::default()
