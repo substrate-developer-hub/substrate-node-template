@@ -17,6 +17,7 @@ use sp_std::prelude::*;
 use sp_api::impl_runtime_apis;
 use sp_runtime::{
 	ApplyExtrinsicResult,
+	BoundToRuntimeAppPublic,
 	create_runtime_str,
 	generic,
 	transaction_validity::{
@@ -29,7 +30,9 @@ use sp_runtime::{
 		BlakeTwo256,
 		Block as BlockT,
 		Extrinsic,
-	}
+	},
+	// Importing impl_opaque_keys requires scale info
+	impl_opaque_keys,
 };
 // This strange-looking import is usually done by the `construct_runtime!` macro
 use sp_block_builder::runtime_decl_for_BlockBuilder::BlockBuilder;
@@ -62,6 +65,26 @@ pub mod opaque {
 	pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	/// Opaque block type.
 	pub type Block = generic::Block<Header, FramelessTransaction>;
+
+	// This part is necessary for generating session keys in the runtime
+	impl_opaque_keys! {
+		pub struct SessionKeys {
+			pub aura: AuraAppPublic,
+			pub grandpa: GrandpaAppPublic,
+		}
+	}
+
+	// Typically these are not implemented manually, but rather for the pallet associated with the keys.
+	// Here we are not using the pallets, and these implementations are trivial, so we just re-write them.
+	pub struct AuraAppPublic;
+	impl BoundToRuntimeAppPublic for AuraAppPublic {
+		type Public = AuraId;
+	}
+
+	pub struct GrandpaAppPublic;
+	impl BoundToRuntimeAppPublic for GrandpaAppPublic {
+		type Public = sp_finality_grandpa::AuthorityId;
+	}
 }
 
 /// This runtime version.
@@ -280,13 +303,13 @@ impl_runtime_apis! {
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
 			info!(target: "frameless", "🖼️ Entering generate_session_keys. seed: {:?}", seed);
-			seed.unwrap_or_else(|| vec![0])
+			opaque::SessionKeys::generate(seed)
 		}
 
 		fn decode_session_keys(
-			_encoded: Vec<u8>,
+			encoded: Vec<u8>,
 		) -> Option<Vec<(Vec<u8>, sp_core::crypto::KeyTypeId)>> {
-			None
+			opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
 		}
 	}
 
