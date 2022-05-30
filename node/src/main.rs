@@ -6,8 +6,6 @@ mod chain_spec;
 mod service;
 mod cli;
 mod command;
-// mod command_helper;
-mod rpc;
 
 use node_template_runtime::{FramelessCall, FramelessTransaction};
 use sp_core::crypto::Pair;
