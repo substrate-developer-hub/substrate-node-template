@@ -12,7 +12,6 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 
 use log::info;
 
-use sp_std::if_std;
 use sp_std::prelude::*;
 use sp_api::impl_runtime_apis;
 use sp_runtime::{
@@ -192,9 +191,7 @@ impl_runtime_apis! {
 				match Self::apply_extrinsic(transaction) {
 					Ok(_) => {},
 					Err(e) => {
-						if_std!{
-							println!("Apply extrinsic error {:?}", e);
-						}
+						info!(target: "frameless", "Apply extrinsic error {:?}", e);
 					}
 				};
 			}
