@@ -1,9 +1,5 @@
-use node_template_runtime::{GenesisConfig as FramelessGenesisConfig, WASM_BINARY};
+use node_template_runtime::GenesisConfig as FramelessGenesisConfig;
 use sc_service::ChainType;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{sr25519, Pair, Public};
-use sp_finality_grandpa::AuthorityId as GrandpaId;
-use sp_runtime::traits::{IdentifyAccount, Verify};
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -34,17 +30,13 @@ pub type ChainSpec = sc_service::GenericChainSpec<FramelessGenesisConfig>;
 // }
 
 pub fn development_config() -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
-
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Development",
 		// ID
 		"dev",
 		ChainType::Development,
-		move || {
-			FramelessGenesisConfig
-		},
+		move || FramelessGenesisConfig,
 		// Bootnodes
 		vec![],
 		// Telemetry
@@ -60,17 +52,13 @@ pub fn development_config() -> Result<ChainSpec, String> {
 }
 
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
-
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Local Testnet",
 		// ID
 		"local_testnet",
 		ChainType::Local,
-		move || {
-			FramelessGenesisConfig
-		},
+		move || FramelessGenesisConfig,
 		// Bootnodes
 		vec![],
 		// Telemetry
