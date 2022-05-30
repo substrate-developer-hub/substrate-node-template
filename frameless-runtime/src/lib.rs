@@ -23,7 +23,9 @@ use sp_runtime::{
 		TransactionLongevity,
 		TransactionSource,
 		TransactionValidity,
-		ValidTransaction
+		TransactionValidityError,
+		InvalidTransaction,
+		ValidTransaction,
 	},
 	traits::{
 		BlakeTwo256,
@@ -32,6 +34,11 @@ use sp_runtime::{
 	},
 	// Importing impl_opaque_keys requires scale info
 	impl_opaque_keys,
+};
+use sp_core::{
+	H256,
+	H512,
+	sr25519::{Public, Signature}
 };
 // This strange-looking import is usually done by the `construct_runtime!` macro
 use sp_block_builder::runtime_decl_for_BlockBuilder::BlockBuilder;
@@ -156,19 +163,51 @@ pub enum FramelessCall {
 pub struct FramelessTransaction {
 	call: FramelessCall,
 	salt: Salt,
+	signature: H512,
+	signer: H256,
 }
 
 impl Extrinsic for FramelessTransaction {
 	type Call = FramelessCall;
-	type SignaturePayload = Salt; // For now we directly store the salt here. Later it will also contain a signature.
+	type SignaturePayload = (Salt, H512, H256);
 
-	fn new(call: Self::Call, salt: Option<Self::SignaturePayload>) -> Option<Self> {
-		Some(
-			Self {
-				call,
-				salt: salt.unwrap_or(0),
-			}
-		)
+	fn new(call: Self::Call, salt_sig_signer: Option<Self::SignaturePayload>) -> Option<Self> {
+		match salt_sig_signer {
+			Some((salt, signature, signer)) => Some(Self { call, salt, signature, signer }),
+			None => None,
+		}
+	}
+}
+
+/// Checks a transaction that came in from the outside world.
+/// Returns the same type needed by the transaction pool.
+/// This is seperated into a function so it can be re-used
+/// when executing transactions.
+fn check_framesless_transaction(tx: &FramelessTransaction) -> TransactionValidity {
+
+	info!(target: "frameless", "🖼️ Checking Frameless Transaction");
+
+	// Any transaction with a verifiable signature is valid
+	let signed_payload = (&tx.call, &tx.salt).encode();
+	let valid_sig = sp_io::crypto::sr25519_verify(
+		&Signature::from_raw(*tx.signature.as_fixed_bytes()),
+		&signed_payload,
+		&Public::from_h256(tx.signer)
+	);
+
+	if valid_sig {
+		info!(target: "frameless", "🖼️ Valid signature by: {:?}", tx.signer);
+		Ok(ValidTransaction{
+			priority: 1u64,
+			requires: Vec::new(),
+			// Every transaction must provide _some_ tag to de-duplicate it in the pool
+			provides: vec![tx.encode()],
+			longevity: TransactionLongevity::max_value(),
+			propagate: true,
+		})
+	}
+	else {
+		Err(TransactionValidityError::Invalid(InvalidTransaction::BadProof))
 	}
 }
 
@@ -196,7 +235,6 @@ impl_runtime_apis! {
 				};
 			}
 
-			//TODO is this necessary? What method is it even calling?
 			// In frame executive, they call final_checks, but that might be different
 			Self::finalize_block();
 		}
@@ -213,6 +251,11 @@ impl_runtime_apis! {
 		fn apply_extrinsic(extrinsic: <Block as BlockT>::Extrinsic) -> ApplyExtrinsicResult {
 			info!(target: "frameless", "🖼️ Entering apply_extrinsic: {:?}", extrinsic);
 
+			//TODO log the signer somewhere
+			// First check the transaction
+			check_framesless_transaction(&extrinsic)?;
+
+			// Now we can actually apply the changes
 			let previous_state = sp_io::storage::get(&BOOLEAN_KEY)
 				.map(|bytes| <bool as Decode>::decode(&mut &*bytes).unwrap_or(false))
 				.unwrap_or(false);
@@ -273,15 +316,7 @@ impl_runtime_apis! {
 		) -> TransactionValidity {
 			info!(target: "frameless", "🖼️ Entering validate_transaction. source: {:?}, tx: {:?}, block hash: {:?}", source, tx, block_hash);
 
-			// Any transaction of the correct type is valid
-			Ok(ValidTransaction{
-				priority: 1u64,
-				requires: Vec::new(),
-				// Every transaction must provide _some_ tag to de-duplicate it in the pool
-				provides: vec![tx.encode()],
-				longevity: TransactionLongevity::max_value(),
-				propagate: true,
-			})
+			check_framesless_transaction(&tx)
 		}
 	}
 
