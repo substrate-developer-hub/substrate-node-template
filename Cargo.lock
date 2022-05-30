@@ -3675,6 +3675,7 @@ dependencies = [
  "frame-benchmarking-cli",
  "frame-system",
  "frameless-runtime",
+ "hex",
  "jsonrpc-core",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
