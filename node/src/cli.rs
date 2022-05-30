@@ -47,4 +47,19 @@ pub enum Subcommand {
 	/// Try some command against runtime state. Note: `try-runtime` feature must be enabled.
 	#[cfg(not(feature = "try-runtime"))]
 	TryRuntime,
+
+	/// Create a Transaction for submission to the frameless runtime
+	CreateTransaction(CreateTransactionCmd),
+}
+
+#[derive(Debug, clap::Parser)]
+pub struct CreateTransactionCmd {
+	/// The action to take: "set", "clear", or "toggle"
+	pub action: node_template_runtime::FramelessCall,
+
+	/// The salt to use in the transaction. If none is supplied, a "random" one will be chosen
+	pub salt: Option<u8>,
+
+	/// The seed to sign with. If none is provided, Alice's will be used.
+	pub seed: Option<String>
 }

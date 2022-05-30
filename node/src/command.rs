@@ -5,10 +5,12 @@ use crate::{
 	service,
 };
 use frame_benchmarking_cli::BenchmarkCmd;
-use node_template_runtime::Block;
+use node_template_runtime::{FramelessTransaction, Block};
 use sc_cli::{ChainSpec, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 use std::sync::Arc;
+use sp_core::{Pair, Encode, H512, H256};
+use sp_runtime::traits::Extrinsic;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
@@ -168,6 +170,35 @@ pub fn run() -> sc_cli::Result<()> {
 			runner.run_node_until_exit(|config| async move {
 				service::new_full(config).map_err(sc_cli::Error::Service)
 			})
+		},
+		Some(Subcommand::CreateTransaction(cmd)) => {
+			println!("Creating transaction from command {:?}", cmd);
+
+			let seed = cmd.seed.clone().unwrap_or(String::from("//Alice"));
+			let salt = cmd.salt.unwrap_or(rand::random());
+			let data_to_sign = (&cmd.action, &salt).encode();
+
+			let key_pair = sp_core::sr25519::Pair::from_string(&seed, None)
+				.expect("User provided invalid seed.");
+			let public_h256 = H256::from_slice(&key_pair.public().as_ref());
+			let signature = key_pair.sign(&data_to_sign);
+			let signature_h512 = H512::from_slice(&signature.as_ref());
+
+			// Construct the transaction
+			let tx = FramelessTransaction::new(
+				cmd.action.clone(),
+				Some((
+					salt,
+					signature_h512,
+					public_h256,
+				))
+			).expect("I've given valid data, please construct a valid transaction for me :pray:");
+
+			println!("Encoded final transaction:");
+			println!("{:?}", tx);
+			println!("{:?}", hex::encode(&tx.encode()));
+
+			Ok(())
 		},
 	}
 }

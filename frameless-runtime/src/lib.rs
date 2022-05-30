@@ -158,6 +158,21 @@ pub enum FramelessCall {
 	Toggle,
 }
 
+// So we can have a cli utility to create transactions. Not necessary for the runtime itself.
+#[cfg(feature = "std")]
+impl core::str::FromStr for FramelessCall {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, String> {
+		match s.to_lowercase().as_str() {
+			"set" => Ok(FramelessCall::Set),
+			"clear" => Ok(FramelessCall::Clear),
+			"toggle" => Ok(FramelessCall::Toggle),
+			_ => Err(String::from("Failed to parse frameless transaction.")),
+		}
+	}
+}
+
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, parity_util_mem::MallocSizeOf))]
 #[derive(Encode, Decode, Debug, PartialEq, Eq, Clone)]
 pub struct FramelessTransaction {
