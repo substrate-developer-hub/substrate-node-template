@@ -51,6 +51,7 @@ impl system::Config for Test {
 
 impl pallet_template::Config for Test {
 	type Event = Event;
+	type TimeProvider = pallet_timestamp::Pallet<Test>;
 }
 
 // Build genesis storage according to the mock runtime.
