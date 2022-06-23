@@ -199,7 +199,6 @@ impl Extrinsic for FramelessTransaction {
 /// This is seperated into a function so it can be re-used
 /// when executing transactions.
 fn check_framesless_transaction(tx: &FramelessTransaction) -> TransactionValidity {
-
 	info!(target: "frameless", "🖼️ Checking Frameless Transaction");
 
 	// Any transaction with a verifiable signature is valid
