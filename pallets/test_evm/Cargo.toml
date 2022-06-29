@@ -10,10 +10,14 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 	"derive",
 ] }
 scale-info = { version = "2.1.1", default-features = false, features = ["derive"] }
-frame-support = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.24"}
-frame-system = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.24" }
+frame-support = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.22"}
+frame-system = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.22" }
 
-pallet-evm = { default-features = false, version= "6.0.0-dev", git = "https://github.com/paritytech/frontier.git", branch = "master" }
+pallet-evm = { default-features = false, version= "6.0.0-dev", git = "https://github.com/paritytech/frontier.git", branch = "polkadot-v0.9.22" }
+pallet-timestamp = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22" }
+
+[dev-dependencies]
+pallet-balances = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22" }
 
 [features]
 default = ["std"]
@@ -23,4 +27,5 @@ std = [
 	"frame-support/std",
 	"frame-system/std",
     "pallet-evm/std",
+	"pallet-timestamp/std",
 ]
