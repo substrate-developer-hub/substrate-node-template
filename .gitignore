@@ -5,6 +5,7 @@
 **/*.rs.bk
 
 .DS_Store
+.idea
 
 # The cache for docker container dependency
 .cargo

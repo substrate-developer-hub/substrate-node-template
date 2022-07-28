@@ -1,3 +1,59 @@
+# PBA Final
+
+Your final assignment is worth 50% of your final grade at the Polkadot Blockchain Academy. In this assignment, you will be putting to practice the things you have learnt in the remainder of the modules of the Academy.
+
+> Module 7 (XCM) will not be covered until after the final exam’s submission due date. However, you are free to use 
+> XCM concepts in your project if you wanted to.
+
+The goal of this assignment is to have you implement something from the proposed list of projects below:
+
+* Create a simple multi-token DEX
+  * Create a simple multi-assets pallet (or use the existing one).
+  * Create a Uniswap style DEX to allow users to trustlessly exchange tokens with one another.
+    * Be sure to implement Liquidity rewards.
+    * Expose an API which acts as a “price oracle” based on the existing liquidity pools.
+  * Add a simple NFT pallet (like the kitties pallet we will do in class)
+    * Allow users to mint or buy/sell new kitties with any token.
+
+> In all projects, you are free to use everything that you have learned from Substrate, including existing pallets. 
+> Feel free to use a pallet as-is, or tweak it slightly to fit your needs.
+
+> To the contrary, when needed, make a Trait that is supposed to deliver some functionality, and do a mock 
+> implementation of it, to abstract away components that you want to interact with and are not readily available in FRAME.
+
+## Topic selection
+You are expected to share your selected topic no later than **Sunday July 31st**.
+
+If there is something you would like to implement that’s not in the proposed list, please come talk to either your TA, Shawn, or Kian for approval. Whomever approves your project will also grade your project, so keep them informed of your work.
+
+It is your responsibility to make sure you have all your questions answered by your TA or other instructors before the final deadline.
+
+## Deadline
+The submission due date is Wednesday, August 3rd at 12PM.
+
+## Submission
+Send a link to a GitHub repository containing your implementation to your TA in order to submit. In fairness to all students, please refrain from updating your code past 12 PM of the due date.
+
+## Grading rubric
+Your implementation will be reviewed for code quality and implementation details.
+
+* Implementation
+  * Correctness and accuracy of implementation
+  * Evidence of using various techniques used in class
+  * As close to production ready as possible
+* Code Quality
+  * Tests and code coverage
+  * Use of best practices and efficient code
+  * Well documented, with considerations and compromises noted
+* Bonus Points
+  * Integrate this into a working node.
+  * UX to interact with the runtime code.
+    * Value functionality over beauty.
+  * Integrate node as a working parachain on a relay chain.
+  * Working cross chain scenarios for your runtime logic using XCM and XCMP.
+
+---
+
 # Substrate Node Template
 
 [![Try on playground](https://img.shields.io/badge/Playground-Node_Template-brightgreen?logo=Parity%20Substrate)](https://docs.substrate.io/playground/) [![Matrix](https://img.shields.io/matrix/substrate-technical:matrix.org)](https://matrix.to/#/#substrate-technical:matrix.org)
