@@ -52,6 +52,7 @@ hex-literal = { version = "0.3.4", optional = true }
 
 # Local Dependencies
 pallet-dex = { version = "4.0.0-dev", default-features = false, path = "../pallets/dex" }
+pallet-marketplace = { version = "4.0.0-dev", default-features = false, path = "../pallets/marketplace" }
 
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
@@ -70,6 +71,7 @@ std = [
 	"pallet-dex/std",
 	"pallet-balances/std",
 	"pallet-grandpa/std",
+	"pallet-marketplace/std",
 	"pallet-randomness-collective-flip/std",
 	"pallet-sudo/std",
 	"pallet-timestamp/std",
@@ -98,6 +100,7 @@ runtime-benchmarks = [
 	"pallet-balances/runtime-benchmarks",
 	"pallet-dex/runtime-benchmarks",
 	"pallet-grandpa/runtime-benchmarks",
+	"pallet-marketplace/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"pallet-uniques/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
@@ -111,6 +114,7 @@ try-runtime = [
 	"pallet-balances/try-runtime",
 	"pallet-dex/try-runtime",
 	"pallet-grandpa/try-runtime",
+	"pallet-marketplace/try-runtime",
 	"pallet-randomness-collective-flip/try-runtime",
 	"pallet-sudo/try-runtime",
 	"pallet-timestamp/try-runtime",

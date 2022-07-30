@@ -2,6 +2,7 @@
 members = [
     "node",
     "pallets/dex",
+    "pallets/marketplace",
     "runtime",
 ]
 [profile.release]

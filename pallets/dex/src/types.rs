@@ -1,7 +1,6 @@
 use super::*;
-use frame_support::pallet_prelude::*;
-use frame_support::traits::fungibles::Mutate;
-use sp_runtime::traits::{CheckedAdd, Hash};
+use frame_support::{pallet_prelude::*, traits::fungibles::Mutate};
+use sp_runtime::traits::CheckedAdd;
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 #[scale_info(skip_type_params(T))]

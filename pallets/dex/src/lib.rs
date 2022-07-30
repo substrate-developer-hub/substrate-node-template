@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 use codec::HasCompact;
-use frame_support::traits::fungibles::Inspect;
-use frame_support::traits::Currency;
+use frame_support::{dispatch::DispatchResult, traits::fungibles::Inspect, traits::Currency};
+use frame_system::pallet_prelude::OriginFor;
 pub use pallet::*;
 pub use types::*;
 
@@ -270,4 +270,34 @@ pub mod pallet {
 		// 	}
 		// }
 	}
+
+	impl<T: Config> Swap<T::AccountId> for Pallet<T> {
+		type AssetId = T::AssetId;
+		type Balance = <<T as pallet::Config>::Assets as Inspect<
+			<T as frame_system::Config>::AccountId,
+		>>::Balance;
+
+		fn swap(
+			origin: T::AccountId,
+			amount_0: Self::Balance,
+			asset_0: Self::AssetId,
+			amount_1: Self::Balance,
+			asset_1: Self::AssetId,
+		) -> DispatchResult {
+			todo!()
+		}
+	}
+}
+
+// NOTE: Should be defined in a separate crate for loose coupling
+pub trait Swap<AccountId> {
+	type AssetId;
+	type Balance;
+	fn swap(
+		origin: AccountId,
+		amount_0: Self::Balance,
+		asset_0: Self::AssetId,
+		amount_1: Self::Balance,
+		asset_1: Self::AssetId,
+	) -> DispatchResult;
 }

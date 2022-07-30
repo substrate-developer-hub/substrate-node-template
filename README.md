@@ -65,12 +65,21 @@ Your implementation will be reviewed for code quality and implementation details
 - Considerations & Compromises noted
 - Swap UX
 
-## Pallet(s)
+## Pallets
+The pallets used to implement the solution are as follows, shown in a somewhat layered order. The DEX and 
+Marketplace pallets shown in bold are bespoke.
 - [Assets](https://github.com/paritytech/substrate/tree/master/frame/assets) pallet
-  - Existing FRAME pallet provided by Substrate, used for multi-asset support
-- [DEX](pallets/dex)
-  - Custom pallet for implementation a simple decentralised exchange
+  - Existing FRAME pallet provided by Substrate, used to add multi-asset support
+- **[DEX](pallets/dex)**
+  - Custom pallet implementing a simple decentralised exchange
   - Uses the [assets](https://github.com/paritytech/substrate/tree/master/frame/assets) pallet
+- [Uniques](https://github.com/paritytech/substrate/tree/master/frame/uniques) pallet
+  - Existing FRAME pallet provided by Substrate, used to add non-fungible token support
+- **[Marketplace](pallets/marketplace)**
+  - Custom pallet for implementing a simple NFT marketplace
+  - Uses the [uniques](https://github.com/paritytech/substrate/tree/master/frame/uniques) pallet
+  - Uses the [DEX](pallets/dex) pallet to auto-swap assets to facilitate buying/selling using any asset/token
+
 
 ## Genesis Config
 The [genesis config](node/src/chain_spec.rs) of the chain contains the below:

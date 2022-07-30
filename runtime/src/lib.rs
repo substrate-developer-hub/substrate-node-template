@@ -45,8 +45,9 @@ use pallet_transaction_payment::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-/// Import the dex pallet.
+/// Import the dex and marketplace pallets.
 pub use pallet_dex;
+pub use pallet_marketplace;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -341,6 +342,23 @@ impl pallet_uniques::Config for Runtime {
 	type WeightInfo = ();
 }
 
+// Configure marketplace pallet for runtime
+impl pallet_marketplace::Config for Runtime {
+	type Event = Event;
+	// Identifier type for a fungible asset
+	type AssetId = AssetId;
+	// Balance inspection for fungible assets
+	type Assets = Assets;
+	/// Identifier type for a collection of items
+	type CollectionId = CollectionId;
+	// Auto-swapping to facilitate buying/selling using any asset/token.
+	type DEX = DEX;
+	/// The type used to identify a unique item within a collection
+	type ItemId = ItemId;
+	// Balance inspection for non-fungible assets
+	type Uniques = Uniques;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -358,8 +376,9 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include additional pallets to satisfy required functionality
 		Assets: pallet_assets,
-		Uniques: pallet_uniques,
 		DEX: pallet_dex,
+		Uniques: pallet_uniques,
+		Marketplace: pallet_marketplace
 	}
 );
 
