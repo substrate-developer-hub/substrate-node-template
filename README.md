@@ -53,6 +53,39 @@ Your implementation will be reviewed for code quality and implementation details
   * Working cross chain scenarios for your runtime logic using XCM and XCMP.
 
 ---
+# Documentation
+
+## TODO:
+- Multi-token DEX
+  - Liquidity Rewards
+  - Price Oracle based on liquidity pools
+- NFT pallet
+  - Allow users to **mint**, **buy/sell** with **any** token
+- Tests & Code Coverage
+- Considerations & Compromises noted
+- Swap UX
+
+## Pallet(s)
+- [Assets](https://github.com/paritytech/substrate/tree/master/frame/assets) pallet
+  - Existing FRAME pallet provided by Substrate, used for multi-asset support
+- [DEX](pallets/dex)
+  - Custom pallet for implementation a simple decentralised exchange
+  - Uses the [assets](https://github.com/paritytech/substrate/tree/master/frame/assets) pallet
+
+## Genesis Config
+The [genesis config](node/src/chain_spec.rs) of the chain contains the below:
+
+### Tokens (Assets)
+
+| ID  | Symbol  | Name                     | Decimals |
+|-----|---------|--------------------------|----------|
+| 0   | UNIT    | Native Token             | 18       |
+| 1   | DEX     | Dex Liquidity Pool Token | 18       |
+| 2   | EVIL 🤖 | EVIL 🤖 Coin             | 18       |
+
+
+
+--- 
 
 # Substrate Node Template
 
