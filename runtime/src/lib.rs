@@ -6,6 +6,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+use frame_support::PalletId;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -270,6 +271,10 @@ pub type ItemId = u32;
 
 parameter_types! {
 	pub const AssetMaxLength: u32 = 15;
+	pub const DEXPalletId: PalletId = PalletId(*b"py/de-ex");
+	pub const LiquidityPoolTokenDecimals: u8 = 18;
+	pub const LiquidityPoolTokenMinimumBalance : u32 = 1;
+	pub const MinimumLiquidity : u32 = 1_000;
 	pub const NativeAssetId: u8 = 0;
 }
 
@@ -313,12 +318,28 @@ impl pallet_dex::Config for Runtime {
 	type AssetId = AssetId;
 	// Balance inspection for fungible assets
 	type Assets = Assets;
+	// The minimum balance of the liquidity pool token (must be non-zero)
+	type LiquidityPoolTokenMinimumBalance = LiquidityPoolTokenMinimumBalance;
+	// The number of decimals used for the liquidity pool token
+	type LiquidityPoolTokenDecimals = LiquidityPoolTokenDecimals;
+	// The minimum level of liquidity in a pool
+	type MinimumLiquidity = MinimumLiquidity;
 	// Native currency: for swaps between native token and other assets
 	type NativeCurrency = Balances;
 	/// Identifier of the native asset identifier (proxy between native token and asset)
 	type NativeAssetId = NativeAssetId;
-
+	/// The DEX's pallet id, used for deriving its sovereign account
+	type PalletId = DEXPalletId;
+	/// The units used when determining the swap fee (e.g. 1,000)
+	type SwapFeeUnits = ConstU128<1000>;
+	/// The value used to determine the swap fee rate (e.g. 1,000 - 997 = 0.03%)
+	type SwapFeeValue = ();
+	// A provider of time
 	type Time = pallet_timestamp::Pallet<Runtime>;
+	// Determines whether an asset exists
+	fn exists(id: Self::AssetId) -> bool {
+		Assets::maybe_total_supply(id).is_some()
+	}
 }
 
 // Configure uniques pallet for runtime
