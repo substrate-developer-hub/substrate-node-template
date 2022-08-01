@@ -9,6 +9,7 @@ use sp_runtime::traits::{ConstU128, ConstU32};
 use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
+	BuildStorage,
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -121,6 +122,16 @@ impl pallet_dex::Config for Test {
 }
 
 // Build genesis storage according to the mock runtime.
-pub fn new_test_ext() -> sp_io::TestExternalities {
-	system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	GenesisConfig {
+		balances: BalancesConfig { balances: vec![(1, 100_000), (2, 10_000), (10, 10_000)] },
+		..Default::default()
+	}
+	.assimilate_storage(&mut t)
+	.unwrap();
+
+	let mut ext = sp_io::TestExternalities::new(t);
+	ext.execute_with(|| System::set_block_number(1));
+	ext
 }

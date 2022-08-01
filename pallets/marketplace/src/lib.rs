@@ -11,7 +11,7 @@ use frame_support::{
 use frame_system::pallet_prelude::OriginFor;
 use frame_system::pallet_prelude::*;
 pub use pallet::*;
-use pallet_dex::Swap;
+use pallet_dex::traits::Swap;
 use sp_runtime::{traits::AtLeast32BitUnsigned, traits::Bounded};
 pub use types::*;
 

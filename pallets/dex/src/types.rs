@@ -54,23 +54,23 @@ impl<T: Config> LiquidityPool<T> {
 	}
 
 	// todo: document
+	// Simplified version of https://github.com/Uniswap/v1-contracts/blob/c10c08d81d6114f694baa8bd32f555a40f6264da/contracts/uniswap_exchange.vy#L48
 	pub(super) fn add(
 		&self,
 		amount: (BalanceOf<T>, BalanceOf<T>),
 		liquidity_provider: &AccountIdOf<T>,
 	) -> Result<PriceOf<T>, DispatchError> {
-		// Simplified version of https://github.com/Uniswap/v1-contracts/blob/c10c08d81d6114f694baa8bd32f555a40f6264da/contracts/uniswap_exchange.vy#L48
 		let total_issuance = T::Assets::total_issuance(self.id);
 		if total_issuance == <BalanceOf<T>>::default() {
 			// Use supplied amounts to initialise pool
 			T::Assets::mint_into(self.id, liquidity_provider, amount.0)?;
-			T::Assets::teleport(self.pair.0, liquidity_provider, &self.account, amount.0)?;
-			T::Assets::teleport(self.pair.1, liquidity_provider, &self.account, amount.1)?;
+			<Pallet<T>>::transfer(self.pair.0, liquidity_provider, &self.account, amount.0)?;
+			<Pallet<T>>::transfer(self.pair.1, liquidity_provider, &self.account, amount.1)?;
 		} else {
 			// Determine current balances of each asset held within liquidity pool
 			let balances = (
-				T::Assets::balance(self.pair.0, &self.account),
-				T::Assets::balance(self.pair.1, &self.account),
+				<Pallet<T>>::balance(self.pair.0, &self.account),
+				<Pallet<T>>::balance(self.pair.1, &self.account),
 			);
 
 			// Calculate amount of second token based on existing ratio
@@ -78,23 +78,22 @@ impl<T: Config> LiquidityPool<T> {
 			let liquidity_minted = amount.0 * total_issuance / balances.0;
 			// Transfer the assets from the liquidity provider to the pool and then mint their corresponding LP tokens
 			T::Assets::mint_into(self.id, liquidity_provider, liquidity_minted)?;
-			T::Assets::teleport(self.pair.0, liquidity_provider, &self.account, amount.0)?;
-			T::Assets::teleport(self.pair.1, liquidity_provider, &self.account, amount_1)?;
+			<Pallet<T>>::transfer(self.pair.0, liquidity_provider, &self.account, amount.0)?;
+			<Pallet<T>>::transfer(self.pair.1, liquidity_provider, &self.account, amount_1)?;
 		};
 
 		// Finally return updated price
-		let balance_0 = T::Assets::balance(self.pair.0, &self.account);
-		let balance_1 = T::Assets::balance(self.pair.1, &self.account);
+		let balance_0 = <Pallet<T>>::balance(self.pair.0, &self.account);
+		let balance_1 = <Pallet<T>>::balance(self.pair.1, &self.account);
 		Ok(balance_0 * balance_1)
 	}
 
+	// Simplified version of https://github.com/Uniswap/v1-contracts/blob/master/contracts/uniswap_exchange.vy#L83
 	pub(super) fn remove(
 		&self,
 		amount: BalanceOf<T>,
 		liquidity_provider: &AccountIdOf<T>,
 	) -> Result<PriceOf<T>, DispatchError> {
-		// Simplified version of https://github.com/Uniswap/v1-contracts/blob/master/contracts/uniswap_exchange.vy#L83
-
 		// Get the total number of liquidity pool tokens
 		ensure!(amount > <BalanceOf<T>>::default(), Error::<T>::InvalidAmount);
 		let total_issuance = T::Assets::total_issuance(self.id);
@@ -102,22 +101,22 @@ impl<T: Config> LiquidityPool<T> {
 
 		// Determine current balances of each asset held within liquidity pool
 		let balances = (
-			T::Assets::balance(self.pair.0, &self.account),
-			T::Assets::balance(self.pair.1, &self.account),
+			<Pallet<T>>::balance(self.pair.0, &self.account),
+			<Pallet<T>>::balance(self.pair.1, &self.account),
 		);
 
-		// Calculate the amount of each asset to be withdrawn
+		// Calculate the amount of each asset to be withdrawn (which includes rewards from providing liquidity)
 		let amount_0 = amount * balances.0 / total_issuance;
 		let amount_1 = amount * balances.1 / total_issuance;
 
 		// Transfer the assets from liquidity pool account back to liquidity provider and then burn LP tokens
-		T::Assets::teleport(self.pair.0, &self.account, liquidity_provider, amount_0)?;
-		T::Assets::teleport(self.pair.1, &self.account, liquidity_provider, amount_1)?;
+		<Pallet<T>>::transfer(self.pair.0, &self.account, liquidity_provider, amount_0)?;
+		<Pallet<T>>::transfer(self.pair.1, &self.account, liquidity_provider, amount_1)?;
 		T::Assets::burn_from(self.id, &liquidity_provider, amount)?;
 
 		// Finally return updated price based on new balances
-		let balance_0 = T::Assets::balance(self.pair.0, &self.account);
-		let balance_1 = T::Assets::balance(self.pair.1, &self.account);
+		let balance_0 = <Pallet<T>>::balance(self.pair.0, &self.account);
+		let balance_1 = <Pallet<T>>::balance(self.pair.1, &self.account);
 		Ok(balance_0 * balance_1)
 	}
 
@@ -133,45 +132,48 @@ impl<T: Config> LiquidityPool<T> {
 		let input_amount = amount.0;
 		if amount.1 == self.pair.0 {
 			// Sell TOKEN_0 for TOKEN_1
-			let input_reserve = T::Assets::balance(self.pair.0, &self.account) - input_amount;
-			let output_reserve = T::Assets::balance(self.pair.1, &self.account);
+			let input_reserve = <Pallet<T>>::balance(self.pair.0, &self.account) - input_amount;
+			let output_reserve = <Pallet<T>>::balance(self.pair.1, &self.account);
 
-			// Output amount bought
+			// Subtract fee from input amount, so liquidity providers can accrue rewards
 			let input_amount_with_fee = input_amount * swap_fee_value;
 			let numerator = input_amount_with_fee * output_reserve;
 			let denominator = (input_reserve * swap_fee_units) + input_amount_with_fee;
 			let output_amount = numerator / denominator;
 
 			// Transfer assets
-			T::Assets::teleport(self.pair.0, &who, &self.account, input_amount)?;
-			T::Assets::teleport(self.pair.1, &self.account, who, output_amount)?;
+			<Pallet<T>>::transfer(self.pair.0, &who, &self.account, input_amount)?;
+			<Pallet<T>>::transfer(self.pair.1, &self.account, who, output_amount)?;
 		} else {
 			// Sell TOKEN_1 for TOKEN_0
-			let input_reserve = T::Assets::balance(self.pair.1, &self.account) - input_amount;
-			let output_reserve = T::Assets::balance(self.pair.0, &self.account);
+			let input_reserve = <Pallet<T>>::balance(self.pair.1, &self.account) - input_amount;
+			let output_reserve = <Pallet<T>>::balance(self.pair.0, &self.account);
 
-			// Output amount bought
+			// Subtract fee from input amount, so liquidity providers can accrue rewards
 			let input_amount_with_fee = input_amount * swap_fee_value;
 			let numerator = input_amount_with_fee * output_reserve;
 			let denominator = (input_reserve * swap_fee_units) + input_amount_with_fee;
 			let output_amount = numerator / denominator;
 
 			// Transfer assets
-			T::Assets::teleport(self.pair.0, &self.account, who, output_amount)?;
-			T::Assets::teleport(self.pair.1, &who, &self.account, input_amount)?;
+			<Pallet<T>>::transfer(self.pair.0, &self.account, who, output_amount)?;
+			<Pallet<T>>::transfer(self.pair.1, &who, &self.account, input_amount)?;
 		}
 
 		// Finally return updated price
-		let balance_0 = T::Assets::balance(self.pair.0, &self.account);
-		let balance_1 = T::Assets::balance(self.pair.1, &self.account);
+		let balance_0 = <Pallet<T>>::balance(self.pair.0, &self.account);
+		let balance_1 = <Pallet<T>>::balance(self.pair.1, &self.account);
 		Ok(balance_0 * balance_1)
 	}
 }
 
+/// A generic 'pair'.
 pub(super) struct Pair<T: Config>(PhantomData<T>);
 
 impl<T: Config> Pair<T> {
-	// todo: document
+	/// Creates a pair from two asset identifiers, `asset_0` and `asset_1`.  
+	/// **Note:** The supplied identifiers are sorted so the resulting pair always has the 'lowest' asset identifier as
+	/// the first item of the pair.
 	pub(super) fn from(
 		asset_0: AssetIdOf<T>,
 		asset_1: AssetIdOf<T>,
@@ -184,7 +186,9 @@ impl<T: Config> Pair<T> {
 		}
 	}
 
-	// todo: document
+	/// Creates a pair from a pair of asset values.  
+	/// **Note:** The supplied asset value pairs are sorted by asset identifier, so the resulting pair always has the
+	/// value with the 'lowest' asset identifier as the first item of the pair.
 	pub(super) fn from_values(
 		value_0: BalanceOf<T>,
 		asset_0: AssetIdOf<T>,
@@ -202,6 +206,7 @@ impl<T: Config> Pair<T> {
 	}
 }
 
+/// A `value` of a particular `asset`.
 pub(super) struct Value<T: Config> {
 	pub(super) value: BalanceOf<T>,
 	pub(super) asset: AssetIdOf<T>,
@@ -212,25 +217,37 @@ mod tests {
 	use crate::mock::*;
 	use crate::LiquidityPool;
 	use frame_support::assert_ok;
-	use frame_support::traits::fungibles::Inspect;
-
-	#[test]
-	fn new_liquidity_pool() {
-		new_test_ext().execute_with(|| {
-			let pool = <LiquidityPool<Test>>::new((1, 2)).unwrap();
-			assert_eq!(pool.id, u32::MAX);
-			assert_eq!(pool.pair, (1, 2));
-			assert_ne!(pool.account, 0);
-		});
-	}
+	use frame_support::traits::fungible::Inspect as InspectFungible;
+	use frame_support::traits::fungibles::Inspect as InspectFungibles;
 
 	const ADMIN: u64 = 1;
+	const NATIVE_TOKEN: u32 = 0;
 	const ASSET_0: u32 = 1;
 	const ASSET_1: u32 = 2;
 	const BUYER: u64 = 12312;
 	const UNITS: u128 = 10;
 	const LP: u64 = 123;
 	const MIN_BALANCE: u128 = 1;
+
+	#[test]
+	fn new_liquidity_pool() {
+		new_test_ext().execute_with(|| {
+			let pool = <LiquidityPool<Test>>::new((ASSET_0, ASSET_1)).unwrap();
+			assert_eq!(pool.id, u32::MAX);
+			assert_eq!(pool.pair, (ASSET_0, ASSET_1));
+			assert_ne!(pool.account, 0);
+		});
+	}
+
+	#[test]
+	fn new_liquidity_pool_with_native_currency() {
+		new_test_ext().execute_with(|| {
+			let pool = <LiquidityPool<Test>>::new((NATIVE_TOKEN, ASSET_1)).unwrap();
+			assert_eq!(pool.id, u32::MAX);
+			assert_eq!(pool.pair, (NATIVE_TOKEN, ASSET_1));
+			assert_ne!(pool.account, 0);
+		});
+	}
 
 	#[test]
 	fn adds_liquidity() {
@@ -259,6 +276,38 @@ mod tests {
 	}
 
 	#[test]
+	fn adds_liquidity_with_native_currency() {
+		new_test_ext().execute_with(|| {
+			assert_ok!(Assets::force_create(
+				Origin::root(),
+				NATIVE_TOKEN,
+				ADMIN,
+				true,
+				MIN_BALANCE
+			));
+			assert_ok!(Assets::force_create(Origin::root(), ASSET_1, ADMIN, true, MIN_BALANCE));
+			assert_ok!(Balances::transfer(Origin::signed(ADMIN), LP, 1000 * UNITS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, LP, 1000 * UNITS));
+
+			let pool = <LiquidityPool<Test>>::new((NATIVE_TOKEN, ASSET_1)).unwrap();
+			assert_eq!(
+				pool.add((10 * UNITS, 500 * UNITS), &LP).unwrap(),
+				(10 * UNITS) * (500 * UNITS)
+			);
+
+			// Check pool balances
+			assert_eq!(Balances::balance(&pool.account), 10 * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, pool.account), 500 * UNITS);
+			assert_eq!(Assets::total_issuance(pool.id), 10 * UNITS);
+
+			// Check liquidity provider balances
+			assert_eq!(Balances::balance(&LP), 990 * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, &LP), 500 * UNITS);
+			assert_eq!(Assets::balance(pool.id, &LP), 10 * UNITS);
+		});
+	}
+
+	#[test]
 	fn removes_all_liquidity() {
 		new_test_ext().execute_with(|| {
 			assert_ok!(Assets::force_create(Origin::root(), ASSET_0, ADMIN, true, MIN_BALANCE));
@@ -271,7 +320,7 @@ mod tests {
 			let lp_tokens = Assets::balance(pool.id, &LP);
 			assert_eq!(lp_tokens, (10 * UNITS));
 
-			let result = pool.remove(lp_tokens, &LP).unwrap();
+			assert_ok!(pool.remove(lp_tokens, &LP));
 
 			// Check pool balances
 			assert_eq!(Assets::balance(ASSET_0, pool.account), 0);
@@ -286,6 +335,56 @@ mod tests {
 	}
 
 	#[test]
+	fn removes_all_liquidity_with_native_currency() {
+		new_test_ext().execute_with(|| {
+			assert_ok!(Assets::force_create(Origin::root(), ASSET_1, ADMIN, true, MIN_BALANCE));
+			assert_ok!(Balances::transfer(Origin::signed(ADMIN), LP, 1000 * UNITS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, LP, 1000 * UNITS));
+
+			let pool = <LiquidityPool<Test>>::new((NATIVE_TOKEN, ASSET_1)).unwrap();
+			assert_ok!(pool.add((10 * UNITS, 500 * UNITS), &LP));
+			let lp_tokens = Assets::balance(pool.id, &LP);
+			assert_eq!(lp_tokens, (10 * UNITS));
+
+			assert_ok!(pool.remove(lp_tokens, &LP));
+
+			// Check pool balances
+			assert_eq!(Balances::balance(&pool.account), 0);
+			assert_eq!(Assets::balance(ASSET_1, pool.account), 0);
+			assert_eq!(Assets::total_issuance(pool.id), 0);
+
+			// Check liquidity provider balances (back to original)
+			assert_eq!(Balances::balance(&LP), 1000 * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, &LP), 1000 * UNITS);
+			assert_eq!(Assets::balance(pool.id, &LP), 0);
+		});
+	}
+
+	#[test]
+	fn swaps_with_native_currency() {
+		new_test_ext().execute_with(|| {
+			assert_ok!(Assets::force_create(Origin::root(), ASSET_1, ADMIN, true, MIN_BALANCE));
+			assert_ok!(Balances::transfer(Origin::signed(ADMIN), LP, 1000 * UNITS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, LP, 1000 * UNITS));
+			assert_ok!(Balances::transfer(Origin::signed(ADMIN), BUYER, 100 * UNITS));
+
+			let pool = <LiquidityPool<Test>>::new((NATIVE_TOKEN, ASSET_1)).unwrap();
+			pool.add((10 * UNITS, 500 * UNITS), &LP).unwrap();
+
+			assert_ok!(pool.swap((5 * UNITS, NATIVE_TOKEN), &BUYER));
+
+			// Check buyer balances
+			assert_eq!(Balances::balance(&BUYER), (100 - 5) * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, &BUYER), 2496);
+
+			// Check pool balances
+			assert_eq!(Balances::balance(&pool.account), 15 * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, pool.account), (500 * UNITS) - 2496);
+			assert_eq!(Assets::total_issuance(pool.id), 10 * UNITS);
+		});
+	}
+
+	#[test]
 	fn swaps_asset_0() {
 		new_test_ext().execute_with(|| {
 			assert_ok!(Assets::force_create(Origin::root(), ASSET_0, ADMIN, true, MIN_BALANCE));
@@ -294,7 +393,7 @@ mod tests {
 			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, LP, 1000 * UNITS));
 			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_0, BUYER, 100 * UNITS));
 
-			let pool = <LiquidityPool<Test>>::new((1, 2)).unwrap();
+			let pool = <LiquidityPool<Test>>::new((ASSET_0, ASSET_1)).unwrap();
 			pool.add((10 * UNITS, 500 * UNITS), &LP).unwrap();
 
 			assert_ok!(pool.swap((5 * UNITS, ASSET_0), &BUYER));
@@ -319,7 +418,7 @@ mod tests {
 			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, LP, 1000 * UNITS));
 			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, BUYER, 500 * UNITS));
 
-			let pool = <LiquidityPool<Test>>::new((1, 2)).unwrap();
+			let pool = <LiquidityPool<Test>>::new((ASSET_0, ASSET_1)).unwrap();
 			pool.add((10 * UNITS, 500 * UNITS), &LP).unwrap();
 
 			assert_ok!(pool.swap((250 * UNITS, ASSET_1), &BUYER));

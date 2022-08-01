@@ -19,6 +19,7 @@ mod functions;
 mod mock;
 #[cfg(test)]
 mod tests;
+pub mod traits;
 mod types;
 
 type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
@@ -74,6 +75,7 @@ pub mod pallet {
 		// The minimum level of liquidity in a pool
 		type MinimumLiquidity: Get<u32>;
 		// Native currency: for swaps between native token and other assets
+		// todo: explore use of ReservableCurrency for locking native funds when adding to liquidity pool
 		type NativeCurrency: ReservableCurrency<Self::AccountId>;
 		/// Identifier of the native asset identifier (proxy between native token and asset)
 		#[pallet::constant]
@@ -259,11 +261,11 @@ pub mod pallet {
 			// Ensure signed
 			let who = ensure_signed(origin)?;
 
-			<Self as Swap<T::AccountId>>::swap(amount, asset, counter, who)
+			<Self as traits::Swap<T::AccountId>>::swap(amount, asset, counter, who)
 		}
 	}
 
-	impl<T: Config> Swap<T::AccountId> for Pallet<T> {
+	impl<T: Config> traits::Swap<T::AccountId> for Pallet<T> {
 		type AssetId = T::AssetId;
 		type Balance = <<T as pallet::Config>::Assets as Inspect<
 			<T as frame_system::Config>::AccountId,
@@ -272,7 +274,7 @@ pub mod pallet {
 		fn swap(
 			amount: Self::Balance,
 			asset: Self::AssetId,
-			counter: Self::AssetId,
+			target: Self::AssetId,
 			who: T::AccountId,
 		) -> DispatchResult {
 			// Verify the amounts
@@ -283,7 +285,7 @@ pub mod pallet {
 			ensure!(balance >= amount, Error::<T>::InsufficientBalance);
 
 			// Get liquidity pool
-			let pair = <Pair<T>>::from(asset, counter);
+			let pair = <Pair<T>>::from(asset, target);
 			let pool = match <LiquidityPools<T>>::get(pair) {
 				Some(pool) => Result::<LiquidityPool<T>, DispatchError>::Ok(pool), // Type couldnt be inferred
 				None => Err(DispatchError::from(Error::<T>::NoPool)),
@@ -339,17 +341,4 @@ pub mod pallet {
 			}
 		}
 	}
-}
-
-// todo: document
-// NOTE: Should be defined in a separate crate for loose coupling
-pub trait Swap<AccountId> {
-	type AssetId;
-	type Balance;
-	fn swap(
-		amount: Self::Balance,
-		asset: Self::AssetId,
-		counter: Self::AssetId,
-		who: AccountId,
-	) -> DispatchResult;
 }
