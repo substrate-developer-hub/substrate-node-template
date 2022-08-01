@@ -108,8 +108,8 @@ impl pallet_dex::Config for Test {
 	type LiquidityPoolTokenMinimumBalance = LiquidityPoolTokenMinimumBalance;
 	type LiquidityPoolTokenDecimals = ();
 	type MinimumLiquidity = ();
-	type SwapFeeUnits = ConstU128<10000>;
-	type SwapFeeValue = ConstU128<9975>;
+	type SwapFeeUnits = ConstU128<1000>;
+	type SwapFeeValue = ConstU128<997>;
 	type NativeCurrency = Balances;
 	type NativeAssetId = ();
 	type PalletId = DEXPallet;

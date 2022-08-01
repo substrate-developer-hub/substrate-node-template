@@ -58,10 +58,10 @@ impl<T: Config> LiquidityPool<T> {
 		&self,
 		amount: (BalanceOf<T>, BalanceOf<T>),
 		liquidity_provider: &AccountIdOf<T>,
-	) -> Result<PriceOf<T>, sp_runtime::DispatchError> {
+	) -> Result<PriceOf<T>, DispatchError> {
 		// Simplified version of https://github.com/Uniswap/v1-contracts/blob/c10c08d81d6114f694baa8bd32f555a40f6264da/contracts/uniswap_exchange.vy#L48
 		let total_issuance = T::Assets::total_issuance(self.id);
-		let minted = if total_issuance == <BalanceOf<T>>::default() {
+		if total_issuance == <BalanceOf<T>>::default() {
 			// Use supplied amounts to initialise pool
 			T::Assets::mint_into(self.id, liquidity_provider, amount.0)?;
 			T::Assets::teleport(self.pair.0, liquidity_provider, &self.account, amount.0)?;
@@ -92,44 +92,54 @@ impl<T: Config> LiquidityPool<T> {
 		&self,
 		amount: BalanceOf<T>,
 		liquidity_provider: &AccountIdOf<T>,
-	) -> Result<((BalanceOf<T>, BalanceOf<T>), PriceOf<T>), DispatchError> {
+	) -> Result<PriceOf<T>, DispatchError> {
+		// Simplified version of https://github.com/Uniswap/v1-contracts/blob/master/contracts/uniswap_exchange.vy#L83
+
 		// Get the total number of liquidity pool tokens
+		ensure!(amount > <BalanceOf<T>>::default(), Error::<T>::InvalidAmount);
 		let total_issuance = T::Assets::total_issuance(self.id);
+		ensure!(amount > <BalanceOf<T>>::default(), Error::<T>::EmptyPool);
 
 		// Determine current balances of each asset held within liquidity pool
-		let balance_0 = T::Assets::balance(self.pair.0, &self.account);
-		let balance_1 = T::Assets::balance(self.pair.1, &self.account);
+		let balances = (
+			T::Assets::balance(self.pair.0, &self.account),
+			T::Assets::balance(self.pair.1, &self.account),
+		);
 
 		// Calculate the amount of each asset to be withdrawn
-		let withdrawn_0 = balance_0 * (amount / total_issuance);
-		let withdrawn_1 = balance_1 * (amount / total_issuance);
+		let amount_0 = amount * balances.0 / total_issuance;
+		let amount_1 = amount * balances.1 / total_issuance;
 
-		// Transfer the assets from liquidity pool account back to liquidity provider
-		T::Assets::teleport(self.pair.0, &self.account, liquidity_provider, withdrawn_0)?;
-		T::Assets::teleport(self.pair.1, &self.account, liquidity_provider, withdrawn_1)?;
+		// Transfer the assets from liquidity pool account back to liquidity provider and then burn LP tokens
+		T::Assets::teleport(self.pair.0, &self.account, liquidity_provider, amount_0)?;
+		T::Assets::teleport(self.pair.1, &self.account, liquidity_provider, amount_1)?;
+		T::Assets::burn_from(self.id, &liquidity_provider, amount)?;
 
 		// Finally return updated price based on new balances
 		let balance_0 = T::Assets::balance(self.pair.0, &self.account);
 		let balance_1 = T::Assets::balance(self.pair.1, &self.account);
-		Ok(((withdrawn_0, withdrawn_1), balance_0 * balance_1))
+		Ok(balance_0 * balance_1)
 	}
 
 	pub(super) fn swap(
 		&self,
 		amount: (BalanceOf<T>, AssetIdOf<T>),
 		who: &AccountIdOf<T>,
-	) -> Result<PriceOf<T>, sp_runtime::DispatchError> {
+	) -> Result<PriceOf<T>, DispatchError> {
+		let swap_fee_value = T::SwapFeeValue::get();
+		let swap_fee_units = T::SwapFeeUnits::get();
+
 		// Based on https://docs.uniswap.org/protocol/V1/guides/trade-tokens
+		let input_amount = amount.0;
 		if amount.1 == self.pair.0 {
 			// Sell TOKEN_0 for TOKEN_1
-			let input_amount = amount.0;
-			let input_reserve = T::Assets::balance(self.pair.0, &self.account);
+			let input_reserve = T::Assets::balance(self.pair.0, &self.account) - input_amount;
 			let output_reserve = T::Assets::balance(self.pair.1, &self.account);
 
 			// Output amount bought
-			let numerator = input_amount * output_reserve * T::SwapFeeValue::get();
-			let denominator =
-				input_reserve * T::SwapFeeUnits::get() + input_amount * T::SwapFeeValue::get();
+			let input_amount_with_fee = input_amount * swap_fee_value;
+			let numerator = input_amount_with_fee * output_reserve;
+			let denominator = (input_reserve * swap_fee_units) + input_amount_with_fee;
 			let output_amount = numerator / denominator;
 
 			// Transfer assets
@@ -137,14 +147,13 @@ impl<T: Config> LiquidityPool<T> {
 			T::Assets::teleport(self.pair.1, &self.account, who, output_amount)?;
 		} else {
 			// Sell TOKEN_1 for TOKEN_0
-			let input_amount = amount.0;
-			let input_reserve = T::Assets::balance(self.pair.1, &self.account);
+			let input_reserve = T::Assets::balance(self.pair.1, &self.account) - input_amount;
 			let output_reserve = T::Assets::balance(self.pair.0, &self.account);
 
 			// Output amount bought
-			let numerator = input_amount * output_reserve * T::SwapFeeValue::get();
-			let denominator =
-				input_reserve * T::SwapFeeUnits::get() + input_amount * T::SwapFeeValue::get();
+			let input_amount_with_fee = input_amount * swap_fee_value;
+			let numerator = input_amount_with_fee * output_reserve;
+			let denominator = (input_reserve * swap_fee_units) + input_amount_with_fee;
 			let output_amount = numerator / denominator;
 
 			// Transfer assets
@@ -197,10 +206,11 @@ pub(super) struct Value<T: Config> {
 	pub(super) value: BalanceOf<T>,
 	pub(super) asset: AssetIdOf<T>,
 }
+
 #[cfg(test)]
 mod tests {
+	use crate::mock::*;
 	use crate::LiquidityPool;
-	use crate::{mock::*, Error, LiquidityPools, Price};
 	use frame_support::assert_ok;
 	use frame_support::traits::fungibles::Inspect;
 
@@ -218,8 +228,8 @@ mod tests {
 	const ASSET_0: u32 = 1;
 	const ASSET_1: u32 = 2;
 	const BUYER: u64 = 12312;
-	const DECIMALS: u128 = 10;
-	const LIQUIDITY_PROVIDER: u64 = 123;
+	const UNITS: u128 = 10;
+	const LP: u64 = 123;
 	const MIN_BALANCE: u128 = 1;
 
 	#[test]
@@ -227,70 +237,100 @@ mod tests {
 		new_test_ext().execute_with(|| {
 			assert_ok!(Assets::force_create(Origin::root(), ASSET_0, ADMIN, true, MIN_BALANCE));
 			assert_ok!(Assets::force_create(Origin::root(), ASSET_1, ADMIN, true, MIN_BALANCE));
-			assert_ok!(Assets::mint(
-				Origin::signed(ADMIN),
-				ASSET_0,
-				LIQUIDITY_PROVIDER,
-				1000 * DECIMALS
-			));
-			assert_ok!(Assets::mint(
-				Origin::signed(ADMIN),
-				ASSET_1,
-				LIQUIDITY_PROVIDER,
-				1000 * DECIMALS
-			));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_0, LP, 1000 * UNITS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, LP, 1000 * UNITS));
 
 			let pool = <LiquidityPool<Test>>::new((ASSET_0, ASSET_1)).unwrap();
 			assert_eq!(
-				pool.add((10 * DECIMALS, 500 * DECIMALS), &LIQUIDITY_PROVIDER).unwrap(),
-				(10 * DECIMALS) * (500 * DECIMALS)
+				pool.add((10 * UNITS, 500 * UNITS), &LP).unwrap(),
+				(10 * UNITS) * (500 * UNITS)
 			);
 
 			// Check pool balances
-			assert_eq!(Assets::balance(ASSET_0, pool.account), 10 * DECIMALS);
-			assert_eq!(Assets::balance(ASSET_1, pool.account), 500 * DECIMALS);
-			assert_eq!(Assets::total_issuance(pool.id), 10 * DECIMALS);
+			assert_eq!(Assets::balance(ASSET_0, pool.account), 10 * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, pool.account), 500 * UNITS);
+			assert_eq!(Assets::total_issuance(pool.id), 10 * UNITS);
 
 			// Check liquidity provider balances
-			assert_eq!(Assets::balance(ASSET_0, &LIQUIDITY_PROVIDER), 990 * DECIMALS);
-			assert_eq!(Assets::balance(ASSET_1, &LIQUIDITY_PROVIDER), 500 * DECIMALS);
-			assert_eq!(Assets::balance(pool.id, &LIQUIDITY_PROVIDER), 10 * DECIMALS);
+			assert_eq!(Assets::balance(ASSET_0, &LP), 990 * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, &LP), 500 * UNITS);
+			assert_eq!(Assets::balance(pool.id, &LP), 10 * UNITS);
 		});
 	}
 
 	#[test]
-	fn swaps() {
+	fn removes_all_liquidity() {
 		new_test_ext().execute_with(|| {
 			assert_ok!(Assets::force_create(Origin::root(), ASSET_0, ADMIN, true, MIN_BALANCE));
 			assert_ok!(Assets::force_create(Origin::root(), ASSET_1, ADMIN, true, MIN_BALANCE));
-			assert_ok!(Assets::mint(
-				Origin::signed(ADMIN),
-				ASSET_0,
-				LIQUIDITY_PROVIDER,
-				1000 * DECIMALS
-			));
-			assert_ok!(Assets::mint(
-				Origin::signed(ADMIN),
-				ASSET_1,
-				LIQUIDITY_PROVIDER,
-				1000 * DECIMALS
-			));
-			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, BUYER, 10 * DECIMALS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_0, LP, 1000 * UNITS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, LP, 1000 * UNITS));
 
-			let pool = <LiquidityPool<Test>>::new((1, 2)).unwrap();
-			pool.add((10 * DECIMALS, 500 * DECIMALS), &LIQUIDITY_PROVIDER).unwrap();
+			let pool = <LiquidityPool<Test>>::new((ASSET_0, ASSET_1)).unwrap();
+			assert_ok!(pool.add((10 * UNITS, 500 * UNITS), &LP));
+			let lp_tokens = Assets::balance(pool.id, &LP);
+			assert_eq!(lp_tokens, (10 * UNITS));
 
-			let price = pool.swap((5 * DECIMALS, ASSET_1), &BUYER).unwrap();
+			let result = pool.remove(lp_tokens, &LP).unwrap();
 
 			// Check pool balances
-			assert_eq!(Assets::balance(ASSET_0, pool.account), 10 * DECIMALS);
-			assert_eq!(Assets::balance(ASSET_1, pool.account), 550 * DECIMALS);
-			assert_eq!(Assets::total_issuance(pool.id), 10 * DECIMALS);
+			assert_eq!(Assets::balance(ASSET_0, pool.account), 0);
+			assert_eq!(Assets::balance(ASSET_1, pool.account), 0);
+			assert_eq!(Assets::total_issuance(pool.id), 0);
+
+			// Check liquidity provider balances (back to original)
+			assert_eq!(Assets::balance(ASSET_0, &LP), 1000 * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, &LP), 1000 * UNITS);
+			assert_eq!(Assets::balance(pool.id, &LP), 0);
+		});
+	}
+
+	#[test]
+	fn swaps_asset_0() {
+		new_test_ext().execute_with(|| {
+			assert_ok!(Assets::force_create(Origin::root(), ASSET_0, ADMIN, true, MIN_BALANCE));
+			assert_ok!(Assets::force_create(Origin::root(), ASSET_1, ADMIN, true, MIN_BALANCE));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_0, LP, 1000 * UNITS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, LP, 1000 * UNITS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_0, BUYER, 100 * UNITS));
+
+			let pool = <LiquidityPool<Test>>::new((1, 2)).unwrap();
+			pool.add((10 * UNITS, 500 * UNITS), &LP).unwrap();
+
+			assert_ok!(pool.swap((5 * UNITS, ASSET_0), &BUYER));
 
 			// Check buyer balances
-			assert_eq!(Assets::balance(ASSET_0, &BUYER), 990 * DECIMALS);
-			assert_eq!(Assets::balance(ASSET_1, &BUYER), 5 * DECIMALS);
-			assert_eq!(Assets::balance(pool.id, pool.account), 10 * DECIMALS);
+			assert_eq!(Assets::balance(ASSET_0, &BUYER), (100 - 5) * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, &BUYER), 2496);
+
+			// Check pool balances
+			assert_eq!(Assets::balance(ASSET_0, pool.account), 15 * UNITS);
+			assert_eq!(Assets::balance(ASSET_1, pool.account), (500 * UNITS) - 2496);
+			assert_eq!(Assets::total_issuance(pool.id), 10 * UNITS);
+		});
+	}
+
+	#[test]
+	fn swaps_asset_1() {
+		new_test_ext().execute_with(|| {
+			assert_ok!(Assets::force_create(Origin::root(), ASSET_0, ADMIN, true, MIN_BALANCE));
+			assert_ok!(Assets::force_create(Origin::root(), ASSET_1, ADMIN, true, MIN_BALANCE));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_0, LP, 1000 * UNITS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, LP, 1000 * UNITS));
+			assert_ok!(Assets::mint(Origin::signed(ADMIN), ASSET_1, BUYER, 500 * UNITS));
+
+			let pool = <LiquidityPool<Test>>::new((1, 2)).unwrap();
+			pool.add((10 * UNITS, 500 * UNITS), &LP).unwrap();
+
+			assert_ok!(pool.swap((250 * UNITS, ASSET_1), &BUYER));
+
+			// Check buyer balances
+			assert_eq!(Assets::balance(ASSET_0, &BUYER), 49);
+			assert_eq!(Assets::balance(ASSET_1, &BUYER), (500 - 250) * UNITS);
+
+			// Check pool balances
+			assert_eq!(Assets::balance(ASSET_0, pool.account), 51);
+			assert_eq!(Assets::balance(ASSET_1, pool.account), 750 * UNITS);
 		});
 	}
 }

@@ -1,5 +1,5 @@
 use crate::{mock::*, Error, LiquidityPools, Price};
-use frame_support::{assert_noop, assert_ok, traits::tokens::fungibles::Mutate};
+use frame_support::{assert_noop, assert_ok};
 use sp_runtime::DispatchError;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -211,7 +211,7 @@ fn adds_liquidity() {
 			10,
 			ASSET_1,
 			20,
-			ASSET_0,
+			ASSET_0, // Intentionally placed lower id in second position to test ordering
 			DEADLINE
 		));
 
@@ -222,7 +222,7 @@ fn adds_liquidity() {
 		// Check resulting balances and price
 		assert_eq!(Assets::balance(ASSET_0, &LIQUIDITY_PROVIDER), 80);
 		assert_eq!(Assets::balance(ASSET_1, &LIQUIDITY_PROVIDER), 90);
-		assert_eq!(Assets::balance(pool.id, &LIQUIDITY_PROVIDER), 90);
+		assert_eq!(Assets::balance(pool.id, &LIQUIDITY_PROVIDER), 20);
 		assert_eq!(Price::<Test>::get((ASSET_0, ASSET_1)).unwrap(), 10 * 20);
 	});
 }

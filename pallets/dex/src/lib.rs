@@ -97,45 +97,6 @@ pub mod pallet {
 		fn exists(id: Self::AssetId) -> bool;
 	}
 
-	#[pallet::genesis_config]
-	pub struct GenesisConfig<T: Config> {
-		/// Genesis liquidity pools: ((amount, asset), (amount, asset), liquidity provider)
-		pub liquidity_pools:
-			Vec<((BalanceOf<T>, AssetIdOf<T>), (BalanceOf<T>, AssetIdOf<T>), AccountIdOf<T>)>,
-	}
-
-	#[cfg(feature = "std")]
-	impl<T: Config> Default for GenesisConfig<T> {
-		fn default() -> Self {
-			Self { liquidity_pools: Default::default() }
-		}
-	}
-
-	#[pallet::genesis_build]
-	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
-		fn build(&self) {
-			for (amount_0, amount_1, liquidity_provider) in &self.liquidity_pools {
-				let pair = <Pair<T>>::from_values(amount_0.0, amount_0.1, amount_1.0, amount_1.1);
-				let key = (pair.0.asset, pair.1.asset);
-				assert!(
-					!LiquidityPools::<T>::contains_key(key),
-					"Liquidity pool id already in use"
-				);
-				assert!(pair.0.value > <BalanceOf<T>>::default(), "Amount should not be zero");
-				assert!(pair.1.value > <BalanceOf<T>>::default(), "Amount should not be zero");
-
-				// Create liquidity pool and add liquidity
-				let liquidity_pool = LiquidityPool::<T>::new(key)
-					.expect("Expect to be able to create a new liquidity pool during genesis.");
-				let price = liquidity_pool
-					.add((pair.0.value, pair.1.value), &liquidity_provider)
-					.expect("Expect to be able to add liquidity during genesis.");
-				LiquidityPools::<T>::insert(key, liquidity_pool);
-				Price::<T>::insert(key, price);
-			}
-		}
-	}
-
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);
@@ -165,8 +126,11 @@ pub mod pallet {
 		LiquidityAdded(BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>),
 		// Liquidity pool price changed [asset_0, asset_1, price]
 		PriceChanged(AssetIdOf<T>, AssetIdOf<T>, PriceOf<T>),
-		// Liquidity has been removed from the pool [amount_0, asset_0, amount_1, asset_1]
-		LiquidityRemoved(BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>),
+		// Liquidity has been removed from the pool [amount_0]
+		LiquidityRemoved(BalanceOf<T>),
+
+		// todo: , AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>
+		Swapped(BalanceOf<T>),
 	}
 
 	// Errors inform users that something went wrong.
@@ -178,10 +142,11 @@ pub mod pallet {
 		InvalidAmount,
 		// The asset identifier already exists.
 		AssetAlreadyExists,
+		// The pool is empty.
+		EmptyPool,
 
 		// todo:
 		NoPool,
-		InsufficientOutputAmount,
 		InsufficientBalance,
 		InvalidAsset,
 		DeadlinePassed,
@@ -267,14 +232,14 @@ pub mod pallet {
 
 			// Get liquidity pool
 			let pair = <Pair<T>>::from(asset_0, asset_1);
-			let mut pool = match <LiquidityPools<T>>::get(pair) {
+			let pool = match <LiquidityPools<T>>::get(pair) {
 				Some(pool) => Result::<LiquidityPool<T>, DispatchError>::Ok(pool), // Type couldnt be inferred
 				None => Err(DispatchError::from(Error::<T>::NoPool)),
 			}?;
 
 			// Remove liquidity from pool and emit event
-			let (amount, price) = pool.remove(amount, &liquidity_provider)?;
-			Self::deposit_event(Event::LiquidityRemoved(amount.0, pair.0, amount.1, pair.1));
+			let price = pool.remove(amount, &liquidity_provider)?;
+			Self::deposit_event(Event::LiquidityRemoved(amount));
 
 			// Finally update price oracle, emit event and return success
 			let event = Event::PriceChanged(pair.0, pair.1, price);
@@ -294,31 +259,7 @@ pub mod pallet {
 			// Ensure signed
 			let who = ensure_signed(origin)?;
 
-			// Verify the amounts
-			ensure!(amount != <BalanceOf<T>>::default(), Error::<T>::InsufficientOutputAmount);
-
-			// Verify sender has sufficient balance of asset
-			let balance = Self::balance(asset, &who);
-			ensure!(balance >= amount, Error::<T>::InsufficientBalance);
-
-			let pair = <Pair<T>>::from(asset, counter);
-			match <LiquidityPools<T>>::get(pair) {
-				None => return Err(DispatchError::from(Error::<T>::NoPool)),
-				Some(_pool) => {
-					todo!()
-				},
-			}
-
-			todo!()
-
-			// Update storage.
-			//<Something<T>>::put(something);
-
-			// Emit an event.
-			//			Self::deposit_event(Event::SomethingStored(something, who));
-
-			// Return a successful DispatchResultWithPostInfo
-			//Ok(())
+			<Self as Swap<T::AccountId>>::swap(amount, asset, counter, who)
 		}
 	}
 
@@ -329,26 +270,86 @@ pub mod pallet {
 		>>::Balance;
 
 		fn swap(
-			origin: T::AccountId,
-			amount_0: Self::Balance,
-			asset_0: Self::AssetId,
-			amount_1: Self::Balance,
-			asset_1: Self::AssetId,
+			amount: Self::Balance,
+			asset: Self::AssetId,
+			counter: Self::AssetId,
+			who: T::AccountId,
 		) -> DispatchResult {
-			todo!()
+			// Verify the amounts
+			ensure!(amount != <BalanceOf<T>>::default(), Error::<T>::InvalidAmount);
+
+			// Verify sender has sufficient balance of asset
+			let balance = Self::balance(asset, &who);
+			ensure!(balance >= amount, Error::<T>::InsufficientBalance);
+
+			// Get liquidity pool
+			let pair = <Pair<T>>::from(asset, counter);
+			let pool = match <LiquidityPools<T>>::get(pair) {
+				Some(pool) => Result::<LiquidityPool<T>, DispatchError>::Ok(pool), // Type couldnt be inferred
+				None => Err(DispatchError::from(Error::<T>::NoPool)),
+			}?;
+
+			// Remove liquidity from pool and emit event
+			let price = pool.swap((amount, asset), &who)?;
+			Self::deposit_event(Event::Swapped(amount));
+
+			// Finally update price oracle, emit event and return success
+			let event = Event::PriceChanged(pair.0, pair.1, price);
+			<Price<T>>::set((pair.0, pair.1), Some(price));
+			Self::deposit_event(event);
+			Ok(())
+		}
+	}
+
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config> {
+		/// Genesis liquidity pools: ((amount, asset), (amount, asset), liquidity provider)
+		pub liquidity_pools:
+			Vec<((BalanceOf<T>, AssetIdOf<T>), (BalanceOf<T>, AssetIdOf<T>), AccountIdOf<T>)>,
+	}
+
+	#[cfg(feature = "std")]
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			Self { liquidity_pools: Default::default() }
+		}
+	}
+
+	#[pallet::genesis_build]
+	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+		fn build(&self) {
+			for (amount_0, amount_1, liquidity_provider) in &self.liquidity_pools {
+				let pair = <Pair<T>>::from_values(amount_0.0, amount_0.1, amount_1.0, amount_1.1);
+				let key = (pair.0.asset, pair.1.asset);
+				assert!(
+					!LiquidityPools::<T>::contains_key(key),
+					"Liquidity pool id already in use"
+				);
+				assert!(pair.0.value > <BalanceOf<T>>::default(), "Amount should not be zero");
+				assert!(pair.1.value > <BalanceOf<T>>::default(), "Amount should not be zero");
+
+				// Create liquidity pool and add liquidity
+				let liquidity_pool = LiquidityPool::<T>::new(key)
+					.expect("Expect to be able to create a new liquidity pool during genesis.");
+				let price = liquidity_pool
+					.add((pair.0.value, pair.1.value), &liquidity_provider)
+					.expect("Expect to be able to add liquidity during genesis.");
+				LiquidityPools::<T>::insert(key, liquidity_pool);
+				Price::<T>::insert(key, price);
+			}
 		}
 	}
 }
 
+// todo: document
 // NOTE: Should be defined in a separate crate for loose coupling
 pub trait Swap<AccountId> {
 	type AssetId;
 	type Balance;
 	fn swap(
-		origin: AccountId,
-		amount_0: Self::Balance,
-		asset_0: Self::AssetId,
-		amount_1: Self::Balance,
-		asset_1: Self::AssetId,
+		amount: Self::Balance,
+		asset: Self::AssetId,
+		counter: Self::AssetId,
+		who: AccountId,
 	) -> DispatchResult;
 }
