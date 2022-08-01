@@ -1,10 +1,19 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 use codec::HasCompact;
-use frame_support::traits::tokens::fungibles::Inspect as FungibleInspect;
-use frame_support::traits::tokens::nonfungibles::Inspect as NonFungibleInspect;
-use frame_support::traits::tokens::nonfungibles::Mutate;
+use frame_support::{
+	dispatch::DispatchResult, pallet_prelude::*, traits::fungibles::Create,
+	traits::fungibles::Inspect, traits::fungibles::Mutate,
+	traits::tokens::fungibles::metadata::Mutate as MutateMetadata,
+	traits::tokens::fungibles::Inspect as FungibleInspect,
+	traits::tokens::nonfungibles::Inspect as NonFungibleInspect, traits::Currency,
+	traits::ReservableCurrency, traits::Time, PalletId,
+};
+use frame_system::pallet_prelude::OriginFor;
+use frame_system::pallet_prelude::*;
 pub use pallet::*;
 use pallet_dex::Swap;
+use sp_runtime::{traits::AtLeast32BitUnsigned, traits::Bounded};
+pub use types::*;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -12,6 +21,7 @@ mod benchmarking;
 mod mock;
 #[cfg(test)]
 mod tests;
+mod types;
 
 type AssetIdOf<T> =
 	<<T as Config>::Assets as FungibleInspect<<T as frame_system::Config>::AccountId>>::AssetId;
@@ -29,7 +39,6 @@ type PriceOf<T> =
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
-	use frame_support::traits::tokens::AssetId;
 	use frame_system::pallet_prelude::*;
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -56,13 +65,19 @@ pub mod pallet {
 		type CollectionId: Member + Parameter + MaxEncodedLen + Copy;
 
 		// Auto-swapping to facilitate buying/selling using any asset/token.
-		type DEX: Swap<Self::AccountId, AssetId = Self::AssetId>;
+		type DEX: Swap<
+			Self::AccountId,
+			AssetId = Self::AssetId,
+			Balance = <Self::Assets as FungibleInspect<
+				<Self as frame_system::Config>::AccountId,
+			>>::Balance,
+		>;
 
 		/// The type used to identify a unique item within a collection
 		type ItemId: Member + Parameter + MaxEncodedLen + Copy;
 
 		// Balance inspection for non-fungible assets
-		type Uniques: Mutate<
+		type Uniques: NonFungibleInspect<
 			Self::AccountId,
 			CollectionId = Self::CollectionId,
 			ItemId = Self::ItemId,
@@ -73,13 +88,10 @@ pub mod pallet {
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);
 
-	// The pallet's runtime storage items.
-	// https://docs.substrate.io/v3/runtime/storage
+	/// Stores listings based on composite key of asset pair
 	#[pallet::storage]
-	#[pallet::getter(fn something)]
-	// Learn more about declaring storage items:
-	// https://docs.substrate.io/v3/runtime/storage#declaring-storage-items
-	pub type Something<T> = StorageValue<_, u32>;
+	pub(super) type LiquidityPools<T: Config> =
+		StorageMap<_, Twox64Concat, (CollectionIdOf<T>, ItemIdOf<T>), Listing<T>>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/v3/runtime/events-and-errors
@@ -136,14 +148,20 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			collection: CollectionIdOf<T>,
 			item: ItemIdOf<T>,
+			asset: AssetIdOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			let asset = T::AssetId::default();
+			// Lookup item listing
+			let list_price = <BalanceOf<T>>::default();
 			let balance = T::Assets::balance(asset, &who);
 
+			let listing_asset = <AssetIdOf<T>>::default();
 			// todo: conclude transfer of item, auto-swapping swapping between tokens if required (provided liquidity
 			// pool exists and liquidity available)
+
+			// todo: DEX needs functionality to be able to specify minimum quantity returned
+			T::DEX::swap(list_price, listing_asset, asset, who)?;
 
 			todo!()
 		}
