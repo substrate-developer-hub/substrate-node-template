@@ -238,8 +238,6 @@ impl_runtime_apis! {
 		fn execute_block(block: Block) {
 			info!(target: "frameless", "🖼️ Entering execute_block. block: {:?}", block);
 
-			Self::initialize_block(&block.header);
-
 			for transaction in block.extrinsics {
 				match Self::apply_extrinsic(transaction) {
 					Ok(_) => {},
@@ -249,8 +247,10 @@ impl_runtime_apis! {
 				};
 			}
 
-			// In frame executive, they call final_checks, but that might be different
-			Self::finalize_block();
+			// State root check
+			let mut raw_state_root = &sp_io::storage::root(sp_storage::StateVersion::default())[..];
+			let state_root = sp_core::H256::decode(&mut raw_state_root).expect("sp-io gives a valid H256 state root")
+			assert_eq!(block.header.state_root, state_root);
 		}
 
 		fn initialize_block(header: &<Block as BlockT>::Header) {
