@@ -9,16 +9,16 @@ pub trait Swap<AccountId> {
 	/// Scalar type for representing balance of an account.
 	type Balance;
 
-	/// Performs a swap of an amount of the specified asset to the target asset.  
+	/// Performs a swap of an `amount` of the specified `asset` to the `other` asset.  
 	/// # Arguments
 	/// * `amount` - An amount to be swapped.
 	/// * `asset` - The identifier of the asset type to be swapped.
-	/// * `target` - The identifier of the target asset type.
-	/// * `who` - The identifier of the account initiating the swap.
+	/// * `other` - The identifier of the other asset type.
+	/// * `buyer` - The identifier of the account initiating the swap.
 	fn swap(
 		amount: Self::Balance,
 		asset: Self::AssetId,
-		target: Self::AssetId,
-		who: AccountId,
+		other: Self::AssetId,
+		buyer: AccountId,
 	) -> DispatchResult;
 }

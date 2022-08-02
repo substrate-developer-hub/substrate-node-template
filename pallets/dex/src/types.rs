@@ -150,11 +150,15 @@ impl<T: Config> LiquidityPool<T> {
 		&self,
 		amount: BalanceOf<T>,
 		liquidity_provider: &AccountIdOf<T>,
-	) -> DispatchResult {
+	) -> Result<((BalanceOf<T>, AssetIdOf<T>), (BalanceOf<T>, AssetIdOf<T>)), DispatchError> {
 		// Get the total number of liquidity pool tokens
 		ensure!(amount > <BalanceOf<T>>::default(), Error::<T>::InvalidAmount);
 		let total_issuance = T::Assets::total_issuance(self.id);
 		ensure!(amount > <BalanceOf<T>>::default(), Error::<T>::EmptyPool);
+		ensure!(
+			<Pallet<T>>::balance(self.id, &liquidity_provider) >= amount,
+			Error::<T>::InsufficientBalance
+		); // Ensure sufficient balance
 
 		// Determine current balances of each asset held within liquidity pool
 		let balances = (
@@ -171,7 +175,7 @@ impl<T: Config> LiquidityPool<T> {
 		<Pallet<T>>::transfer(self.pair.1, &self.account, liquidity_provider, amount_1)?;
 		T::Assets::burn_from(self.id, &liquidity_provider, amount)?;
 
-		Ok(())
+		Ok(((amount_0, self.pair.0), (amount_1, self.pair.1)))
 	}
 
 	/// Performs a swap of an amount of the specified asset type, returning the resulting amount of the corresponding

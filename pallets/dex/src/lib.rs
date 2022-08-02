@@ -29,15 +29,13 @@ type BalanceOf<T> =
 	<<T as Config>::Assets as Inspect<<T as frame_system::Config>::AccountId>>::Balance;
 type NativeBalanceOf<T> =
 	<<T as Config>::NativeCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-type RateOf<T> =
-	<<T as Config>::Assets as Inspect<<T as frame_system::Config>::AccountId>>::Balance;
 type MomentOf<T> = <<T as Config>::Time as Time>::Moment;
 
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
 
-	/// Configure the pallet by specifying the parameters and types on which it depends.
+	/// The configuration for the pallet.
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
@@ -115,60 +113,64 @@ pub mod pallet {
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);
 
-	/// Stores liquidity pools based on composite key of asset pair
+	/// Stores liquidity pools based on composite key of asset pair.
 	#[pallet::storage]
 	pub(super) type LiquidityPools<T: Config> =
 		StorageMap<_, Twox64Concat, (AssetIdOf<T>, AssetIdOf<T>), LiquidityPool<T>>;
 
-	/// Stores a counter for liquidity pool token identifiers (starting at max and counting down).
+	/// Stores a simple counter for liquidity pool token identifiers (starting at AssetIdOf<T>::max_value() and
+	/// counting down).
 	#[pallet::storage]
 	pub(super) type LiquidityPoolTokenIdGenerator<T: Config> = StorageValue<_, AssetIdOf<T>>;
 
-	/// Stores liquidity pool rates based on composite key of asset pair
-	#[pallet::storage]
-	pub(super) type Rates<T: Config> =
-		StorageMap<_, Twox64Concat, (AssetIdOf<T>, AssetIdOf<T>), RateOf<T>>;
-
-	// Pallets use events to inform users when important changes are made.
-	// https://docs.substrate.io/v3/runtime/events-and-errors
+	// The various events emitted by the pallet.
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		// Liquidity pool created [asset_0, asset_1]
+		// A new liquidity pool was created [asset_0, asset_1]
 		LiquidityPoolCreated(AssetIdOf<T>, AssetIdOf<T>),
 		// Liquidity has been added to the pool [amount_0, asset_0, amount_1, asset_1]
 		LiquidityAdded(BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>),
-		// Liquidity has been removed from the pool [amount_0]
-		LiquidityRemoved(BalanceOf<T>),
+		// Liquidity has been removed from the pool [amount_0, asset_0, amount_1, asset_1, lp_tokens]
+		LiquidityRemoved(BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>),
 		// A swap has been completed, showing the input amount of one asset and the resulting output amount of another
-		// [BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>
+		// [input_amount, input_asset, output_amount, output_asset]
 		Swapped(BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>),
 	}
 
-	// Errors inform users that something went wrong.
+	// The various errors returned by the pallet.
 	#[pallet::error]
 	pub enum Error<T> {
-		// The asset identifier already exists.
+		/// The asset identifier already exists.
 		AssetAlreadyExists,
-		// An invalid amount was provided.
-		InvalidAmount,
-		// Identical assets provided.
-		IdenticalAssets,
+		/// The specified deadline has passed.
+		DeadlinePassed,
 		// The pool is empty.
 		EmptyPool,
-		// No pool could be found.
-		NoPool,
-
-		// todo:
+		/// Identical assets provided.
+		IdenticalAssets,
+		// The current balance is insufficient.
 		InsufficientBalance,
+		/// An invalid amount was provided.
+		InvalidAmount,
+		/// The asset does not exist.
 		InvalidAsset,
-		DeadlinePassed,
+		/// No pool could be found.
+		NoPool,
 	}
 
-	// Dispatchable functions which materialize as "extrinsics"
+	// The various calls made available by the pallet (dispatchable functions which materialize as "extrinsics").
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Adds liquidity to a pool, with liquidity pool (LP) tokens being minted for the liquidity provider
+		/// Adds liquidity to a pool in the form of a pair of asset amounts, with liquidity pool (LP) tokens being
+		/// minted for the liquidity provider.
+		/// # Arguments
+		/// * `origin` - The origin of the call.
+		/// * `amount_0` - The first amount of the pair.
+		/// * `asset_0` - The identifier of the first asset of the pair.
+		/// * `amount_1` - The other amount of the pair.
+		/// * `asset_1` - The identifier of the other asset of the pair.
+		/// * `deadline` - At deadline at which the transaction is no longer valid.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn add_liquidity(
 			origin: OriginFor<T>,
@@ -186,13 +188,13 @@ pub mod pallet {
 			ensure!(
 				amount_0 != <BalanceOf<T>>::default() && amount_1 != <BalanceOf<T>>::default(),
 				Error::<T>::InvalidAmount
-			); // Check if either amount invalid
+			); // Check if either amount valid
 			ensure!(T::exists(asset_0) && T::exists(asset_1), Error::<T>::InvalidAsset); // Ensure assets exists
 			ensure!(
 				Self::balance(asset_0, &liquidity_provider) >= amount_0
 					&& Self::balance(asset_1, &liquidity_provider) >= amount_1,
 				Error::<T>::InsufficientBalance
-			); // Ensure sufficient balance
+			); // Ensure sufficient balance of both assets
 			ensure!(deadline > T::Time::now(), Error::<T>::DeadlinePassed); // Check whether deadline passed
 
 			// Create pair from supplied values
@@ -222,7 +224,14 @@ pub mod pallet {
 			Ok(())
 		}
 
-		// todo: document
+		/// Removes liquidity from a pool by redeeming liquidity pool (LP) tokens for the corresponding assets and
+		/// rewards.
+		/// # Arguments
+		/// * `origin` - The origin of the call.
+		/// * `amount` - The amount of liquidity pool tokens being redeemed.
+		/// * `asset_0` - The identifier of the first asset of the pair, used to identify the liquidity pool.
+		/// * `asset_1` - The identifier of the other asset of the pair, used to identify the liquidity pool.
+		/// * `deadline` - At deadline at which the transaction is no longer valid.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn remove_liquidity(
 			origin: OriginFor<T>,
@@ -236,8 +245,12 @@ pub mod pallet {
 
 			// Check inputs
 			ensure!(asset_0 != asset_1, Error::<T>::IdenticalAssets); // Check if same asset supplied
-			ensure!(amount != <BalanceOf<T>>::default(), Error::<T>::InvalidAmount); // Check if amount invalid
+			ensure!(amount != <BalanceOf<T>>::default(), Error::<T>::InvalidAmount); // Check if amount valid
 			ensure!(deadline > T::Time::now(), Error::<T>::DeadlinePassed); // Check whether deadline passed
+
+			// NOTE:
+			// - individual assets identifiers not checked here as we just attempt to look up pool using them below
+			// - balance checked in pool.remove()
 
 			// Get liquidity pool
 			let pair = <Pair<T>>::from(asset_0, asset_1);
@@ -247,60 +260,83 @@ pub mod pallet {
 			}?;
 
 			// Remove liquidity from pool and emit event
-			pool.remove(amount, &liquidity_provider)?;
-			Self::deposit_event(Event::LiquidityRemoved(amount));
+			let output = pool.remove(amount, &liquidity_provider)?;
+			Self::deposit_event(Event::LiquidityRemoved(
+				output.0 .0,
+				output.0 .1,
+				output.1 .0,
+				output.1 .1,
+				amount,
+			));
 			Ok(())
 		}
 
-		// todo: document
+		/// Swaps an amount of some asset for another asset.
+		/// # Arguments
+		/// * `origin` - The origin of the call.
+		/// * `amount` - The amount of the asset to be swapped.
+		/// * `asset` - The identifier of the asset being swapped.
+		/// * `other` - The identifier of the other asset being requested.
+		/// * `deadline` - At deadline at which the transaction is no longer valid.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn swap(
 			origin: OriginFor<T>,
 			amount: BalanceOf<T>,
 			asset: AssetIdOf<T>,
-			counter: AssetIdOf<T>,
+			other: AssetIdOf<T>,
+			deadline: MomentOf<T>,
 		) -> DispatchResult {
-			// Ensure signed
-			let who = ensure_signed(origin)?;
+			// Ensure signed and get the buyer
+			let buyer = ensure_signed(origin)?;
 
-			// Forward to trait implementation
-			<Self as traits::Swap<T::AccountId>>::swap(amount, asset, counter, who)
+			// Check inputs (note: remaining checked in swap implementation)
+			ensure!(deadline > T::Time::now(), Error::<T>::DeadlinePassed); // Check whether deadline passed
+
+			// Forward to trait implementation (below)
+			<Self as traits::Swap<T::AccountId>>::swap(amount, asset, other, buyer)
 		}
 	}
 
+	/// Trait for exposing asset swapping to other pallets.  
 	impl<T: Config> traits::Swap<T::AccountId> for Pallet<T> {
 		type AssetId = T::AssetId;
 		type Balance = <<T as pallet::Config>::Assets as Inspect<
 			<T as frame_system::Config>::AccountId,
 		>>::Balance;
 
+		/// Performs a swap of an `amount` of the specified `asset` to the `other` asset.  
+		/// # Arguments
+		/// * `amount` - An amount to be swapped.
+		/// * `asset` - The identifier of the asset type to be swapped.
+		/// * `other` - The identifier of the other asset type.
+		/// * `buyer` - The identifier of the account initiating the swap.
 		fn swap(
 			amount: Self::Balance,
 			asset: Self::AssetId,
-			target: Self::AssetId,
-			who: T::AccountId,
+			other: Self::AssetId,
+			buyer: T::AccountId,
 		) -> DispatchResult {
-			// Verify the amounts
-			ensure!(amount != <BalanceOf<T>>::default(), Error::<T>::InvalidAmount);
+			// Check inputs
+			ensure!(amount != <BalanceOf<T>>::default(), Error::<T>::InvalidAmount); // Verify the amounts
+			ensure!(Self::balance(asset, &buyer) >= amount, Error::<T>::InsufficientBalance); // Verify sender has sufficient balance of asset
 
-			// Verify sender has sufficient balance of asset
-			let balance = Self::balance(asset, &who);
-			ensure!(balance >= amount, Error::<T>::InsufficientBalance);
+			// NOTE: individual assets identifiers not checked here as we just attempt to look up pool using them below
 
 			// Get liquidity pool
-			let pair = <Pair<T>>::from(asset, target);
+			let pair = <Pair<T>>::from(asset, other);
 			let pool = match <LiquidityPools<T>>::get(pair) {
-				Some(pool) => Result::<LiquidityPool<T>, DispatchError>::Ok(pool), // Type couldnt be inferred
+				Some(pool) => Ok(pool),
 				None => Err(DispatchError::from(Error::<T>::NoPool)),
 			}?;
 
 			// Finally perform swap and emit event
-			let output = pool.swap((amount, asset), &who)?;
+			let output = pool.swap((amount, asset), &buyer)?;
 			Self::deposit_event(Event::Swapped(amount, asset, output.0, output.1));
 			Ok(())
 		}
 	}
 
+	/// Configuration of the DEX state at genesis
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		/// Genesis liquidity pools: ((amount, asset), (amount, asset), liquidity provider)
