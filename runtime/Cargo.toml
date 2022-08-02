@@ -52,6 +52,7 @@ hex-literal = { version = "0.3.4", optional = true }
 
 # Local Dependencies
 pallet-dex = { version = "4.0.0-dev", default-features = false, path = "../pallets/dex" }
+pallet-dex-api = { version = "4.0.0-dev", default-features = false, path = "../pallets/dex/runtime-api" }
 pallet-marketplace = { version = "4.0.0-dev", default-features = false, path = "../pallets/marketplace" }
 
 [build-dependencies]

@@ -332,7 +332,7 @@ impl pallet_dex::Config for Runtime {
 	type PalletId = DEXPalletId;
 	/// The units used when determining the swap fee (e.g. 1,000)
 	type SwapFeeUnits = ConstU128<1000>;
-	/// The value used to determine the swap fee rate (e.g. 1,000 - 997 = 0.03%)
+	/// The value used to determine the swap fee rate (e.g. 1,000 - 997 = 0.3%)
 	type SwapFeeValue = ();
 	// A provider of time
 	type Time = pallet_timestamp::Pallet<Runtime>;
@@ -642,6 +642,18 @@ impl_runtime_apis! {
 
 		fn execute_block_no_check(block: Block) -> Weight {
 			Executive::execute_block_no_check(block)
+		}
+	}
+
+	#[cfg(feature = "try-runtime")]
+	impl pallet_dex_api::DexApi<Block> for Runtime {
+		/// Calculates the output amount of asset `other`, given an input `amount` and `asset` type.
+		/// # Arguments
+		/// * `amount` - An amount to be valued.
+		/// * `asset` - The asset type of the amount.
+		/// * `other` - The required asset type.
+		fn price(amount: Balance, asset: AssetId, other: AssetId) -> Balance {
+			DEX::price(amount, asset, other).unwrap_or(Balance::default())
 		}
 	}
 }

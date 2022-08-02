@@ -1,0 +1,18 @@
+[package]
+name = "pallet-dex-api"
+version = "4.0.0-dev"
+authors = ['Substrate DevHub <https://github.com/substrate-developer-hub>']
+edition = "2021"
+license = "GPL-3.0-or-later"
+
+[dependencies]
+sp-api = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch ="polkadot-v0.9.26" }
+
+[dev-dependencies]
+serde_json = "1.0"
+
+[features]
+default = ["std"]
+std = [
+    "sp-api/std",
+]

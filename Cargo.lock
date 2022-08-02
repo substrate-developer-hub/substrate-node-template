@@ -3776,6 +3776,7 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-dex",
+ "pallet-dex-api",
  "pallet-grandpa",
  "pallet-marketplace",
  "pallet-randomness-collective-flip",
@@ -4040,6 +4041,14 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
+]
+
+[[package]]
+name = "pallet-dex-api"
+version = "4.0.0-dev"
+dependencies = [
+ "serde_json",
+ "sp-api",
 ]
 
 [[package]]
