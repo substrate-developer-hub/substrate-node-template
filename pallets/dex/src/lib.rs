@@ -29,7 +29,7 @@ type BalanceOf<T> =
 	<<T as Config>::Assets as Inspect<<T as frame_system::Config>::AccountId>>::Balance;
 type NativeBalanceOf<T> =
 	<<T as Config>::NativeCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-type PriceOf<T> =
+type RateOf<T> =
 	<<T as Config>::Assets as Inspect<<T as frame_system::Config>::AccountId>>::Balance;
 type MomentOf<T> = <<T as Config>::Time as Time>::Moment;
 
@@ -42,6 +42,7 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
 		// Identifier type for a fungible asset
 		type AssetId: AtLeast32BitUnsigned
 			+ Bounded
@@ -55,6 +56,7 @@ pub mod pallet {
 			+ Copy
 			+ MaxEncodedLen
 			+ PartialOrd;
+
 		// Balance inspection for fungible assets
 		type Assets: Create<Self::AccountId>
 			+ Mutate<
@@ -66,33 +68,43 @@ pub mod pallet {
 				AssetId = Self::AssetId,
 				Balance = NativeBalanceOf<Self>,
 			> + StorageInfoTrait;
+
 		// The minimum balance of the liquidity pool token (must be non-zero)
 		type LiquidityPoolTokenMinimumBalance: Get<
 			<Self::Assets as Inspect<<Self as frame_system::Config>::AccountId>>::Balance,
 		>;
+
 		// The number of decimals used for the liquidity pool token
 		type LiquidityPoolTokenDecimals: Get<u8>;
+
 		// The minimum level of liquidity in a pool
 		type MinimumLiquidity: Get<u32>;
+
 		// Native currency: for swaps between native token and other assets
 		// todo: explore use of ReservableCurrency for locking native funds when adding to liquidity pool
 		type NativeCurrency: ReservableCurrency<Self::AccountId>;
+
 		/// Identifier of the native asset identifier (proxy between native token and asset)
 		#[pallet::constant]
 		type NativeAssetId: Get<Self::AssetId>;
+
 		/// The DEX's pallet id, used for deriving its sovereign account
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;
+
 		/// The units used when determining the swap fee (e.g. 1,000)
 		type SwapFeeUnits: Get<
 			<Self::Assets as Inspect<<Self as frame_system::Config>::AccountId>>::Balance,
 		>;
-		/// The value used to determine the swap fee rate (e.g. 1,000 - 997 = 0.03%)
+
+		/// The value used to determine the swap fee rate (e.g. 1,000 - 997 = 0.3%)
 		type SwapFeeValue: Get<
 			<Self::Assets as Inspect<<Self as frame_system::Config>::AccountId>>::Balance,
 		>;
+
 		// A provider of time
 		type Time: Time;
+
 		// Call out to runtime to have it provide result
 		// NOTE: no easy way to determine if an asset exists via loose-coupling, so this provides a simple layer of
 		// indirection to work around this without tight coupling to the assets pallet
@@ -112,10 +124,10 @@ pub mod pallet {
 	#[pallet::storage]
 	pub(super) type LiquidityPoolTokenIdGenerator<T: Config> = StorageValue<_, AssetIdOf<T>>;
 
-	/// Stores liquidity pool price based on composite key of asset pair
+	/// Stores liquidity pool rates based on composite key of asset pair
 	#[pallet::storage]
-	pub(super) type Price<T: Config> =
-		StorageMap<_, Twox64Concat, (AssetIdOf<T>, AssetIdOf<T>), PriceOf<T>>;
+	pub(super) type Rates<T: Config> =
+		StorageMap<_, Twox64Concat, (AssetIdOf<T>, AssetIdOf<T>), RateOf<T>>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/v3/runtime/events-and-errors
@@ -126,29 +138,28 @@ pub mod pallet {
 		LiquidityPoolCreated(AssetIdOf<T>, AssetIdOf<T>),
 		// Liquidity has been added to the pool [amount_0, asset_0, amount_1, asset_1]
 		LiquidityAdded(BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>),
-		// Liquidity pool price changed [asset_0, asset_1, price]
-		PriceChanged(AssetIdOf<T>, AssetIdOf<T>, PriceOf<T>),
 		// Liquidity has been removed from the pool [amount_0]
 		LiquidityRemoved(BalanceOf<T>),
-
-		// todo: , AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>
-		Swapped(BalanceOf<T>),
+		// A swap has been completed, showing the input amount of one asset and the resulting output amount of another
+		// [BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>
+		Swapped(BalanceOf<T>, AssetIdOf<T>, BalanceOf<T>, AssetIdOf<T>),
 	}
 
 	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T> {
-		// Identical assets provided.
-		IdenticalAssets,
-		// An invalid amount was provided.
-		InvalidAmount,
 		// The asset identifier already exists.
 		AssetAlreadyExists,
+		// An invalid amount was provided.
+		InvalidAmount,
+		// Identical assets provided.
+		IdenticalAssets,
 		// The pool is empty.
 		EmptyPool,
+		// No pool could be found.
+		NoPool,
 
 		// todo:
-		NoPool,
 		InsufficientBalance,
 		InvalidAsset,
 		DeadlinePassed,
@@ -201,17 +212,13 @@ pub mod pallet {
 			}?;
 
 			// Add liquidity to pool and emit event
-			let price = pool.add((pair.0.value, pair.1.value), &liquidity_provider)?;
+			pool.add((pair.0.value, pair.1.value), &liquidity_provider)?;
 			Self::deposit_event(Event::LiquidityAdded(
 				pair.0.value,
 				pair.0.asset,
 				pair.1.value,
 				pair.1.asset,
 			));
-
-			// Finally update price oracle, emit event and return success
-			<Price<T>>::set(key, Some(price));
-			Self::deposit_event(Event::PriceChanged(pair.0.asset, pair.1.asset, price));
 			Ok(())
 		}
 
@@ -240,13 +247,8 @@ pub mod pallet {
 			}?;
 
 			// Remove liquidity from pool and emit event
-			let price = pool.remove(amount, &liquidity_provider)?;
+			pool.remove(amount, &liquidity_provider)?;
 			Self::deposit_event(Event::LiquidityRemoved(amount));
-
-			// Finally update price oracle, emit event and return success
-			let event = Event::PriceChanged(pair.0, pair.1, price);
-			<Price<T>>::set((pair.0, pair.1), Some(price));
-			Self::deposit_event(event);
 			Ok(())
 		}
 
@@ -261,6 +263,7 @@ pub mod pallet {
 			// Ensure signed
 			let who = ensure_signed(origin)?;
 
+			// Forward to trait implementation
 			<Self as traits::Swap<T::AccountId>>::swap(amount, asset, counter, who)
 		}
 	}
@@ -291,14 +294,9 @@ pub mod pallet {
 				None => Err(DispatchError::from(Error::<T>::NoPool)),
 			}?;
 
-			// Remove liquidity from pool and emit event
-			let price = pool.swap((amount, asset), &who)?;
-			Self::deposit_event(Event::Swapped(amount));
-
-			// Finally update price oracle, emit event and return success
-			let event = Event::PriceChanged(pair.0, pair.1, price);
-			<Price<T>>::set((pair.0, pair.1), Some(price));
-			Self::deposit_event(event);
+			// Finally perform swap and emit event
+			let output = pool.swap((amount, asset), &who)?;
+			Self::deposit_event(Event::Swapped(amount, asset, output.0, output.1));
 			Ok(())
 		}
 	}
@@ -331,13 +329,11 @@ pub mod pallet {
 				assert!(pair.1.value > <BalanceOf<T>>::default(), "Amount should not be zero");
 
 				// Create liquidity pool and add liquidity
-				let liquidity_pool = LiquidityPool::<T>::new(key)
+				let pool = LiquidityPool::<T>::new(key)
 					.expect("Expect to be able to create a new liquidity pool during genesis.");
-				let price = liquidity_pool
-					.add((pair.0.value, pair.1.value), &liquidity_provider)
+				pool.add((pair.0.value, pair.1.value), &liquidity_provider)
 					.expect("Expect to be able to add liquidity during genesis.");
-				LiquidityPools::<T>::insert(key, liquidity_pool);
-				Price::<T>::insert(key, price);
+				LiquidityPools::<T>::insert(key, pool);
 			}
 		}
 	}

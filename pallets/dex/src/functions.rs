@@ -14,6 +14,20 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
+	/// Calculates the output amount of asset `other`, given an input `amount` and `asset` type.
+	/// # Arguments
+	/// * `amount` - An amount to be valued.
+	/// * `asset` - The asset type of the amount.
+	/// * `other` - The required asset type.
+	pub fn price(
+		amount: BalanceOf<T>,
+		asset: AssetIdOf<T>,
+		other: AssetIdOf<T>,
+	) -> Result<BalanceOf<T>, DispatchError> {
+		ensure!(amount > <BalanceOf<T>>::default(), Error::<T>::InvalidAmount);
+		<LiquidityPool<T>>::price((amount, asset), other)
+	}
+
 	/// Transfer funds from one account into another. The default implementation uses `mint_into`
 	/// and `burn_from` and may generate unwanted events.
 	/// **Note:** this is a wrapper function for handling native and custom asset transfers.

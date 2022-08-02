@@ -1,4 +1,4 @@
-use crate::{mock::*, Error, LiquidityPools, Price};
+use crate::{mock::*, Error, LiquidityPools};
 use frame_support::{assert_noop, assert_ok};
 use sp_runtime::DispatchError;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -223,6 +223,8 @@ fn adds_liquidity() {
 		assert_eq!(Assets::balance(ASSET_0, &LIQUIDITY_PROVIDER), 80);
 		assert_eq!(Assets::balance(ASSET_1, &LIQUIDITY_PROVIDER), 90);
 		assert_eq!(Assets::balance(pool.id, &LIQUIDITY_PROVIDER), 20);
-		assert_eq!(Price::<Test>::get((ASSET_0, ASSET_1)).unwrap(), 10 * 20);
+
+		// Check price
+		todo!()
 	});
 }
