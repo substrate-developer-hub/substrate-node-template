@@ -40,8 +40,9 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use pallet_dex::traits::Price;
 
-	/// Configure the pallet by specifying the parameters and types on which it depends.
+	/// The configuration for the pallet.
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
@@ -66,12 +67,17 @@ pub mod pallet {
 
 		// Auto-swapping to facilitate buying/selling using any asset/token.
 		type DEX: Swap<
-			Self::AccountId,
-			AssetId = Self::AssetId,
-			Balance = <Self::Assets as FungibleInspect<
-				<Self as frame_system::Config>::AccountId,
-			>>::Balance,
-		>;
+				Self::AccountId,
+				AssetId = Self::AssetId,
+				Balance = <Self::Assets as FungibleInspect<
+					<Self as frame_system::Config>::AccountId,
+				>>::Balance,
+			> + Price<
+				AssetId = Self::AssetId,
+				Balance = <Self::Assets as FungibleInspect<
+					<Self as frame_system::Config>::AccountId,
+				>>::Balance,
+			>;
 
 		/// The type used to identify a unique item within a collection
 		type ItemId: Member + Parameter + MaxEncodedLen + Copy;
@@ -88,28 +94,26 @@ pub mod pallet {
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);
 
-	/// Stores listings based on composite key of asset pair
+	/// Stores listings based on composite key of asset pair.
 	#[pallet::storage]
-	pub(super) type LiquidityPools<T: Config> =
+	pub(super) type Listings<T: Config> =
 		StorageMap<_, Twox64Concat, (CollectionIdOf<T>, ItemIdOf<T>), Listing<T>>;
 
-	// Pallets use events to inform users when important changes are made.
-	// https://docs.substrate.io/v3/runtime/events-and-errors
+	// The various events emitted by the pallet.
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// Event documentation should end with an array that provides descriptive names for event
-		/// parameters. [collection, item, price]
-		Listed(CollectionIdOf<T>, ItemIdOf<T>),
+		/// An item was listed for sale. [collection, item, price, asset]
+		Listed(CollectionIdOf<T>, ItemIdOf<T>, BalanceOf<T>, AssetIdOf<T>),
+		/// An item was delisted. [collection, item, price, asset]
+		Delisted(CollectionIdOf<T>, ItemIdOf<T>),
 	}
 
-	// Errors inform users that something went wrong.
+	// The various errors returned by the pallet.
 	#[pallet::error]
 	pub enum Error<T> {}
 
-	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
-	// These functions materialize as "extrinsics", which are often compared to transactions.
-	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
+	// The various calls made available by the pallet (dispatchable functions which materialize as "extrinsics").
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// todo: document
@@ -122,9 +126,18 @@ pub mod pallet {
 			asset: AssetIdOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-
 			// todo: create/replace list of item
+			todo!()
+		}
 
+		/// todo: document
+		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		pub fn mint(
+			origin: OriginFor<T>,
+			collection: CollectionIdOf<T>,
+			asset: AssetIdOf<T>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
 			todo!()
 		}
 

@@ -148,17 +148,21 @@ fn testnet_genesis(
 				(0, get_account_id_from_seed::<sr25519::Public>("Alice"), true, 1),
 				(1, get_account_id_from_seed::<sr25519::Public>("Alice"), true, 1),
 				(2, get_account_id_from_seed::<sr25519::Public>("Alice"), true, 1),
+				(3, get_account_id_from_seed::<sr25519::Public>("Alice"), true, 1),
 			],
 			/// Genesis metadata: asset id, name, symbol, decimal places
 			metadata: vec![
 				(0, "Native Token".into(), "UNIT".into(), 18), // Proxy for native token
-				(1, "DEX Token".into(), "DEX".into(), 18),
-				(2, "EVIL 🤖 Coin".into(), "EVIL 🤖".into(), 18),
+				(1, "EVIL 🤖 Coin".into(), "EVIL 🤖".into(), 18),
+				(2, "Wrapped Ether".into(), "WETH".into(), 18),
+				(3, "Wrapped Bitcoin".into(), "WBTC".into(), 18),
 			],
 			/// Genesis accounts: id, account_id, balance
 			accounts: vec![
 				// Token 0 ignored as determined from native token
-				(2, get_account_id_from_seed::<sr25519::Public>("Alice"), 1000), // Alice has 1,000 EVIL
+				(1, get_account_id_from_seed::<sr25519::Public>("Alice"), 10_000_000), // Alice has 10,000,000 EVIL
+				(2, get_account_id_from_seed::<sr25519::Public>("Alice"), 1_000_000),  // Alice has 1,000,000 WETH
+				(3, get_account_id_from_seed::<sr25519::Public>("Alice"), 500_000),    // Alice has 1,000,000 WBTC
 			],
 		},
 		aura: AuraConfig {
@@ -166,11 +170,23 @@ fn testnet_genesis(
 		},
 		dex: DEXConfig {
 			/// Genesis liquidity pools: ((amount, asset), (amount, asset), liquidity provider)
-			liquidity_pools: vec![(
-				(100, 0),
-				(200, 2),
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-			)],
+			liquidity_pools: vec![
+				(
+					(100_000, 0),    // Native
+					(10_000_000, 1), // EVIL
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+				),
+				(
+					(100_000, 0),   // Native
+					(1_000_000, 2), // WETH
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+				),
+				(
+					(100_000, 0), // Native
+					(500_000, 3), // WBTC
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+				),
+			],
 		},
 		grandpa: GrandpaConfig {
 			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),

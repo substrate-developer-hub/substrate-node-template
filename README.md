@@ -1,333 +1,76 @@
-# PBA Final
-
-Your final assignment is worth 50% of your final grade at the Polkadot Blockchain Academy. In this assignment, you will be putting to practice the things you have learnt in the remainder of the modules of the Academy.
-
-> Module 7 (XCM) will not be covered until after the final exam’s submission due date. However, you are free to use 
-> XCM concepts in your project if you wanted to.
-
-The goal of this assignment is to have you implement something from the proposed list of projects below:
-
-* Create a simple multi-token DEX
-  * Create a simple multi-assets pallet (or use the existing one).
-  * Create a Uniswap style DEX to allow users to trustlessly exchange tokens with one another.
-    * Be sure to implement Liquidity rewards.
-    * Expose an API which acts as a “price oracle” based on the existing liquidity pools.
-  * Add a simple NFT pallet (like the kitties pallet we will do in class)
-    * Allow users to mint or buy/sell new kitties with any token.
-
-> In all projects, you are free to use everything that you have learned from Substrate, including existing pallets. 
-> Feel free to use a pallet as-is, or tweak it slightly to fit your needs.
-
-> To the contrary, when needed, make a Trait that is supposed to deliver some functionality, and do a mock 
-> implementation of it, to abstract away components that you want to interact with and are not readily available in FRAME.
-
-## Topic selection
-You are expected to share your selected topic no later than **Sunday July 31st**.
-
-If there is something you would like to implement that’s not in the proposed list, please come talk to either your TA, Shawn, or Kian for approval. Whomever approves your project will also grade your project, so keep them informed of your work.
-
-It is your responsibility to make sure you have all your questions answered by your TA or other instructors before the final deadline.
-
-## Deadline
-The submission due date is Wednesday, August 3rd at 12PM.
-
-## Submission
-Send a link to a GitHub repository containing your implementation to your TA in order to submit. In fairness to all students, please refrain from updating your code past 12 PM of the due date.
-
-## Grading rubric
-Your implementation will be reviewed for code quality and implementation details.
-
-* Implementation
-  * Correctness and accuracy of implementation
-  * Evidence of using various techniques used in class
-  * As close to production ready as possible
-* Code Quality
-  * Tests and code coverage
-  * Use of best practices and efficient code
-  * Well documented, with considerations and compromises noted
-* Bonus Points
-  * Integrate this into a working node.
-  * UX to interact with the runtime code.
-    * Value functionality over beauty.
-  * Integrate node as a working parachain on a relay chain.
-  * Working cross chain scenarios for your runtime logic using XCM and XCMP.
+# PBA Final: Multi-Token DEX
 
 ---
-# Documentation
 
-## TODO:
-- Multi-token DEX
-  - Liquidity Rewards
-  - Price Oracle based on liquidity pools
-- NFT pallet
-  - Allow users to **mint**, **buy/sell** with **any** token
-- Tests & Code Coverage
-- Considerations & Compromises noted
-- Swap UX
+## Introduction
+I selected the multi-token DEX option as I know little about defi and it therefore seemed a good opportunity to
+learn how liquidity pools work. My implementation is rather rudimentary and the scope has been limited to
+Uniswap V1, with the addition of multi-asset pools/swaps.
 
-## Pallets
-The pallets used to implement the solution are as follows, shown in a somewhat layered order. The DEX and 
-Marketplace pallets shown in bold are bespoke.
-- [Assets](https://github.com/paritytech/substrate/tree/master/frame/assets) pallet
-  - Existing FRAME pallet provided by Substrate, used to add multi-asset support
-- **[DEX](pallets/dex)**
-  - Custom pallet implementing a simple decentralised exchange
-  - Uses the [assets](https://github.com/paritytech/substrate/tree/master/frame/assets) pallet
-- [Uniques](https://github.com/paritytech/substrate/tree/master/frame/uniques) pallet
-  - Existing FRAME pallet provided by Substrate, used to add non-fungible token support
-- **[Marketplace](pallets/marketplace)**
-  - Custom pallet for implementing a simple NFT marketplace
-  - Uses the [uniques](https://github.com/paritytech/substrate/tree/master/frame/uniques) pallet
-  - Uses the [DEX](pallets/dex) pallet to auto-swap assets to facilitate buying/selling using any asset/token
+Liquidity providers can provide liquidity to liquidity pools in exchange for liquidity pool (LP) tokens, which are a
+claim on pool rewards. Each swap takes a 0.3% commission/fee, which is added to the liquidity pool. A liquidity
+provider can then redeem their LP tokens at any point to withdraw their liquidity, along with their portion of the
+rewards.
 
+The implementation is described below, which has been integrated into a working substrate node. 
+I had also hoped to create a simple swap UI using [Yew](https://yew.rs/), and explore creating a WebAssembly wrapper such as
+[eth-wasm](https://github.com/evilrobotindustries/eth-wasm), but sadly ran out of time.
 
-## Genesis Config
-The [genesis config](node/src/chain_spec.rs) of the chain contains the below:
-
-### Tokens (Assets)
-
-| ID  | Symbol  | Name                     | Decimals |
-|-----|---------|--------------------------|----------|
-| 0   | UNIT    | Native Token             | 18       |
-| 1   | DEX     | Dex Liquidity Pool Token | 18       |
-| 2   | EVIL 🤖 | EVIL 🤖 Coin             | 18       |
-
-
-
---- 
-
-# Substrate Node Template
-
-[![Try on playground](https://img.shields.io/badge/Playground-Node_Template-brightgreen?logo=Parity%20Substrate)](https://docs.substrate.io/playground/) [![Matrix](https://img.shields.io/matrix/substrate-technical:matrix.org)](https://matrix.to/#/#substrate-technical:matrix.org)
-
-A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
-
-## Getting Started
-
-Follow the steps below to get started with the Node Template, or get it up and running right from
-your browser in just a few clicks using
-the [Substrate Playground](https://docs.substrate.io/playground/) :hammer_and_wrench:
-
-### Using Nix
-
-Install [nix](https://nixos.org/) and optionally [direnv](https://github.com/direnv/direnv) and
-[lorri](https://github.com/nix-community/lorri) for a fully plug and play experience for setting up
-the development environment. To get all the correct dependencies activate direnv `direnv allow` and
-lorri `lorri shell`.
-
-### Rust Setup
-
-First, complete the [basic Rust setup instructions](./docs/rust-setup.md).
-
-### Run
-
-Use Rust's native `cargo` command to build and launch the template node:
-
-```sh
-cargo run --release -- --dev
-```
-
-### Build
-
-The `cargo run` command will perform an initial build. Use the following command to build the node
-without launching it:
-
-```sh
-cargo build --release
-```
-
-### Embedded Docs
-
-Once the project has been built, the following command can be used to explore all parameters and
-subcommands:
-
-```sh
-./target/release/node-template -h
-```
-
-## Run
-
-The provided `cargo run` command will launch a temporary node and its state will be discarded after
-you terminate the process. After the project has been built, there are other ways to launch the
-node.
-
-### Single-Node Development Chain
-
-This command will start the single-node development chain with non-persistent state:
-
-```bash
-./target/release/node-template --dev
-```
-
-Purge the development chain's state:
-
-```bash
-./target/release/node-template purge-chain --dev
-```
-
-Start the development chain with detailed logging:
-
-```bash
-RUST_BACKTRACE=1 ./target/release/node-template -ldebug --dev
-```
-
-> Development chain means that the state of our chain will be in a tmp folder while the nodes are
-> running. Also, **alice** account will be authority and sudo account as declared in the
-> [genesis state](https://github.com/substrate-developer-hub/substrate-node-template/blob/main/node/src/chain_spec.rs#L49).
-> At the same time the following accounts will be pre-funded:
-> - Alice
-> - Bob
-> - Alice//stash
-> - Bob//stash
-
-In case of being interested in maintaining the chain' state between runs a base path must be added
-so the db can be stored in the provided folder instead of a temporal one. We could use this folder
-to store different chain databases, as a different folder will be created per different chain that
-is ran. The following commands shows how to use a newly created folder as our db base path.
-
-```bash
-// Create a folder to use as the db base path
-$ mkdir my-chain-state
-
-// Use of that folder to store the chain state
-$ ./target/release/node-template --dev --base-path ./my-chain-state/
-
-// Check the folder structure created inside the base path after running the chain
-$ ls ./my-chain-state
-chains
-$ ls ./my-chain-state/chains/
-dev
-$ ls ./my-chain-state/chains/dev
-db keystore network
-```
-
-
-### Connect with Polkadot-JS Apps Front-end
-
-Once the node template is running locally, you can connect it with **Polkadot-JS Apps** front-end
-to interact with your chain. [Click
-here](https://polkadot.js.org/apps/#/explorer?rpc=ws://localhost:9944) connecting the Apps to your
-local node template.
-
-### Multi-Node Local Testnet
-
-If you want to see the multi-node consensus algorithm in action, refer to our
-[Start a Private Network tutorial](https://docs.substrate.io/tutorials/v3/private-network).
-
-## Template Structure
-
-A Substrate project such as this consists of a number of components that are spread across a few
-directories.
-
-### Node
-
-A blockchain node is an application that allows users to participate in a blockchain network.
-Substrate-based blockchain nodes expose a number of capabilities:
-
-- Networking: Substrate nodes use the [`libp2p`](https://libp2p.io/) networking stack to allow the
-  nodes in the network to communicate with one another.
-- Consensus: Blockchains must have a way to come to
-  [consensus](https://docs.substrate.io/v3/advanced/consensus) on the state of the
-  network. Substrate makes it possible to supply custom consensus engines and also ships with
-  several consensus mechanisms that have been built on top of
-  [Web3 Foundation research](https://research.web3.foundation/en/latest/polkadot/NPoS/index.html).
-- RPC Server: A remote procedure call (RPC) server is used to interact with Substrate nodes.
-
-There are several files in the `node` directory - take special note of the following:
-
-- [`chain_spec.rs`](./node/src/chain_spec.rs): A
-  [chain specification](https://docs.substrate.io/v3/runtime/chain-specs) is a
-  source code file that defines a Substrate chain's initial (genesis) state. Chain specifications
-  are useful for development and testing, and critical when architecting the launch of a
-  production chain. Take note of the `development_config` and `testnet_genesis` functions, which
-  are used to define the genesis state for the local development chain configuration. These
-  functions identify some
-  [well-known accounts](https://docs.substrate.io/v3/tools/subkey#well-known-keys)
-  and use them to configure the blockchain's initial state.
-- [`service.rs`](./node/src/service.rs): This file defines the node implementation. Take note of
-  the libraries that this file imports and the names of the functions it invokes. In particular,
-  there are references to consensus-related topics, such as the
-  [longest chain rule](https://docs.substrate.io/v3/advanced/consensus#longest-chain-rule),
-  the [Aura](https://docs.substrate.io/v3/advanced/consensus#aura) block authoring
-  mechanism and the
-  [GRANDPA](https://docs.substrate.io/v3/advanced/consensus#grandpa) finality
-  gadget.
-
-After the node has been [built](#build), refer to the embedded documentation to learn more about the
-capabilities and configuration parameters that it exposes:
-
-```shell
-./target/release/node-template --help
-```
-
-### Runtime
-
-In Substrate, the terms
-"[runtime](https://docs.substrate.io/v3/getting-started/glossary#runtime)" and
-"[state transition function](https://docs.substrate.io/v3/getting-started/glossary#state-transition-function-stf)"
-are analogous - they refer to the core logic of the blockchain that is responsible for validating
-blocks and executing the state changes they define. The Substrate project in this repository uses
-the [FRAME](https://docs.substrate.io/v3/runtime/frame) framework to construct a
-blockchain runtime. FRAME allows runtime developers to declare domain-specific logic in modules
-called "pallets". At the heart of FRAME is a helpful
-[macro language](https://docs.substrate.io/v3/runtime/macros) that makes it easy to
-create pallets and flexibly compose them to create blockchains that can address
-[a variety of needs](https://www.substrate.io/substrate-users/).
-
-Review the [FRAME runtime implementation](./runtime/src/lib.rs) included in this template and note
-the following:
-
-- This file configures several pallets to include in the runtime. Each pallet configuration is
-  defined by a code block that begins with `impl $PALLET_NAME::Config for Runtime`.
-- The pallets are composed into a single runtime by way of the
-  [`construct_runtime!`](https://crates.parity.io/frame_support/macro.construct_runtime.html)
-  macro, which is part of the core
-  [FRAME Support](https://docs.substrate.io/v3/runtime/frame#support-crate)
-  library.
+## Implementation
+The [Substrate node template](https://github.com/substrate-developer-hub/substrate-node-template) has been forked 
+and the following pallets have been added. The pallets have been integrated into a working now and the 
+runtime configuration can be found [here](runtime/src/lib.rs).
 
 ### Pallets
+The pallets used to implement the solution are as follows, shown in a somewhat layered order.
 
-The runtime in this project is constructed using many FRAME pallets that ship with the
-[core Substrate repository](https://github.com/paritytech/substrate/tree/master/frame) and a
-template pallet that is [defined in the `pallets`](./pallets/template/src/lib.rs) directory.
+#### [Assets](https://github.com/paritytech/substrate/tree/master/frame/assets) 
+  - An existing FRAME pallet provided by Substrate, used to add multi-asset support
+  - Asset `0` is created at genesis as a proxy of the native currency. Wrapper functions for balance transfers and 
+    therefore process the
 
-A FRAME pallet is comprised of a number of blockchain primitives:
+#### **[DEX](pallets/dex)**
+  - A custom pallet implementing a simple decentralised exchange
+  - Uses the [assets](https://github.com/paritytech/substrate/tree/master/frame/assets) pallet
+  - A new asset is created for each liquidity pool. The asset identifiers start at the end of the `u32` range and
+        are decremented each time via the `LiquidityPoolTokenIdGenerator` storage item. This should ideally be using 
+    hashes.
+  - Liquidity rewards are generated via fees on each call to the `LiquidityPool.swap()` method (via 
+    `LiquidityPool::calculate()`.
+  - The pallets provide two traits, which exposes pricing and swap functionality to other pallets via loose coupling:
+    - `Price`: `fn price(amount: Balance, asset: AssetId, other: AssetId) -> Result<Balance, DispatchError>`
+    - `Swap`: `fn swap(amount: Balance, asset: AssetId, other: AssetId, buyer: AccountId) -> DispatchResult;`
+  - A runtime API has also been implemented to provide price oracle functionality. The final portion of implementing a 
+    RPC client could not be completed due to trait compiler issues, but I feel like I was on the right track. See 
+    [here](node/src/rpc.rs) and [here](pallets/dex/rpc) and the end of [here](runtime/src/lib.rs).
 
-- Storage: FRAME defines a rich set of powerful
-  [storage abstractions](https://docs.substrate.io/v3/runtime/storage) that makes
-  it easy to use Substrate's efficient key-value database to manage the evolving state of a
-  blockchain.
-- Dispatchables: FRAME pallets define special types of functions that can be invoked (dispatched)
-  from outside of the runtime in order to update its state.
-- Events: Substrate uses [events and errors](https://docs.substrate.io/v3/runtime/events-and-errors)
-  to notify users of important changes in the runtime.
-- Errors: When a dispatchable fails, it returns an error.
-- Config: The `Config` configuration interface is used to define the types and parameters upon
-  which a FRAME pallet depends.
+#### [Uniques](https://github.com/paritytech/substrate/tree/master/frame/uniques)
+  - Existing FRAME pallet provided by Substrate, used to add non-fungible token support
 
-### Run in Docker
+#### **[Marketplace](pallets/marketplace)**
+  - A custom pallet for implementing a simple NFT marketplace
+  - Uses the [uniques](https://github.com/paritytech/substrate/tree/master/frame/uniques) pallet
+  - Uses the [DEX](pallets/dex) pallet to auto-swap assets to facilitate buying/selling using any asset/token. It 
+    also adds the `Price` trait bound fir future use.
 
-First, install [Docker](https://docs.docker.com/get-docker/) and
-[Docker Compose](https://docs.docker.com/compose/install/).
+### Genesis Config
+The [genesis config](node/src/chain_spec.rs) of the chain contains the below:
 
-Then run the following command to start a single node development chain.
+#### Assets
+Alice has been issued amounts of EVIL, WETH and WBTC.
 
-```bash
-./scripts/docker_run.sh
-```
+| ID  | Symbol  | Name            | Decimals |
+|-----|---------|-----------------|----------|
+| 0   | UNIT    | Native Token    | 18       |
+| 1   | EVIL 🤖 | EVIL 🤖 Coin    | 18       |
+| 2   | WETH    | Wrapped Ether   | 18       |
+| 3   | WBTC    | Wrapped Bitcoin | 18       |
 
-This command will firstly compile your code, and then start a local development network. You can
-also replace the default command
-(`cargo build --release && ./target/release/node-template --dev --ws-external`)
-by appending your own. A few useful ones are as follow.
+#### Liquidity Pools
+The following liquidity pools are created at genesis, funded exclusively by Alice.
 
-```bash
-# Run Substrate node without re-compiling
-./scripts/docker_run.sh ./target/release/node-template --dev --ws-external
-
-# Purge the local dev chain
-./scripts/docker_run.sh ./target/release/node-template purge-chain --dev
-
-# Check whether the code is compilable
-./scripts/docker_run.sh cargo check
-```
+| Pool ID       | Pair        | Liquidity                      |
+|---------------|-------------|--------------------------------|
+| 4,294,967,295 | UNIT / EVIL | 100,000 UNIT / 10,000,000 EVIL |
+| 4,294,967,294 | UNIT / WETH | 100,000 UNIT / 1,000,000 WETH  |
+| 4,294,967,293 | UNIT / WBTC | 100,000 UNIT / 500,000 WBTC    |

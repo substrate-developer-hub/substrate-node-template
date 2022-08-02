@@ -1,6 +1,6 @@
 [package]
 name = "pallet-marketplace"
-version = "4.0.0-dev"
+version = "0.1.0"
 description = "FRAME pallet template for defining custom runtime logic."
 authors = ["Substrate DevHub <https://github.com/substrate-developer-hub>"]
 homepage = "https://substrate.io/"
@@ -20,7 +20,7 @@ frame-system = { default-features = false, version = "4.0.0-dev", git = "https:/
 frame-benchmarking = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26", optional = true }
 sp-runtime = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }
 # NOTE: Should rather have a separate crate with Swap trait
-pallet-dex = { version = "4.0.0-dev", default-features = false, path = "../dex" }
+pallet-dex = { version = "0.1.0", default-features = false, path = "../dex" }
 
 [dev-dependencies]
 sp-core = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }

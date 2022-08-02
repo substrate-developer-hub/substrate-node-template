@@ -297,6 +297,26 @@ pub mod pallet {
 		}
 	}
 
+	impl<T: Config> traits::Price for Pallet<T> {
+		type AssetId = T::AssetId;
+		type Balance = <<T as pallet::Config>::Assets as Inspect<
+			<T as frame_system::Config>::AccountId,
+		>>::Balance;
+
+		/// Calculates the output amount of asset `other`, given an input `amount` and `asset` type.
+		/// # Arguments
+		/// * `amount` - An amount to be valued.
+		/// * `asset` - The asset type of the amount.
+		/// * `other` - The required asset type.
+		fn price(
+			amount: Self::Balance,
+			asset: Self::AssetId,
+			other: Self::AssetId,
+		) -> Result<Self::Balance, DispatchError> {
+			<LiquidityPool<T>>::price((amount, asset), other)
+		}
+	}
+
 	/// Trait for exposing asset swapping to other pallets.  
 	impl<T: Config> traits::Swap<T::AccountId> for Pallet<T> {
 		type AssetId = T::AssetId;

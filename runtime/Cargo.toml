@@ -51,9 +51,9 @@ frame-system-benchmarking = { version = "4.0.0-dev", default-features = false, g
 hex-literal = { version = "0.3.4", optional = true }
 
 # Local Dependencies
-pallet-dex = { version = "4.0.0-dev", default-features = false, path = "../pallets/dex" }
-pallet-dex-api = { version = "4.0.0-dev", default-features = false, path = "../pallets/dex/runtime-api" }
-pallet-marketplace = { version = "4.0.0-dev", default-features = false, path = "../pallets/marketplace" }
+pallet-dex = { version = "0.1.0", default-features = false, path = "../pallets/dex" }
+pallet-dex-runtime-api = { version = "0.1.0", default-features = false, path = "../pallets/dex/runtime-api" }
+pallet-marketplace = { version = "0.1.0", default-features = false, path = "../pallets/marketplace" }
 
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.26" }

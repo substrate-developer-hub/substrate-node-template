@@ -1,7 +1,4 @@
 License: Unlicense
 
-Implements a simple DEX based on https://uniswap.org/whitepaper.pdf
-
-Notes:
-- 0: Native token
-- 1: DEX token
+Implements a simple DEX based on [Uniswap V1](https://hackmd.io/@HaydenAdams/HJ9jLsfTz), along with multi-token 
+support.

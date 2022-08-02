@@ -2,6 +2,7 @@
 members = [
     "node",
     "pallets/dex",
+    "pallets/dex/rpc",
     "pallets/dex/runtime-api",
     "pallets/marketplace",
     "runtime",

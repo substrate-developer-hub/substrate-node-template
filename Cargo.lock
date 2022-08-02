@@ -3728,6 +3728,7 @@ dependencies = [
  "frame-system",
  "jsonrpsee",
  "node-template-runtime",
+ "pallet-dex-rpc",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "sc-basic-authorship",
@@ -3776,7 +3777,7 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-dex",
- "pallet-dex-api",
+ "pallet-dex-runtime-api",
  "pallet-grandpa",
  "pallet-marketplace",
  "pallet-randomness-collective-flip",
@@ -4028,7 +4029,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-dex"
-version = "4.0.0-dev"
+version = "0.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -4044,11 +4045,26 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-dex-api"
-version = "4.0.0-dev"
+name = "pallet-dex-rpc"
+version = "0.1.0"
 dependencies = [
+ "jsonrpsee",
+ "pallet-dex-runtime-api",
+ "parity-scale-codec",
+ "sp-api",
+ "sp-core",
+ "sp-rpc",
+ "sp-runtime",
+]
+
+[[package]]
+name = "pallet-dex-runtime-api"
+version = "0.1.0"
+dependencies = [
+ "parity-scale-codec",
  "serde_json",
  "sp-api",
+ "sp-runtime",
 ]
 
 [[package]]
@@ -4076,7 +4092,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-marketplace"
-version = "4.0.0-dev"
+version = "0.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-support",

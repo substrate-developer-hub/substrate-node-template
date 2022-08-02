@@ -18,19 +18,22 @@ pub struct LiquidityPool<T: Config> {
 }
 
 impl<T: Config> LiquidityPool<T> {
-	// todo: document
+	/// Creates a new liquidity pool based on the (ordered) `pair` of asset identifiers.  
+	/// # Arguments
+	/// * `pair` - The pair of asset identifiers.
 	pub(super) fn new(pair: (AssetIdOf<T>, AssetIdOf<T>)) -> Result<Self, DispatchError> {
 		let id = Self::create(pair)?;
 		let account = T::PalletId::get().into_sub_account_truncating(id);
 		Ok(Self { id, pair, account })
 	}
 
-	// Create asset for liquidity pool token
-	// todo: document
+	/// Creates the asset for the liquidity pool token (based on ordered 'pair')
 	fn create(pair: (AssetIdOf<T>, AssetIdOf<T>)) -> Result<AssetIdOf<T>, DispatchError> {
 		// Generate asset identifier of liquidity pool token
-		// NOTE: Currently storing identifiers of liquidity pool tokens at end of u32 range due to time constraints
-		// todo: ideally use a hash for asset id to make this easier, but seems assets pallet has a trait bound not provided by default hash type
+		// NOTE:
+		//  - Currently storing identifiers of liquidity pool tokens at end of u32 range due to time constraints
+		//  - This should ideally use a hash for asset id to make this easier, but seems assets pallet has a trait
+		// bound not provided by default hash type
 		let id = <LiquidityPoolTokenIdGenerator<T>>::get()
 			.unwrap_or_else(|| AssetIdOf::<T>::max_value());
 
@@ -53,7 +56,11 @@ impl<T: Config> LiquidityPool<T> {
 		Ok(id)
 	}
 
-	// todo: document
+	/// Adds liquidity to the pool.  
+	/// # Arguments
+	/// * `amount` - An ordered pair of balances.
+	/// * `liquidity_provider` - The provider of the liquidity, which will receive liquidity tokens representing
+	/// their share.
 	// Simplified version of https://github.com/Uniswap/v1-contracts/blob/c10c08d81d6114f694baa8bd32f555a40f6264da/contracts/uniswap_exchange.vy#L48
 	pub(super) fn add(
 		&self,
@@ -108,6 +115,9 @@ impl<T: Config> LiquidityPool<T> {
 		numerator / denominator
 	}
 
+	/// Calculates the resulting output amount of the other asset in the pair, given an `amount` (and asset).   
+	/// # Arguments
+	/// * `amount` - An amount to be traded.
 	fn calculate_price(&self, amount: (BalanceOf<T>, AssetIdOf<T>)) -> BalanceOf<T> {
 		// Determine other asset from pair
 		let (input_amount, asset) = amount;
