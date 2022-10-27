@@ -1,19 +1,21 @@
-# This is the build stage for Polkadot. Here we create the binary in a temporary image.
+# This is an example build stage for the node template. Here we create the binary in a temporary image.
+
+# This is a base image to build substrate nodes
 FROM docker.io/paritytech/ci-linux:production as builder
 
 WORKDIR /node-template
 COPY . .
 RUN cargo build --locked --release
 
-# This is the 2nd stage: a very small image where we copy the Polkadot binary."
+# This is the 2nd stage: a very small image where we copy the binary."
 FROM docker.io/library/ubuntu:20.04
-LABEL description="Multistage Docker image for NODE_TEMPLATE" \
+LABEL description="Multistage Docker image for Substrate Node Template" \
   image.type="builder" \
-  image.authors="support@onfinality.io" \
-  image.vendor="OnFinality" \
-  image.description="Multistage Docker image for NODE_TEMPLATE" \
-  image.source="https://github.com/OnFinality-io/substrate-node-template" \
-  image.documentation="https://github.com/OnFinality-io/substrate-node-template"
+  image.authors="you@email.com" \
+  image.vendor="Substrate Developer Hub" \
+  image.description="Multistage Docker image for Substrate Node Template" \
+  image.source="https://github.com/substrate-developer-hub/substrate-node-template" \
+  image.documentation="https://github.com/substrate-developer-hub/substrate-node-template"
 
 # Copy the node binary.
 COPY --from=builder /node-template/target/release/node-template /usr/local/bin
