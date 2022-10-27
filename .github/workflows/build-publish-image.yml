@@ -39,7 +39,7 @@ jobs:
       # Get the commit short hash, to use as the rev
       - name: Calculate rev hash
         id: rev
-        run: echo "value=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT"
+        run: echo "value=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       # Build and push 2 images, One with the version tag and the other with latest tag
       - name: Build and push Docker images
