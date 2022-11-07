@@ -2,6 +2,7 @@
 # You need to add the following secrets to your GitHub Repository or Organization to make this work
 # - DOCKER_USERNAME: The username of the DockerHub account. E.g. parity
 # - DOCKER_TOKEN: Access token for DockerHub, see https://docs.docker.com/docker-hub/access-tokens/. E.g. VVVVVVVV-WWWW-XXXXXX-YYYY-ZZZZZZZZZ
+# The following are setup as an environment variable below
 # - DOCKER_REPO: The unique name of the DockerHub repository. E.g. parity/polkadot
 
 name: Build & Publish Docker Image
@@ -14,6 +15,10 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+  
+# Set an environment variable (that can be overriden) for the Docker Repo
+env:
+  DOCKER_REPO: parity/polkadot
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -45,4 +50,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_REPO }}:rev-${{ steps.rev.outputs.value }}, ${{ secrets.DOCKER_REPO }}:latest
+          tags: ${{ env.DOCKER_REPO }}:rev-${{ steps.rev.outputs.value }}, ${{ secrets.DOCKER_REPO }}:latest
