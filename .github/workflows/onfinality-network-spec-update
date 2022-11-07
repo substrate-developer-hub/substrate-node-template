@@ -7,7 +7,7 @@
 # - ONF_ACCESS_KEY: The unique access key to OnFinality
 # - ONF_SECRET_KEY: A secret access key to OnFinality
 # - ONF_WORKSPACE_ID: The workspace ID of your OnFinality workspace, you can retrieve this from your workspace settings. E.g. 6683212593101979648
-# - ONF_NETWORK_KEY: The workspace ID of your OnFinality workspace, you can retrieve this from your workspace settings. E.g. 6683212593101979648
+# - ONF_NETWORK_KEY: The network ID of your OnFinality workspace, you can retrieve this from the URL when viewing the network. E.g. f987705c-fe75-4069-99b4-77d62c4fe58k
 
 name: Build & Publish Docker Image
 
