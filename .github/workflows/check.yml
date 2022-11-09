@@ -4,9 +4,9 @@ name: Check Set-Up & Build
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Set-Up
-        run: sudo apt install -y git clang curl libssl-dev llvm libudev-dev
+        run: sudo apt install -y git clang curl libssl-dev llvm libudev-dev protobuf-compiler
 
       - name: Install Rustup
         run: |
