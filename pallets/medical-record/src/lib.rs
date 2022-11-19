@@ -29,6 +29,12 @@ pub mod pallet {
 		type MaxRecordLength: Get<u32>;
 	}
 
+	#[derive(Decode, Encode, MaxEncodedLen, Clone, PartialEq, Eq, Debug, TypeInfo)]
+	pub enum UserType {
+		Patient,
+		Doctor,
+	}
+
 	type RecordId = u32;
 	type RecordContent<T> = BoundedVec<u8, <T as Config>::MaxRecordContentLength>;
 	type Signature<T> = BoundedVec<u8, <T as Config>::SignatureLength>;
@@ -41,16 +47,22 @@ pub mod pallet {
 	}
 
 	#[pallet::storage]
-	#[pallet::getter(fn patient_records)]
-	pub type PatientRecords<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, BoundedVec<Record<T>, T::MaxRecordLength>>;
+	#[pallet::getter(fn records)]
+	pub type Records<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		Blake2_128Concat,
+		UserType,
+		BoundedVec<Record<T>, T::MaxRecordLength>,
+	>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/main-docs/build/events-errors/
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		PatientAccountCreated(T::AccountId),
+		PatientAccountCreated(T::AccountId, UserType),
 		DoctorAccountCreated(T::AccountId),
 		PatientRecordsUpdated(u32, T::AccountId),
 		DoctorRecordsUpdated(u32, T::AccountId),
@@ -75,17 +87,18 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight(10_000)]
-		pub fn create_patient_account(origin: OriginFor<T>) -> DispatchResult {
+		pub fn create_account(origin: OriginFor<T>, user_type: UserType) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			match Self::patient_records(&who) {
+			match Self::records(&who, &user_type) {
 				Some(_) => Err(Error::<T>::AccountAlreadyExist.into()),
 				None => {
-					<PatientRecords<T>>::insert(
+					<Records<T>>::insert(
 						who.clone(),
+						user_type.clone(),
 						BoundedVec::with_bounded_capacity(T::MaxRecordLength::get() as usize),
 					);
-					Self::deposit_event(Event::PatientAccountCreated(who));
+					Self::deposit_event(Event::PatientAccountCreated(who, user_type));
 					Ok(())
 				},
 			}

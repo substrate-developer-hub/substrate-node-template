@@ -1,17 +1,18 @@
-use crate::{mock::*, Error};
+use crate::{mock::*, Error, UserType};
 use frame_support::{assert_noop, assert_ok};
 use frame_system::RawOrigin;
 
 #[test]
-fn patient_can_create_account() {
+fn user_can_create_account() {
 	new_test_ext().execute_with(|| {
 		let o = RuntimeOrigin::signed(1);
 
-		assert_ok!(MedicalRecord::create_patient_account(o.clone()));
-		let mb_raw_origin: Result<RawOrigin<u64>, RuntimeOrigin> = o.clone().into();
-		match mb_raw_origin.ok().unwrap() {
+		assert_ok!(MedicalRecord::create_account(o.clone(), UserType::Patient));
+		let ro: Result<RawOrigin<u64>, RuntimeOrigin> = o.clone().into();
+
+		match ro.ok().unwrap() {
 			RawOrigin::Signed(account_id) => {
-				let account_created = match MedicalRecord::patient_records(account_id) {
+				let account_created = match MedicalRecord::records(account_id, UserType::Patient) {
 					None => false,
 					Some(_) => true,
 				};
@@ -20,6 +21,9 @@ fn patient_can_create_account() {
 			_ => (),
 		}
 
-		assert_noop!(MedicalRecord::create_patient_account(o), Error::<Test>::AccountAlreadyExist);
+		assert_noop!(
+			MedicalRecord::create_account(o, UserType::Patient),
+			Error::<Test>::AccountAlreadyExist
+		);
 	});
 }
