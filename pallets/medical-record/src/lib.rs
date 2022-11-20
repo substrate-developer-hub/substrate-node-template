@@ -39,7 +39,7 @@ pub mod pallet {
 	type RecordContent<T> = BoundedVec<u8, <T as Config>::MaxRecordContentLength>;
 	type Signature<T> = BoundedVec<u8, <T as Config>::SignatureLength>;
 
-	#[derive(Decode, Encode, MaxEncodedLen, TypeInfo)]
+	#[derive(Decode, Encode, Debug, MaxEncodedLen, TypeInfo)]
 	#[scale_info(skip_type_params(T))]
 	pub enum Record<T: Config> {
 		VerifiedRecord(RecordId, T::AccountId, RecordContent<T>, Signature<T>),
@@ -62,11 +62,7 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		PatientAccountCreated(T::AccountId, UserType),
-		DoctorAccountCreated(T::AccountId),
-		PatientRecordsUpdated(u32, T::AccountId),
-		DoctorRecordsUpdated(u32, T::AccountId),
-		PatientRecordVerified(u32),
+		AccountCreated(T::AccountId, UserType),
 	}
 
 	// Errors inform users that something went wrong.
@@ -74,11 +70,8 @@ pub mod pallet {
 	pub enum Error<T> {
 		AccountNotFound,
 		AccountAlreadyExist,
-		InvalidRecordId,
-		/// Error names should be descriptive.
-		NoneValue,
-		/// Errors should have helpful documentation associated with them.
-		StorageOverflow,
+		InvalidArgument,
+		ExceedsMaxRecordLength,
 	}
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
@@ -98,10 +91,38 @@ pub mod pallet {
 						user_type.clone(),
 						BoundedVec::with_bounded_capacity(T::MaxRecordLength::get() as usize),
 					);
-					Self::deposit_event(Event::PatientAccountCreated(who, user_type));
+					Self::deposit_event(Event::AccountCreated(who, user_type));
 					Ok(())
 				},
 			}
+		}
+
+		#[pallet::weight(10_000)]
+		pub fn patient_adds_record(
+			origin: OriginFor<T>,
+			record_content: RecordContent<T>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			let add_record = |mb_record: &mut Option<BoundedVec<Record<_>, _>>| match mb_record {
+				None => Err(Error::<T>::AccountNotFound),
+				Some(patient_records) => {
+					let record_id = patient_records.len() as u32 + 1;
+					patient_records
+						.try_push(Record::<T>::UnverifiedRecord(
+							record_id,
+							who.clone(),
+							record_content,
+						))
+						.map_err(|_| Error::<T>::ExceedsMaxRecordLength)?;
+
+					Ok(())
+				},
+			};
+
+			<Records<T>>::mutate(&who, &UserType::Patient, add_record)?;
+
+			Ok(())
 		}
 	}
 }

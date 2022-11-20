@@ -51,9 +51,9 @@ impl system::Config for Test {
 
 impl pallet_medical_record::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
-	type MaxRecordContentLength = ConstU32<10>;
-	type SignatureLength = ConstU32<4>;
-	type MaxRecordLength = ConstU32<10>;
+	type MaxRecordContentLength = ConstU32<1>;
+	type SignatureLength = ConstU32<1>;
+	type MaxRecordLength = ConstU32<1>;
 }
 
 // Build genesis storage according to the mock runtime.
