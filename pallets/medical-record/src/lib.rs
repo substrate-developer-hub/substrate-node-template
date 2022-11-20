@@ -39,7 +39,7 @@ pub mod pallet {
 	type RecordContent<T> = BoundedVec<u8, <T as Config>::MaxRecordContentLength>;
 	type Signature<T> = BoundedVec<u8, <T as Config>::SignatureLength>;
 
-	#[derive(Decode, Encode, Debug, MaxEncodedLen, TypeInfo)]
+	#[derive(Decode, Encode, Debug, Eq, PartialEq, MaxEncodedLen, TypeInfo)]
 	#[scale_info(skip_type_params(T))]
 	pub enum Record<T: Config> {
 		VerifiedRecord(RecordId, T::AccountId, RecordContent<T>, Signature<T>),
@@ -103,7 +103,6 @@ pub mod pallet {
 			record_content: RecordContent<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-
 			let add_record = |mb_record: &mut Option<BoundedVec<Record<_>, _>>| match mb_record {
 				None => Err(Error::<T>::AccountNotFound),
 				Some(patient_records) => {
@@ -114,13 +113,43 @@ pub mod pallet {
 							who.clone(),
 							record_content,
 						))
-						.map_err(|_| Error::<T>::ExceedsMaxRecordLength)?;
-
-					Ok(())
+						.map_err(|_| Error::<T>::ExceedsMaxRecordLength)
 				},
 			};
 
 			<Records<T>>::mutate(&who, &UserType::Patient, add_record)?;
+
+			Ok(())
+		}
+
+		#[pallet::weight(10_000)]
+		pub fn doctor_adds_record(
+			origin: OriginFor<T>,
+			patient_account_id: T::AccountId,
+			record_content: RecordContent<T>,
+			signature: Signature<T>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			ensure!(
+				<Records<T>>::contains_key(&who, &UserType::Doctor),
+				Error::<T>::AccountNotFound
+			);
+			let add_record = |mb_record: &mut Option<BoundedVec<Record<_>, _>>| match mb_record {
+				None => Err(Error::<T>::AccountNotFound),
+				Some(patient_records) => {
+					let record_id = patient_records.len() as u32 + 1;
+					patient_records
+						.try_push(Record::<T>::VerifiedRecord(
+							record_id,
+							who.clone(),
+							record_content,
+							signature,
+						))
+						.map_err(|_| Error::<T>::ExceedsMaxRecordLength)
+				},
+			};
+
+			<Records<T>>::mutate(&patient_account_id, &UserType::Patient, add_record)?;
 
 			Ok(())
 		}
