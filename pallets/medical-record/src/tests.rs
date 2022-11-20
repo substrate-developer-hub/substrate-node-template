@@ -24,6 +24,10 @@ fn user_can_create_account() {
 fn patient_can_add_record() {
 	new_test_ext().execute_with(|| {
 		let o = RuntimeOrigin::signed(1);
+		assert_noop!(
+			MedicalRecord::patient_adds_record(o.clone(), BoundedVec::with_max_capacity()),
+			Error::<Test>::AccountNotFound
+		);
 		assert_ok!(MedicalRecord::create_account(o.clone(), UserType::Patient));
 		let max_record_len = <MockMaxRecordLength as Get<u32>>::get() as usize;
 		for _ in 0..max_record_len {
@@ -35,7 +39,7 @@ fn patient_can_add_record() {
 
 		let records =
 			MedicalRecord::records(origin_to_account_id(o.clone()), UserType::Patient).unwrap();
-		assert_eq!(records.len(), 3);
+		assert_eq!(records.len(), max_record_len);
 		assert_eq!(
 			records
 				.into_iter()
@@ -45,20 +49,53 @@ fn patient_can_add_record() {
 				})
 				.collect::<Vec<_>>()
 				.len(),
-			max_record_len as usize
+			max_record_len
 		);
 
 		assert_noop!(
 			MedicalRecord::patient_adds_record(o.clone(), BoundedVec::with_max_capacity()),
 			Error::<Test>::ExceedsMaxRecordLength
 		);
+	});
+}
+
+#[test]
+fn doctor_can_add_record_for_patient() {
+	new_test_ext().execute_with(|| {
+		let doctor = RuntimeOrigin::signed(1);
+		let patient = RuntimeOrigin::signed(2);
+		assert_ok!(MedicalRecord::create_account(doctor.clone(), UserType::Doctor));
+		assert_ok!(MedicalRecord::create_account(patient.clone(), UserType::Patient));
+
+		let max_record_len = <MockMaxRecordLength as Get<u32>>::get() as usize;
+		for _ in 0..max_record_len {
+			assert_ok!(MedicalRecord::doctor_adds_record(
+				doctor.clone(),
+				origin_to_account_id(patient.clone()),
+				BoundedVec::with_max_capacity(),
+				BoundedVec::with_max_capacity(),
+			));
+		}
+
+		let patient_records =
+			MedicalRecord::records(origin_to_account_id(patient.clone()), UserType::Patient)
+				.unwrap();
+		assert_eq!(patient_records.len(), max_record_len);
+		assert_eq!(
+			patient_records
+				.into_iter()
+				.filter(|r| match r {
+					Record::VerifiedRecord(_, _, _, _) => true,
+					_ => false,
+				})
+				.collect::<Vec<_>>()
+				.len(),
+			max_record_len
+		);
 
 		assert_noop!(
-			MedicalRecord::patient_adds_record(
-				RuntimeOrigin::signed(2),
-				BoundedVec::with_max_capacity()
-			),
-			Error::<Test>::AccountNotFound
+			MedicalRecord::patient_adds_record(patient.clone(), BoundedVec::with_max_capacity()),
+			Error::<Test>::ExceedsMaxRecordLength
 		);
 	});
 }
