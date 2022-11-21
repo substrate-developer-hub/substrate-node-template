@@ -37,8 +37,8 @@ fn patient_can_add_record() {
 			));
 		}
 
-		let records =
-			MedicalRecord::records(origin_to_account_id(o.clone()), UserType::Patient).unwrap();
+		let records = MedicalRecord::records(origin_to_account_id(o.clone()), UserType::Patient)
+			.expect("The record should exist");
 		assert_eq!(records.len(), max_record_len);
 		assert_eq!(
 			records
@@ -79,7 +79,7 @@ fn doctor_can_add_record_for_patient() {
 
 		let patient_records =
 			MedicalRecord::records(origin_to_account_id(patient.clone()), UserType::Patient)
-				.unwrap();
+				.expect("the record should exist");
 		assert_eq!(patient_records.len(), max_record_len);
 		assert_eq!(
 			patient_records
@@ -102,7 +102,7 @@ fn doctor_can_add_record_for_patient() {
 
 fn origin_to_account_id(o: RuntimeOrigin) -> u64 {
 	let ro: Result<RawOrigin<u64>, RuntimeOrigin> = o.clone().into();
-	match ro.ok().unwrap() {
+	match ro.ok().expect("Assume remote origin is signed") {
 		RawOrigin::Signed(account_id) => account_id,
 		_ => unreachable!(),
 	}
