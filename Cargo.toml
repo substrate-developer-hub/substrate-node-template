@@ -3,6 +3,7 @@ members = [
     "node",
     "pallets/template",
     "pallets/medical-record",
+    "pallets/medical-encryption/",
     "runtime",
 ]
 [profile.release]
