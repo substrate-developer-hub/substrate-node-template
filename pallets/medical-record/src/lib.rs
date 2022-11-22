@@ -153,5 +153,32 @@ pub mod pallet {
 
 			Ok(())
 		}
+		#[pallet::weight(10_000)]
+		pub fn doctor_verifies_record(
+			origin: OriginFor<T>,
+			patient_account_id: T::AccountId,
+			record_id: u32,
+			signature: Signature<T>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin.clone())?;
+			ensure!(
+				<Records<T>>::contains_key(&who, &UserType::Doctor),
+				Error::<T>::AccountNotFound
+			);
+			let patient_records = <Records<T>>::get(&patient_account_id, &UserType::Patient)
+				.ok_or(Error::<T>::AccountNotFound)?;
+			ensure!((record_id as usize) < patient_records.len(), Error::<T>::InvalidArgument);
+			let old_unverified_record = &patient_records[(record_id as usize)];
+			if let Record::UnverifiedRecord(_, _, content_to_verify) = old_unverified_record {
+				Self::doctor_adds_record(
+					origin,
+					patient_account_id,
+					content_to_verify.clone(),
+					signature,
+				)?;
+			}
+
+			Ok(())
+		}
 	}
 }
