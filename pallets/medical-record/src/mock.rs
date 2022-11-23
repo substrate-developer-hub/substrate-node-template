@@ -11,7 +11,7 @@ type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 type MockMaxRecordContentLength = ConstU32<1>;
-type MockSignatureLength = ConstU32<1>;
+type MockSignatureLength = ConstU32<3>;
 pub type MockMaxRecordLength = ConstU32<3>;
 
 // Configure a mock runtime to test the pallet.

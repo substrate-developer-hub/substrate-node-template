@@ -1,5 +1,7 @@
 use crate::{mock::*, Error, Record, UserType};
-use frame_support::{assert_noop, assert_ok, BoundedVec};
+use frame_support::{assert_noop, assert_ok, bounded_vec, BoundedVec};
+use sp_core::ConstU32;
+
 use frame_system::RawOrigin;
 use sp_core::Get;
 
@@ -96,6 +98,44 @@ fn doctor_can_add_record_for_patient() {
 		assert_noop!(
 			MedicalRecord::patient_adds_record(patient.clone(), BoundedVec::with_max_capacity()),
 			Error::<Test>::ExceedsMaxRecordLength
+		);
+	});
+}
+
+#[test]
+fn doctor_can_transform_unverified_record() {
+	new_test_ext().execute_with(|| {
+		let doctor = RuntimeOrigin::signed(1);
+		let patient = RuntimeOrigin::signed(2);
+		assert_ok!(MedicalRecord::create_account(doctor.clone(), UserType::Doctor));
+		assert_ok!(MedicalRecord::create_account(patient.clone(), UserType::Patient));
+
+		// Patient submits a record
+		assert_ok!(MedicalRecord::patient_adds_record(
+			patient.clone(),
+			BoundedVec::with_max_capacity()
+		));
+		// Doctor verifies it
+		let signature: BoundedVec<u8, ConstU32<3>> = bounded_vec![];
+		assert_ok!(MedicalRecord::doctor_verifies_record(
+			doctor.clone(),
+			origin_to_account_id(patient.clone()),
+			0,
+			signature
+		));
+		let verified_records =
+			MedicalRecord::records(origin_to_account_id(patient.clone()), UserType::Patient)
+				.expect("Record should verified");
+		assert_eq!(
+			verified_records
+				.into_iter()
+				.filter(|r| match r {
+					Record::VerifiedRecord(_, _, _, _) => true,
+					_ => false,
+				})
+				.collect::<Vec<_>>()
+				.len(),
+			1
 		);
 	});
 }

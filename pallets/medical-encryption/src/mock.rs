@@ -1,7 +1,7 @@
-use crate as pallet_template;
+use crate as pallet_medical_encryption;
 use frame_support::traits::{ConstU16, ConstU64};
 use frame_system as system;
-use sp_core::H256;
+use sp_core::{ConstU32, H256};
 use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
@@ -9,6 +9,10 @@ use sp_runtime::{
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
+
+type MockMaxRecordContentLength = ConstU32<1>;
+type MockSignatureLength = ConstU32<1>;
+pub type MockMaxRecordLength = ConstU32<3>;
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
@@ -18,7 +22,8 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system,
-		TemplateModule: pallet_template,
+		MedicalRecord: pallet_medical_record,
+		MedicalEncryption: pallet_medical_encryption,
 	}
 );
 
@@ -49,8 +54,15 @@ impl system::Config for Test {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
-impl pallet_template::Config for Test {
+impl pallet_medical_encryption::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
+}
+
+impl pallet_medical_record::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+	type MaxRecordContentLength = MockMaxRecordContentLength;
+	type SignatureLength = MockSignatureLength;
+	type MaxRecordLength = MockMaxRecordLength;
 }
 
 // Build genesis storage according to the mock runtime.
