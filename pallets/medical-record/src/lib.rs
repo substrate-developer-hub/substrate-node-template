@@ -42,7 +42,7 @@ pub mod pallet {
 	#[derive(Decode, Encode, Debug, Eq, PartialEq, MaxEncodedLen, TypeInfo)]
 	#[scale_info(skip_type_params(T))]
 	pub enum Record<T: Config> {
-		VerifiedRecord(RecordId, T::AccountId, RecordContent<T>, Signature<T>),
+		VerifiedRecord(RecordId, T::AccountId, RecordContent<T>),
 		UnverifiedRecord(RecordId, T::AccountId, RecordContent<T>),
 	}
 
@@ -127,7 +127,6 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			patient_account_id: T::AccountId,
 			record_content: RecordContent<T>,
-			signature: Signature<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			ensure!(
@@ -143,7 +142,6 @@ pub mod pallet {
 							record_id,
 							who.clone(),
 							record_content,
-							signature,
 						))
 						.map_err(|_| Error::<T>::ExceedsMaxRecordLength)
 				},
@@ -158,7 +156,6 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			patient_account_id: T::AccountId,
 			record_id: u32,
-			signature: Signature<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin.clone())?;
 			ensure!(
@@ -174,7 +171,6 @@ pub mod pallet {
 					origin,
 					patient_account_id,
 					content_to_verify.clone(),
-					signature,
 				)?;
 			}
 
