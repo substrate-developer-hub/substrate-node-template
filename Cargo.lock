@@ -3716,6 +3716,7 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-grandpa",
+ "pallet-medical-encryption",
  "pallet-medical-record",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
@@ -3951,12 +3952,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-medical-encryption"
+version = "4.0.0-dev"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-medical-record"
 version = "4.0.0-dev"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "pallet-medical-encryption",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
