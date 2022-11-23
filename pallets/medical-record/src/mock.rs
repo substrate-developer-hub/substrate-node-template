@@ -1,6 +1,7 @@
 use crate as pallet_medical_record;
 use frame_support::traits::{ConstU16, ConstU64};
 use frame_system as system;
+use pallet_medical_encryption;
 use sp_core::{ConstU32, H256};
 use sp_runtime::{
 	testing::Header,
@@ -23,6 +24,7 @@ frame_support::construct_runtime!(
 	{
 		System: frame_system,
 		MedicalRecord: pallet_medical_record,
+		MedicalEncryption: pallet_medical_encryption,
 	}
 );
 
@@ -58,6 +60,10 @@ impl pallet_medical_record::Config for Test {
 	type MaxRecordContentLength = MockMaxRecordContentLength;
 	type SignatureLength = MockSignatureLength;
 	type MaxRecordLength = MockMaxRecordLength;
+}
+
+impl pallet_medical_encryption::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
 }
 
 // Build genesis storage according to the mock runtime.
