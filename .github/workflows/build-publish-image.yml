@@ -50,4 +50,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.DOCKER_REPO }}:v${{ steps.rev.outputs.value }}, ${{ secrets.DOCKER_REPO }}:latest
+          tags: ${{ env.DOCKER_REPO }}:v${{ steps.rev.outputs.value }}, ${{ env.DOCKER_REPO }}:latest
