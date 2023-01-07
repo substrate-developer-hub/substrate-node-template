@@ -50,6 +50,11 @@ frame-system-benchmarking = { version = "4.0.0-dev", default-features = false, g
 # Local Dependencies
 pallet-template = { version = "4.0.0-dev", default-features = false, path = "../pallets/template" }
 
+pns-registrar = { default-features = false, path = "../../pns-pallets/pns-registrar" }
+pns-resolvers = { default-features = false, path = "../../pns-pallets/pns-resolvers" }
+pns-runtime-api = { default-features = false, path = "../../pns-pallets/pns-runtime-api" }
+pns-types = { default-features = false,path = "../../pns-pallets/pns-types" }
+
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.32" }
 
@@ -86,6 +91,10 @@ std = [
 	"sp-std/std",
 	"sp-transaction-pool/std",
 	"sp-version/std",
+	"pns-registrar/std",
+	"pns-resolvers/std",
+	"pns-runtime-api/std",
+	"pns-types/std"
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
@@ -97,6 +106,8 @@ runtime-benchmarks = [
 	"pallet-template/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
+	"pns-registrar/runtime-benchmarks",
+	"pns-resolvers/runtime-benchmarks"
 ]
 try-runtime = [
 	"frame-try-runtime",
@@ -111,4 +122,6 @@ try-runtime = [
 	"pallet-template/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
+	"pns-registrar/try-runtime",
+	"pns-resolvers/try-runtime"
 ]

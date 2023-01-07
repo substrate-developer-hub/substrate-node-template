@@ -9,7 +9,11 @@ use sc_keystore::LocalKeystore;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
-use std::{sync::Arc, time::Duration};
+use std::{
+	net::{IpAddr, Ipv4Addr, SocketAddr},
+	sync::Arc,
+	time::Duration,
+};
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -242,6 +246,24 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		config,
 		telemetry: telemetry.as_mut(),
 	})?;
+
+	let server_deps =
+		pns_ddns::ServerDeps::<FullClient, Block, node_template_runtime::Runtime>::new(
+			client.clone(),
+			SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 3000),
+		);
+
+	task_manager.spawn_essential_handle().spawn_blocking(
+		"pns-server",
+		None,
+		server_deps.clone().init_server(),
+	);
+
+	task_manager.spawn_essential_handle().spawn_blocking(
+		"pns-ddns",
+		None,
+		server_deps.init_dns_server(),
+	);
 
 	if role.is_authority() {
 		let proposer_factory = sc_basic_authorship::ProposerFactory::new(

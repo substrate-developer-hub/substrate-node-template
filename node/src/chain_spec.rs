@@ -1,6 +1,7 @@
 use node_template_runtime::{
-	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
-	SystemConfig, WASM_BINARY,
+	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, PnsNftConfig,
+	PnsOriginConfig, PnsPriceOracleConfig, PnsRedeemCodeConfig, PnsRegistrarConfig,
+	PnsRegistryConfig, PnsResolversConfig, Signature, SudoConfig, SystemConfig, WASM_BINARY,
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -152,5 +153,35 @@ fn testnet_genesis(
 			key: Some(root_key),
 		},
 		transaction_payment: Default::default(),
+		pns_nft: PnsNftConfig {
+			tokens: vec![(
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				vec![1, 2, 3],
+				(),
+				vec![(
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					vec![3, 2, 1],
+					Default::default(),
+					node_template_runtime::pns::BaseNode::get(),
+				)],
+			)],
+		},
+		pns_registry: PnsRegistryConfig {
+			origin: vec![],
+			official: Some(get_account_id_from_seed::<sr25519::Public>("Alice")),
+			..Default::default()
+		},
+		pns_registrar: PnsRegistrarConfig { infos: vec![], ..Default::default() },
+		pns_redeem_code: PnsRedeemCodeConfig { redeems: None },
+		pns_price_oracle: PnsPriceOracleConfig {
+			base_prices: [0; 11],
+			rent_prices: [0; 11],
+			deposit_prices: [0; 11],
+			init_rate: 0,
+		},
+		pns_resolvers: PnsResolversConfig { accounts: vec![], texts: vec![] },
+		pns_origin: PnsOriginConfig {
+			origins: vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+		},
 	}
 }

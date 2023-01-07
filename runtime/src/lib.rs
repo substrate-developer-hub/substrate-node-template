@@ -11,7 +11,7 @@ use pallet_grandpa::{
 };
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H256};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
@@ -296,6 +296,14 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		// PNS
+		PnsNft: pns_registrar::nft,
+		PnsRegistry: pns_registrar::registry,
+		PnsRegistrar: pns_registrar::registrar,
+		PnsRedeemCode: pns_registrar::redeem_code,
+		PnsPriceOracle: pns_registrar::price_oracle,
+		PnsOrigin: pns_registrar::origin,
+		PnsResolvers: pns_resolvers::resolvers,
 	}
 );
 
@@ -346,7 +354,23 @@ mod benches {
 	);
 }
 
+use pns_types::{ddns::codec_type::RecordType, RegistrarInfo};
+
 impl_runtime_apis! {
+	impl pns_runtime_api::PnsStorageApi<Block,u64,Balance> for Runtime {
+		fn get_info(id: H256) -> Option<RegistrarInfo<u64, Balance>> {
+			PnsRegistrar::get_info(id)
+		}
+
+		fn all() -> sp_std::vec::Vec<(H256,RegistrarInfo<u64, Balance>)> {
+			PnsRegistrar::all()
+		}
+
+		fn lookup(id: H256) -> sp_std::vec::Vec<(RecordType, sp_std::vec::Vec<u8>)> {
+			PnsResolvers::lookup(id)
+		}
+	}
+
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
 			VERSION
@@ -494,6 +518,7 @@ impl_runtime_apis! {
 		}
 	}
 
+
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
 		fn benchmark_metadata(extra: bool) -> (
@@ -591,5 +616,145 @@ mod tests {
 		assert!(
 			whitelist.contains("26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7")
 		);
+	}
+}
+
+pub mod pns {
+	pub use super::*;
+	use pns_types::{DomainHash, Record};
+	use sp_core::H256;
+
+	parameter_types! {
+		pub const MaxMetadata: u32 = 15;
+	}
+	impl pns_registrar::nft::Config for Runtime {
+		type ClassId = u32;
+
+		type TotalId = u128;
+
+		type TokenId = H256;
+
+		type ClassData = ();
+
+		type TokenData = Record;
+
+		type MaxClassMetadata = MaxMetadata;
+
+		type MaxTokenMetadata = MaxMetadata;
+	}
+
+	impl pns_registrar::registry::Config for Runtime {
+		type RuntimeEvent = RuntimeEvent;
+
+		type WeightInfo = ();
+
+		type Registrar = PnsRegistrar;
+
+		type ResolverId = u32;
+
+		type ManagerOrigin = PnsOrigin;
+	}
+
+	parameter_types! {
+		pub const GracePeriod: Moment = 90 * 24 * 60 * 60;
+		pub const MinRegistrationDuration: Moment = 28 * 24 * 60 * 60;
+		pub const DefaultCapacity: u32 = 20;
+		pub const BaseNode: DomainHash = sp_core::H256([
+			63, 206, 125, 19, 100, 168, 147, 226, 19, 188, 66, 18, 121, 43, 81, 127, 252, 136, 245,
+			177, 59, 134, 200, 239, 156, 141, 57, 12, 58, 19, 112, 206,
+		]);
+	}
+
+	pub type Moment = u64;
+
+	impl pns_registrar::registrar::Config for Runtime {
+		type RuntimeEvent = RuntimeEvent;
+
+		type ResolverId = u32;
+
+		type Registry = PnsRegistry;
+
+		type Currency = Balances;
+
+		type NowProvider = super::Timestamp;
+
+		type Moment = Moment;
+
+		type GracePeriod = GracePeriod;
+
+		type DefaultCapacity = DefaultCapacity;
+
+		type BaseNode = BaseNode;
+
+		type MinRegistrationDuration = MinRegistrationDuration;
+
+		type WeightInfo = ();
+
+		type PriceOracle = PnsPriceOracle;
+
+		type ManagerOrigin = PnsOrigin;
+
+		type IsOpen = PnsOrigin;
+
+		type Official = PnsRegistry;
+	}
+
+	impl pns_registrar::price_oracle::Config for Runtime {
+		type RuntimeEvent = RuntimeEvent;
+
+		type Currency = Balances;
+
+		type Moment = Moment;
+
+		type ExchangeRate = PnsPriceOracle;
+
+		type WeightInfo = ();
+
+		type ManagerOrigin = PnsOrigin;
+	}
+
+	impl pns_registrar::redeem_code::Config for Runtime {
+		type RuntimeEvent = RuntimeEvent;
+
+		type WeightInfo = ();
+
+		type Registrar = PnsRegistrar;
+
+		type Moment = Moment;
+
+		type Public = <Signature as Verify>::Signer;
+
+		type Signature = Signature;
+
+		type ManagerOrigin = PnsOrigin;
+
+		type Official = PnsRegistry;
+	}
+
+	impl pns_registrar::origin::Config for Runtime {
+		type RuntimeEvent = RuntimeEvent;
+
+		type WeightInfo = ();
+	}
+
+	impl pns_resolvers::resolvers::Config for Runtime {
+		type RuntimeEvent = RuntimeEvent;
+
+		type WeightInfo = ();
+
+		type AccountIndex = u32;
+
+		type RegistryChecker = LocalChecker;
+	}
+
+	pub struct LocalChecker;
+
+	impl pns_resolvers::resolvers::RegistryChecker for LocalChecker {
+		type AccountId = AccountId;
+		fn check_node_useable(node: H256, owner: &Self::AccountId) -> bool {
+			use pns_registrar::traits::Registrar;
+			pns_registrar::nft::TokensByOwner::<Runtime>::contains_key((owner, 0, node)) &&
+				PnsRegistrar::check_expires_useable(node).is_ok()
+		}
 	}
 }
