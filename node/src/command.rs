@@ -10,6 +10,25 @@ use sc_cli::{ChainSpec, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
 
+#[cfg(test)]
+#[test]
+fn gen_set_code() {
+	// TODO: Cli tool
+	use core::str::FromStr;
+	let code = pns_ddns::SetCode::<node_template_runtime::Runtime>::new::<
+		sp_core::sr25519::Pair,
+		sp_core::sr25519::Public,
+		sp_core::sr25519::Signature,
+	>(
+		Sr25519Keyring::Bob.pair(),
+		pns_ddns::name_hash_str("cupnfish.dot").expect("create name hash failed."),
+		pns_ddns::RData::ANAME(
+			pns_ddns::Name::from_str("www.baidu.com").expect("create ddns Name failed."),
+		),
+	);
+	println!("{}", code.hex());
+}
+
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
 		"Substrate Node".into()

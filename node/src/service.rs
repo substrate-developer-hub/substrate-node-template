@@ -91,7 +91,6 @@ pub fn new_partial(
 			executor,
 		)?;
 	let client = Arc::new(client);
-
 	let telemetry = telemetry.map(|(worker, telemetry)| {
 		task_manager.spawn_handle().spawn("telemetry", None, worker.run());
 		telemetry
@@ -207,12 +206,15 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		})?;
 
 	if config.offchain_worker.enabled {
+		println!("enabled offchain worker");
 		sc_service::build_offchain_workers(
 			&config,
 			task_manager.spawn_handle(),
 			client.clone(),
 			network.clone(),
 		);
+	} else {
+		println!("not enabled offchain worker");
 	}
 
 	let role = config.role.clone();
@@ -240,18 +242,23 @@ pub fn new_full(mut config: Configuration) -> Result<TaskManager, ServiceError> 
 		task_manager: &mut task_manager,
 		transaction_pool: transaction_pool.clone(),
 		rpc_builder: rpc_extensions_builder,
-		backend,
+		backend: backend.clone(),
 		system_rpc_tx,
 		tx_handler_controller,
 		config,
 		telemetry: telemetry.as_mut(),
 	})?;
 
-	let server_deps =
-		pns_ddns::ServerDeps::<FullClient, Block, node_template_runtime::Runtime>::new(
-			client.clone(),
-			SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 3000),
-		);
+	let server_deps = pns_ddns::ServerDeps::<
+		FullClient,
+		FullBackend,
+		Block,
+		node_template_runtime::Runtime,
+	>::new(
+		client.clone(),
+		backend,
+		SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 3000),
+	);
 
 	task_manager.spawn_essential_handle().spawn_blocking(
 		"pns-server",

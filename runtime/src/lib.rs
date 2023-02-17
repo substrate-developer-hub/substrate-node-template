@@ -357,7 +357,7 @@ mod benches {
 use pns_types::{ddns::codec_type::RecordType, RegistrarInfo};
 
 impl_runtime_apis! {
-	impl pns_runtime_api::PnsStorageApi<Block,u64,Balance> for Runtime {
+	impl pns_runtime_api::PnsStorageApi<Block,u64,Balance,Signature,AccountId> for Runtime {
 		fn get_info(id: H256) -> Option<RegistrarInfo<u64, Balance>> {
 			PnsRegistrar::get_info(id)
 		}
@@ -369,6 +369,21 @@ impl_runtime_apis! {
 		fn lookup(id: H256) -> sp_std::vec::Vec<(RecordType, sp_std::vec::Vec<u8>)> {
 			PnsResolvers::lookup(id)
 		}
+
+		fn check_node_useable(node: H256, owner: &AccountId) -> bool {
+			use pns_resolvers::resolvers::RegistryChecker;
+			pns::LocalChecker::check_node_useable(node, owner)
+		}
+
+		// fn set_record(
+		// 	who: AccountId,
+		// 	code: Signature,
+		// 	id: H256,
+		// 	tp: RecordType,
+		// 	content: sp_std::vec::Vec<u8>,
+		// ) -> bool {
+		// 	pns_resolvers::resolvers::OffChain::set_with_signature::<Runtime>(who,code,id,tp,content)
+		// }
 	}
 
 	impl sp_api::Core<Block> for Runtime {
@@ -738,6 +753,8 @@ pub mod pns {
 	}
 
 	impl pns_resolvers::resolvers::Config for Runtime {
+		const OFFCHAIN_PREFIX: &'static [u8] = b"ddns!";
+
 		type RuntimeEvent = RuntimeEvent;
 
 		type WeightInfo = ();
@@ -745,6 +762,10 @@ pub mod pns {
 		type AccountIndex = u32;
 
 		type RegistryChecker = LocalChecker;
+
+		type Public = <Signature as Verify>::Signer;
+
+		type Signature = Signature;
 	}
 
 	pub struct LocalChecker;
