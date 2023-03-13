@@ -4146,6 +4146,7 @@ dependencies = [
 name = "node-template"
 version = "4.0.0-dev"
 dependencies = [
+ "bs58",
  "clap",
  "frame-benchmarking",
  "frame-benchmarking-cli",
@@ -4201,6 +4202,7 @@ dependencies = [
  "pallet-balances",
  "pallet-grandpa",
  "pallet-insecure-randomness-collective-flip",
+ "pallet-node-authorization",
  "pallet-sudo",
  "pallet-template",
  "pallet-timestamp",
@@ -4494,6 +4496,22 @@ dependencies = [
  "parity-scale-codec",
  "safe-mix",
  "scale-info",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-node-authorization"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.39#1837f423b494254e1d27834b1c9da34b2c0c2375"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
  "sp-runtime",
  "sp-std",
 ]
