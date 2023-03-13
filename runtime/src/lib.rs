@@ -24,6 +24,7 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
+use frame_system::EnsureRoot;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
