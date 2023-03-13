@@ -7,6 +7,8 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_core::OpaquePeerId; // A struct wraps Vec<u8> to represent the node `PeerId`.
+use node_template_runtime::NodeAuthorizationConfig; // The genesis config that serves the pallet.
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -152,5 +154,17 @@ fn testnet_genesis(
 			key: Some(root_key),
 		},
 		transaction_payment: Default::default(),
+		node_authorization: NodeAuthorizationConfig {
+			nodes: vec![
+			  (
+				OpaquePeerId(bs58::decode("12D3KooWQXb7Szf5xKSU4boDEHLqy2nTAH1nP4VEvLfMZvtbEYZH").into_vec().unwrap()), // Node 1
+				endowed_accounts[0].clone()
+			  ),
+			  (
+				OpaquePeerId(bs58::decode("12D3KooWGSVy6jVqen2ikUjCUW5LCiQXvYp9i4y1XysKM9eAmeCd").into_vec().unwrap()), // Node 2
+				endowed_accounts[1].clone()
+			  ),
+			],
+		},
 	}
 }
