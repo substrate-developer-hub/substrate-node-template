@@ -24,8 +24,7 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-use frame_system::EnsureRoot;
-
+use frame_system::{EnsureRoot};
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
 	construct_runtime, parameter_types,
@@ -50,6 +49,7 @@ pub use sp_runtime::{Perbill, Permill};
 
 /// Import the template pallet.
 pub use pallet_template;
+pub use pallet_mbkm_mitra;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -152,6 +152,10 @@ parameter_types! {
 	pub const SS58Prefix: u8 = 42;
 	pub const MaxWellKnownNodes: u32 = 8;
 	pub const MaxPeerIdLength: u32 = 128;
+	pub const BlogPostMinBytes: u32 = 64; // <-- new
+	pub const BlogPostMaxBytes: u32 = 4096;// <-- new
+	pub const BlogPostCommentMinBytes: u32 = 64;// <-- new
+	pub const BlogPostCommentMaxBytes: u32 = 1024;// <-- new
 }
 
 // Configure FRAME pallets to include in runtime.
@@ -293,6 +297,45 @@ impl pallet_sudo::Config for Runtime {
 /// Configure the pallet-template in pallets/template.
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances; // <-- new
+	type BlogPostMinBytes = BlogPostMinBytes;// <-- new
+	type BlogPostMaxBytes = BlogPostMaxBytes;// <-- new
+	type BlogPostCommentMinBytes = BlogPostCommentMinBytes;// <-- new
+	type BlogPostCommentMaxBytes = BlogPostCommentMaxBytes; // <-- new
+}
+
+impl pallet_nicks::Config for Runtime {
+	// The Balances pallet implements the ReservableCurrency trait.
+	// `Balances` is defined in `construct_runtime!` macro.
+	type Currency = Balances;
+	
+	// Set ReservationFee to a value.
+	type ReservationFee = ConstU128<100>;
+	
+	// No action is taken when deposits are forfeited.
+	type Slashed = ();
+	
+	// Configure the FRAME System Root origin as the Nick pallet admin.
+	// https://paritytech.github.io/substrate/master/frame_system/enum.RawOrigin.html#variant.Root
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	
+	// Set MinLength of nick name to a desired value.
+	type MinLength = ConstU32<8>;
+	
+	// Set MaxLength of nick name to a desired value.
+	type MaxLength = ConstU32<32>;
+	
+	// The ubiquitous event type.
+	type RuntimeEvent = RuntimeEvent;
+}
+
+impl pallet_mbkm_mitra::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances; // <-- new
+	type BlogPostMinBytes = BlogPostMinBytes;// <-- new
+	type BlogPostMaxBytes = BlogPostMaxBytes;// <-- new
+	type BlogPostCommentMinBytes = BlogPostCommentMinBytes;// <-- new
+	type BlogPostCommentMaxBytes = BlogPostCommentMaxBytes; // <-- new
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -312,9 +355,10 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
+		MitraMbkm: pallet_mbkm_mitra,
 		TemplateModule: pallet_template,
 		NodeAuthorization: pallet_node_authorization::{Pallet, Call, Storage, Event<T>, Config<T>},
-
+		Nicks: pallet_nicks,
 	}
 );
 
