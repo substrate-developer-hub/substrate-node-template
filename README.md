@@ -158,25 +158,4 @@ To get all the correct dependencies, activate direnv `direnv allow` and lorri `l
 
 ### Docker
 
-First, install [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/).
-
-Then run the following command to start a single node development chain.
-
-```sh
-./scripts/docker_run.sh
-```
-
-This command compiles the code and starts a local development network.
-You can also replace the default command (`cargo build --release && ./target/release/node-template --dev --ws-external`) by appending your own.
-For example:
-
-```sh
-# Run Substrate node without re-compiling
-./scripts/docker_run.sh ./target/release/node-template --dev --ws-external
-
-# Purge the local dev chain
-./scripts/docker_run.sh ./target/release/node-template purge-chain --dev
-
-# Check whether the code is compilable
-./scripts/docker_run.sh cargo check
-```
+Refer to the [Docker instructions](https://github.com/paritytech/substrate/blob/master/docker/README.md) in the Substrate repository to quickly run Substrate, Substrate Node Template, Subkey, or to build a chain spec.
