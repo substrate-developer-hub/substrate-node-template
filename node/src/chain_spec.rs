@@ -1,4 +1,4 @@
-use node_template_runtime::{
+use node_mbkm_unikom::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
 	SystemConfig, WASM_BINARY
 };
@@ -8,7 +8,7 @@ use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use sp_core::OpaquePeerId; // A struct wraps Vec<u8> to represent the node `PeerId`.
-use node_template_runtime::NodeAuthorizationConfig; // The genesis config that serves the pallet.
+use node_mbkm_unikom::NodeAuthorizationConfig; // The genesis config that serves the pallet.
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
