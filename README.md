@@ -90,7 +90,7 @@ You can also find the source code and instructions for hosting your own instance
 
 ### Multi-Node Local Testnet
 
-If you want to see the multi-node consensus algorithm in action, see [Simulate a network](https://docs.substrate.io/tutorials/build-a-blockchain/simulate-network/).
+If you want to see the multi-node consensus algorithm in action, see [Simulate a network](https://docs.substrate.io/tutorials/get-started/simulate-network/).
 
 ## Template Structure
 
