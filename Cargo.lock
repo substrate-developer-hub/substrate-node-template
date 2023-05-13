@@ -246,6 +246,7 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-grandpa",
+ "pallet-marketplace",
  "pallet-sudo",
  "pallet-template",
  "pallet-timestamp",
@@ -4684,6 +4685,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-marketplace"
+version = "0.1.1"
+dependencies = [
+ "bs58",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
 name = "pallet-session"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.42#bca8a29dbde0009e80c4c4737be47abff6b3e2c2"
@@ -8814,7 +8830,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.6",
- "rand 0.7.3",
+ "rand 0.8.5",
  "static_assertions",
 ]
 

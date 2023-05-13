@@ -47,6 +47,8 @@ pub use sp_runtime::{Perbill, Permill};
 
 /// Import the template pallet.
 pub use pallet_template;
+pub use pallet_marketplace;
+
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -95,8 +97,8 @@ pub mod opaque {
 // https://docs.substrate.io/main-docs/build/upgrade#runtime-versioning
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("node-template"),
-	impl_name: create_runtime_str!("node-template"),
+	spec_name: create_runtime_str!("aisland-node"),
+	impl_name: create_runtime_str!("aisland-node"),
 	authoring_version: 1,
 	// The version of the runtime specification. A full node will not attempt to use its native
 	//   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
@@ -272,6 +274,12 @@ impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
 }
+/// Configure the pallet-marketplace in pallets/marketplace.
+impl pallet_marketplace::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_marketplace::weights::SubstrateWeight<Runtime>;
+}
+
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -290,6 +298,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		MarketPlace: pallet_marketplace,
 	}
 );
 

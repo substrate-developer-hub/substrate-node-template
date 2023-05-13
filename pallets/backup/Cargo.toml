@@ -1,0 +1,58 @@
+[package]
+authors = ['Aisland <https://aisland.io>']
+description = 'Aisland Node - Substrate framework'
+edition = '2018'
+homepage = 'https://aisland.io'
+license = 'Unlicense'
+name = 'pallet-marketplace'
+repository = 'https://github.com/aisland-dao/aisland-node'
+version = '0.1.1'
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
+
+# alias "parity-scale-code" to "codec"
+[dependencies.codec]
+default-features = false
+features = ['derive','max-encoded-len']
+package = 'parity-scale-codec'
+version = '2.2.0'
+
+
+[dependencies]
+frame-support= { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
+frame-system= { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
+sp-std= { version = "5.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
+sp-runtime= { version = "7.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
+sp-io= { version = "7.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
+sp-core= { version = "7.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
+scale-info = { version = "2.5.0", default-features = false, features = ["derive"] }
+primitive-types =  { default-features = false, version = '0.7.3'}
+rand =  { default-features = false, version = '0.7.3'}
+hex = { default-features = false, version = '0.4'}
+bs58 = { default-features = false, version = '0.4.0',features=['alloc']}
+
+
+
+
+[dev-dependencies]
+serde = { version = "1.0.119" }
+sp-core= { version = "7.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
+sp-io= { version = "7.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
+sp-runtime= { version = "7.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.42" }
+scale-info = { version = "2.5.0", default-features = false, features = ["derive"] }
+
+
+[features]
+default = ['std']
+std = [
+    'codec/std',
+    'frame-support/std',
+    'frame-system/std',
+    'sp-std/std',
+    'sp-runtime/std',
+    'sp-io/std',
+    'sp-core/std',
+    'hex/std',
+    'bs58/std',
+]
