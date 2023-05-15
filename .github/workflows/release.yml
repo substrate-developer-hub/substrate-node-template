@@ -84,7 +84,7 @@ jobs:
         # warning: "jemalloc support for `x86_64-pc-windows-msvc` is untested"
         run: |
           choco install -y protoc
-          echo "RUSTFLAGS=''" >>"${GITHUB_ENV}"
+          echo 'RUSTFLAGS=""' >> "${env:GITHUB_ENV}"
       - uses: taiki-e/setup-cross-toolchain-action@v1
         if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
         with:
