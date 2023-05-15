@@ -5,8 +5,8 @@ permissions:
 
 on:
   push:
-    tags:
-      - v[0-9]+.*
+    # tags:
+    #   - v[0-9]+.*
 
 env:
   RUST_BACKTRACE: 1
@@ -35,7 +35,6 @@ jobs:
         run: |
           rustup update stable --no-self-update
           rustup target add wasm32-unknown-unknown
-      - run: cargo package
       - uses: taiki-e/create-gh-release-action@v1
         with:
           title: $version
