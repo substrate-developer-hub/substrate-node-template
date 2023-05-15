@@ -22,25 +22,25 @@ defaults:
     shell: bash
 
 jobs:
-  # create-release:
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 60
-  #   permissions:
-  #     contents: write
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         persist-credentials: false
-  #     - uses: taiki-e/create-gh-release-action@v1
-  #       with:
-  #         title: $version
-  #         branch: main
-  #         token: ${{ secrets.GITHUB_TOKEN }}
+  create-release:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          title: $version
+          branch: main
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-assets:
     name: ${{ matrix.target }}
-    # needs:
-    #   - create-release
+    needs:
+      - create-release
     strategy:
       matrix:
         # The list of architechture and OS to build for
