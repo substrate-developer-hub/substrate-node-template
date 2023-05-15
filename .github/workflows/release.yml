@@ -5,8 +5,11 @@ permissions:
 
 on:
   push:
-    # tags:
-    #   - v[0-9]+.*
+    tags:
+      - v[0-9]+.*
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 env:
   RUST_BACKTRACE: 1
@@ -22,29 +25,29 @@ defaults:
     shell: bash
 
 jobs:
-  create-release:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 60
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-      - name: Install Rust
-        run: |
-          rustup update stable --no-self-update
-          rustup target add wasm32-unknown-unknown
-      - uses: taiki-e/create-gh-release-action@v1
-        with:
-          title: $version
-          branch: main
-          token: ${{ secrets.GITHUB_TOKEN }}
+  # create-release:
+  #   runs-on: ubuntu-22.04
+  #   timeout-minutes: 60
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         persist-credentials: false
+  #     - name: Install Rust
+  #       run: |
+  #         rustup update stable --no-self-update
+  #         rustup target add wasm32-unknown-unknown
+  #     - uses: taiki-e/create-gh-release-action@v1
+  #       with:
+  #         title: $version
+  #         branch: main
+  #         token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-assets:
     name: ${{ matrix.target }}
-    needs:
-      - create-release
+    # needs:
+    #   - create-release
     strategy:
       matrix:
         # When updating this list, remember to update the target list in tests too
