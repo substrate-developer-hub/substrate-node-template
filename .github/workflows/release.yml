@@ -72,9 +72,17 @@ jobs:
         run: |
           rustup update stable --no-self-update
           rustup target add wasm32-unknown-unknown
-      - name: Install dependencies
+      - name: Install linux dependencies
         if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
-        run: sudo apt install -y protobuf-compiler
+        run: |
+          apt-get -qq update
+          apt-get install -y protobuf-compiler
+      - name: Install mac dependencies
+        if: startsWith(matrix.os, 'macos')
+        run: brew install protobuf
+      - name: Install windows dependencies
+        if: startsWith(matrix.os, 'windows')
+        run: choco install -y protoc
       - uses: taiki-e/setup-cross-toolchain-action@v1
         if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
         with:
