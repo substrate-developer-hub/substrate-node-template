@@ -7,9 +7,6 @@ on:
   push:
     tags:
       - v[0-9]+.*
-    branches: [main]
-  pull_request:
-    branches: [main]
 
 env:
   RUST_BACKTRACE: 1
@@ -47,6 +44,7 @@ jobs:
     strategy:
       matrix:
         # The list of architechture and OS to build for
+        # You can add or remove targets here if you want
         #
         # When updating this list, remember to update the target list in tests too
         include:
@@ -81,12 +79,17 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: brew install protobuf
       - name: Install windows dependencies
-        if: startsWith(matrix.os, 'windows')
-        run: choco install -y protoc
+        if: endsWith(matrix.target, 'windows-msvc')
+        # Workaround untested dependency warning for windows
+        # warning: "jemalloc support for `x86_64-pc-windows-msvc` is untested"
+        run: |
+          choco install -y protoc
+          echo "RUSTFLAGS="" >>"${GITHUB_ENV}"
       - uses: taiki-e/setup-cross-toolchain-action@v1
         if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
         with:
           target: ${{ matrix.target }}
+      # Build and upload the binary to the new release
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: node-template
