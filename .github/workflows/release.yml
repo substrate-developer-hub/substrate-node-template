@@ -3,8 +3,10 @@ name: Release
 permissions:
   contents: read
 
+# Controls when the action will run.
 on:
   push:
+    # Triggers the workflow on tag push events
     tags:
       - v[0-9]+.*
 
@@ -21,8 +23,10 @@ defaults:
   run:
     shell: bash
 
+
 jobs:
   create-release:
+    # The type of runner that the job will run on
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     permissions:
@@ -56,11 +60,14 @@ jobs:
             os: macos-11
           - target: universal-apple-darwin
             os: macos-11
+    # The type of runner that the job will run on
+    # Runs on Ubuntu if other os is not specified above
     runs-on: ${{ matrix.os || 'ubuntu-22.04' }}
-    timeout-minutes: 60
+    timeout-minutes: 90
     permissions:
       contents: write
     steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
