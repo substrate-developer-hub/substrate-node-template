@@ -75,8 +75,8 @@ jobs:
       - name: Install linux dependencies
         if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
         run: |
-          apt-get -qq update
-          apt-get install -y protobuf-compiler
+          sudo apt-get -qq update
+          sudo apt-get install -y protobuf-compiler
       - name: Install mac dependencies
         if: startsWith(matrix.os, 'macos')
         run: brew install protobuf
