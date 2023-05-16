@@ -94,11 +94,6 @@ jobs:
           target: ${{ matrix.target }}
           tar: all
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: debug
-        run: |
-          pwd
-          echo ${{ github.workspace }}
-          ${{ github.workspace }}/target/x86_64-unknown-linux-gnu/release/node-template --version
       - name: Upload x86_64 linux binary to workflow
         if: (matrix.target == 'x86_64-unknown-linux-gnu')
         uses: actions/upload-artifact@v3
@@ -130,11 +125,6 @@ jobs:
         with:
           name: node-template
           path: ${{ github.workspace }}
-
-      - name: debug
-        run: |
-          pwd
-          ls -la
 
       # Build and push 2 images, One with the version tag and the other with latest tag
       - name: Build and push Docker images
