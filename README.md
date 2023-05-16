@@ -144,7 +144,7 @@ A FRAME pallet is compromised of a number of blockchain primitives:
 - Errors: When a dispatchable fails, it returns an error.
 - Config: The `Config` configuration interface is used to define the types and parameters upon which a FRAME pallet depends.
 
-## Alternatives Installations
+## Alternative Installations
 
 Instead of installing dependencies and building this source directly, consider the following alternatives.
 
