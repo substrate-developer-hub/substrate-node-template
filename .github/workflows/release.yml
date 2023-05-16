@@ -129,6 +129,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: node-template
+          path: ${{ github.workspace }}
 
       - name: debug
         run: |
