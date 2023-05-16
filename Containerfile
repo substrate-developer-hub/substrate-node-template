@@ -28,7 +28,7 @@ RUN /usr/bin/node-template --version
 COPY node-template /usr/bin/node-template
 
 # ws_port
-EXPOSE 9930
+EXPOSE 9930 9333 9944 30333 30334
 
 VOLUME ["/node-template"]
 
