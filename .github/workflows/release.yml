@@ -96,13 +96,15 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: debug
         run: |
-          ls ~/target/x86_64-unknown-linux-gnu/release/
-          ~/target/x86_64-unknown-linux-gnu/release/node-template --version
+          pwd
+          echo ${{ github.workspace }}
+          ${{ github.workspace }}/target/x86_64-unknown-linux-gnu/release/node-template --version
       - name: Upload x86_64 linux binary to workflow
+        if: (matrix.target == 'x86_64-unknown-linux-gnu')
         uses: actions/upload-artifact@v3
         with:
           name: node-template
-          path: ~/target/x86_64-unknown-linux-gnu/release/node-template
+          path: ${{ github.workspace }}/target/x86_64-unknown-linux-gnu/release/node-template
 
   build-image:
     # The type of runner that the job will run on
@@ -119,8 +121,8 @@ jobs:
 
       - name: debug
         run: |
-          ls ~/node-template
-          ~/node-template --version
+          pwd
+          ls -la
         
       # Login to Docker hub using the credentials stored in the repository secrets
       - name: Log in to Docker Hub

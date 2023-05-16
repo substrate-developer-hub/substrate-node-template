@@ -22,6 +22,10 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      - name: debug
+        run: |
+          echo ${{ github.workspace }}
+
       - name: Install linux dependencies
         run: sudo apt-get install -y clang libssl-dev llvm libudev-dev protobuf-compiler
 
