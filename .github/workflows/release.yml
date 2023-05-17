@@ -87,9 +87,6 @@ jobs:
           rustup update stable --no-self-update
           rustup target add wasm32-unknown-unknown
 
-      # Rust cache
-      - uses: Swatinem/rust-cache@v2
-
       - name: Install linux dependencies
         if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
         run: |
