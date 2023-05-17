@@ -22,10 +22,11 @@ RUN apt-get update && \
 
 USER node-template
 
+# copy the compiled binary to the container
+COPY node-template /usr/bin/node-template
+
 # check if executable works in this container
 RUN /usr/bin/node-template --version
-
-COPY node-template /usr/bin/node-template
 
 # ws_port
 EXPOSE 9930 9333 9944 30333 30334
