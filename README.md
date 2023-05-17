@@ -11,8 +11,8 @@ All bugs, suggestions, and feature requests should be made upstream in the [Subs
 ## Getting Started
 
 Depending on your operating system and Rust version, there might be additional packages required to compile this template.
-Check the [install](https://docs.substrate.io/install/) instructions for your platform for the most common dependencies.
-Alternatively, you can use one of the [alternative installation](#alternatives-installations) options.
+Check the [installation](https://docs.substrate.io/install/) instructions for your platform for the most common dependencies.
+Alternatively, you can use one of the [alternative installation](#alternative-installations) options.
 
 ### Build
 

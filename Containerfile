@@ -23,7 +23,7 @@ RUN apt-get update && \
 USER node-template
 
 # copy the compiled binary to the container
-COPY node-template /usr/bin/node-template
+COPY --chown=node-template:node-template --chmod=774 node-template /usr/bin/node-template
 
 # check if executable works in this container
 RUN /usr/bin/node-template --version

@@ -61,14 +61,15 @@ jobs:
         #
         # When updating this list, remember to update the target list in tests too
         include:
-          - target: aarch64-unknown-linux-gnu
+          # - target: aarch64-unknown-linux-gnu
           - target: x86_64-unknown-linux-gnu
           - target: aarch64-apple-darwin
             os: macos-11
           - target: x86_64-apple-darwin
             os: macos-11
-          - target: universal-apple-darwin
-            os: macos-11
+          # - target: universal-apple-darwin
+          #   os: macos-11
+
     # The type of runner that the job will run on
     # Runs on Ubuntu if other os is not specified above
     runs-on: ${{ matrix.os || 'ubuntu-22.04' }}
