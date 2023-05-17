@@ -1,3 +1,10 @@
+# This is an example GitHub action that will build and publish the binaries and a Docker image
+# You need to add the following secrets to your GitHub Repository or Organization to make this work
+# - DOCKERHUB_USERNAME: The username of the DockerHub account. E.g. parity
+# - DOCKERHUB_TOKEN: Access token for DockerHub, see https://docs.docker.com/docker-hub/access-tokens/.
+# The following is set up as an environment variable below
+# - DOCKER_REPO: The unique name of the DockerHub repository. E.g. parity/polkadot
+
 name: Release
 
 permissions:
@@ -18,6 +25,8 @@ env:
   RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
   CARGO_TERM_COLOR: always
+  # Set an environment variable (that can be overriden) for the Docker Repo
+  DOCKER_REPO: tripleight/node-template
 
 defaults:
   run:
@@ -71,15 +80,21 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
+
       - name: Install Rust
         run: |
           rustup update stable --no-self-update
           rustup target add wasm32-unknown-unknown
+
+      # Rust cache
+      - uses: Swatinem/rust-cache@v2
+
       - name: Install linux dependencies
         if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
         run: |
           sudo apt-get -qq update
           sudo apt-get install -y protobuf-compiler
+
       - name: Install mac dependencies
         if: startsWith(matrix.os, 'macos')
         run: brew install protobuf
@@ -87,6 +102,7 @@ jobs:
         if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
         with:
           target: ${{ matrix.target }}
+
       # Build and upload the binary to the new release
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
@@ -94,6 +110,7 @@ jobs:
           target: ${{ matrix.target }}
           tar: all
           token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload x86_64 linux binary to workflow
         if: (matrix.target == 'x86_64-unknown-linux-gnu')
         uses: actions/upload-artifact@v3
@@ -118,7 +135,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check out the repo
         uses: actions/checkout@v3
-      
+
       # Download the binary from the previous job
       - name: Download x86_64 linux binary
         uses: actions/download-artifact@v3
@@ -133,6 +150,8 @@ jobs:
           context: .
           file: ./Containerfile
           push: true
+          build-args: |
+            DOCKER_REPO=${{ env.DOCKER_REPO }}
           tags: |
-            tripleight/node-template:${{ github.event.release.tag_name }}
-            tripleight/node-template:latest
+            ${{ env.DOCKER_REPO }}:${{ github.ref_name }}
+            ${{ env.DOCKER_REPO }}:latest
