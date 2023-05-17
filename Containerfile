@@ -1,7 +1,4 @@
-# Original Containerfile:
-# https://github.com/paritytech/polkadot/blob/9428d8c3ebcd4ec5fb9095549be7d5f84c48d8a2/scripts/ci/dockerfiles/polkadot_injected_release.Dockerfile
-
-FROM docker.io/library/ubuntu:20.04
+FROM docker.io/library/ubuntu:22.04
 
 # show backtraces
 ENV RUST_BACKTRACE 1
@@ -9,7 +6,6 @@ ENV RUST_BACKTRACE 1
 # install tools and dependencies
 RUN apt-get update && \
 	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-		libssl1.1 \
 		ca-certificates && \
   useradd -m -u 1000 -U -s /bin/sh -d /node-template node-template && \
 # apt cleanup
