@@ -2,7 +2,7 @@ use aisland_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
 	SystemConfig, WASM_BINARY,
 };
-use sc_service::ChainType;
+use sc_service::{ChainType, Properties};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
@@ -73,7 +73,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		None,
 		None,
 		// Properties
-		None,
+		Some(aisland_properties()),
 		// Extensions
 		None,
 	))
@@ -119,9 +119,10 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		None,
 		// Protocol ID
 		None,
+		// telemetry ?
+		None,
 		// Properties
-		None,
-		None,
+		Some(aisland_properties()),
 		// Extensions
 		None,
 	))
@@ -169,4 +170,13 @@ fn testnet_genesis(
 		  },
 		
 	}
+}
+
+/// Token
+pub fn aisland_properties() -> Properties {
+    let mut p = Properties::new();
+    p.insert("ss58format".into(), 42.into());
+    p.insert("tokenDecimals".into(), 18.into());
+    p.insert("tokenSymbol".into(), "AISC".into());
+    p
 }
