@@ -183,13 +183,13 @@ pub fn public_testnet_config() -> Result<ChainSpec, String> {
 		},
 		// Bootnodes
 		vec![
-            "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWJ4YEdFmRayeeXqdES4D6u4vQGHvYsxTsTvSB59STj8dz"
+            "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWSaStSZDjwJqp75uqf5gzvFXzRVsHmELmmUNYBky6u2em"
                 .parse()
                 .unwrap(),
-            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWJRVgD2b3NDf6Jph9Vt2VCubxkEbkLiGf6YLQsH1UeSiE"
+            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWMpXRsmX1JU1wwtnMHLQ22ai53G4uTDGHr2ZF3tMv6LHq"
                 .parse()
                 .unwrap(),
-            "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWRSNSv85rsJsoWQ3JgAAcQfDg6aGek1ygW3Eyed7u9W6L"
+            "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWSHdwqGgQKBGdRcZeHWdmMwxNvHnhuAovpYgih4VYBgJA"
                 .parse()
                 .unwrap(),
 	        ],
