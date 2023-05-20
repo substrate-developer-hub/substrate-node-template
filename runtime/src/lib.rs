@@ -277,7 +277,7 @@ impl pallet_marketplace::Config for Runtime {
 	type WeightInfo = pallet_marketplace::weights::SubstrateWeight<Runtime>;
 }
 parameter_types! {
-	pub const MaxWellKnownNodes: u32 = 8;
+	pub const MaxWellKnownNodes: u32 = 128;
 	pub const MaxPeerIdLength: u32 = 128;
    }
 impl pallet_node_authorization::Config for Runtime {

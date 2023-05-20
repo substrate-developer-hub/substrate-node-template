@@ -8,14 +8,16 @@ use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
+
 use sp_core::OpaquePeerId; // A struct wraps Vec<u8> to represent the node `PeerId`.
 use aisland_runtime::NodeAuthorizationConfig; // The genesis config that serves the pallet.
-
+use hex_literal::hex;
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
+
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -61,6 +63,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
 					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+					hex!("dc31445d24993e946ebf9f444dd17a9698fe859eeb574b78910100baab083b75").into(),
 				],
 				true,
 			)
@@ -71,6 +74,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		None,
 		// Protocol ID
 		None,
+		// Fork id
 		None,
 		// Properties
 		Some(aisland_properties()),
@@ -114,12 +118,22 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 			)
 		},
 		// Bootnodes
-		vec![],
+		vec![
+            "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWPu79TFZHuZYU78mi72C1e8Dk37ot69Um8atNNiz9Hm2R"
+                .parse()
+                .unwrap(),
+            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWSZVBZtM1fetf2wCLSvRCLmYhisYFMJrqQn4eZdW1RFNi"
+                .parse()
+                .unwrap(),
+            "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWSecRjwjJ6CFJLtCNacEzWBV2S46vrHD1DcC491fz13Ut"
+                .parse()
+                .unwrap(),
+        ],
 		// Telemetry
 		None,
 		// Protocol ID
 		None,
-		// telemetry ?
+		// ??
 		None,
 		// Properties
 		Some(aisland_properties()),
@@ -127,6 +141,65 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		None,
 	))
 }
+pub fn public_testnet_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
+
+	Ok(ChainSpec::from_genesis(
+		// Name
+		"Aisland Testnet",
+		// ID
+		"aisland_testnet",
+		ChainType::Live,
+		move || {
+			testnet_genesis(
+				wasm_binary,
+				// Initial PoA authorities
+				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
+				// Sudo account
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				// Pre-funded accounts
+				vec![
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie"),
+					get_account_id_from_seed::<sr25519::Public>("Dave"),
+					get_account_id_from_seed::<sr25519::Public>("Eve"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+				],
+				true,
+			)
+		},
+		// Bootnodes
+		vec![
+            "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWPu79TFZHuZYU78mi72C1e8Dk37ot69Um8atNNiz9Hm2R"
+                .parse()
+                .unwrap(),
+            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWSZVBZtM1fetf2wCLSvRCLmYhisYFMJrqQn4eZdW1RFNi"
+                .parse()
+                .unwrap(),
+            "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWSecRjwjJ6CFJLtCNacEzWBV2S46vrHD1DcC491fz13Ut"
+                .parse()
+                .unwrap(),
+        ],
+		// Telemetry
+		None,
+		// Protocol ID
+		None,
+		// ??
+		None,
+		// Properties
+		Some(aisland_properties()),
+		// Extensions
+		None,
+	))
+}
+
 
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
