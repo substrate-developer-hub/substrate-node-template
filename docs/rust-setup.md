@@ -25,7 +25,7 @@ Use a terminal shell to execute the following commands:
 ```bash
 sudo apt update
 # May prompt for location information
-sudo apt install -y git clang curl libssl-dev llvm libudev-dev
+sudo apt install --assume-yes git clang curl libssl-dev llvm libudev-dev make protobuf-compiler
 ```
 
 ### Arch Linux
@@ -33,7 +33,7 @@ sudo apt install -y git clang curl libssl-dev llvm libudev-dev
 Run these commands from a terminal:
 
 ```bash
-pacman -Syu --needed --noconfirm curl git clang
+pacman -Syu --needed --noconfirm curl git clang make protobuf
 ```
 
 ### Fedora
@@ -42,7 +42,7 @@ Run these commands from a terminal:
 
 ```bash
 sudo dnf update
-sudo dnf install clang curl git openssl-devel
+sudo dnf install clang curl git openssl-devel make protobuf-compiler
 ```
 
 ### OpenSUSE
@@ -50,7 +50,7 @@ sudo dnf install clang curl git openssl-devel
 Run these commands from a terminal:
 
 ```bash
-sudo zypper install clang curl git openssl-devel llvm-devel libudev-devel
+sudo zypper install clang curl git openssl-devel llvm-devel libudev-devel make protobuf
 ```
 
 ### macOS
@@ -98,6 +98,7 @@ rustup default stable
 rustup update
 rustup update nightly
 rustup target add wasm32-unknown-unknown --toolchain nightly
+rustup target add wasm32-unknown-unknown
 ```
 
 ## Test your set-up
