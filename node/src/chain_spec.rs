@@ -7,8 +7,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-
-
+use sp_core::crypto::UncheckedInto;
 use sp_core::OpaquePeerId; // A struct wraps Vec<u8> to represent the node `PeerId`.
 use aisland_runtime::NodeAuthorizationConfig; // The genesis config that serves the pallet.
 use hex_literal::hex;
@@ -96,9 +95,12 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 			testnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
+				vec![
+				authority_keys_from_seed("Alice"), 
+				authority_keys_from_seed("Bob"),
+				],
 				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				hex!("001a667f2603ce2cb86703796aff2372c5a78ddeef0ff9b540d9ad745c254447").into(),
 				// Pre-funded accounts
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -122,7 +124,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
             "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWPu79TFZHuZYU78mi72C1e8Dk37ot69Um8atNNiz9Hm2R"
                 .parse()
                 .unwrap(),
-            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWSZVBZtM1fetf2wCLSvRCLmYhisYFMJrqQn4eZdW1RFNi"
+            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWJRVgD2b3NDf6Jph9Vt2VCubxkEbkLiGf6YLQsH1UeSiE"
                 .parse()
                 .unwrap(),
             "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWSecRjwjJ6CFJLtCNacEzWBV2S46vrHD1DcC491fz13Ut"
@@ -153,40 +155,44 @@ pub fn public_testnet_config() -> Result<ChainSpec, String> {
 		move || {
 			testnet_genesis(
 				wasm_binary,
-				// Initial PoA authorities
-				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
+				// Initial PoA authorities (Aura,Grandpa)
+				vec![
+					(
+					 hex!("da7c3f90a9ac2907026f909525fe59a36283e1a359c9cecf8a3e5d02a5b65a5c").unchecked_into(),
+					 hex!("bec120902cdf3e20fcb2155abedf422a127f61c4fa1ffe2b56a0a8b374cacc2d").unchecked_into()
+					),
+										(
+					 hex!("a65840c94f1bf99b95437300da9a93dd31655ac829dd46d098c31be1344ddd52").unchecked_into(),
+					 hex!("35d9c81770177e172036b11560365088e23b4cf486b4814935eb396953277fa2").unchecked_into()
+					),
+										(
+					 hex!("604c1792783545e4f11bc95f9b69fb16baebb6734d8d42f3f29502e13a21835b").unchecked_into(),
+					 hex!("72a1bfc72dba31c0b91b3d2b8a07a569c758173325c943681c775730b0fde189").unchecked_into()
+					)
+				],
 				// Sudo account
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				hex!("001a667f2603ce2cb86703796aff2372c5a78ddeef0ff9b540d9ad745c254447").into(),
+
 				// Pre-funded accounts
 				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+					hex!("9ad611a1a67fcf50f16be2650316d3ef976452bc32eaee8caca2da485bf40202").into(),
+					hex!("1ec3154ebd4d0fc993c91c04b22f402d863f360fef026c80debf7fee4cdc7e68").into(),
 				],
 				true,
 			)
 		},
 		// Bootnodes
 		vec![
-            "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWPu79TFZHuZYU78mi72C1e8Dk37ot69Um8atNNiz9Hm2R"
+            "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWJ4YEdFmRayeeXqdES4D6u4vQGHvYsxTsTvSB59STj8dz"
                 .parse()
                 .unwrap(),
-            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWSZVBZtM1fetf2wCLSvRCLmYhisYFMJrqQn4eZdW1RFNi"
+            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWJRVgD2b3NDf6Jph9Vt2VCubxkEbkLiGf6YLQsH1UeSiE"
                 .parse()
                 .unwrap(),
-            "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWSecRjwjJ6CFJLtCNacEzWBV2S46vrHD1DcC491fz13Ut"
+            "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWRSNSv85rsJsoWQ3JgAAcQfDg6aGek1ygW3Eyed7u9W6L"
                 .parse()
                 .unwrap(),
-        ],
+	        ],
 		// Telemetry
 		None,
 		// Protocol ID
@@ -232,11 +238,15 @@ fn testnet_genesis(
 		node_authorization: NodeAuthorizationConfig {
 			nodes: vec![
 			  (
-				OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()),
+				OpaquePeerId(bs58::decode("12D3KooWJ4YEdFmRayeeXqdES4D6u4vQGHvYsxTsTvSB59STj8dz").into_vec().unwrap()),
 				endowed_accounts[0].clone()
 			  ),
 			  (
-				OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap()),
+				OpaquePeerId(bs58::decode("12D3KooWJRVgD2b3NDf6Jph9Vt2VCubxkEbkLiGf6YLQsH1UeSiE").into_vec().unwrap()),
+				endowed_accounts[1].clone()
+			  ),
+			  (
+				OpaquePeerId(bs58::decode("12D3KooWRSNSv85rsJsoWQ3JgAAcQfDg6aGek1ygW3Eyed7u9W6L").into_vec().unwrap()),
 				endowed_accounts[1].clone()
 			  ),
 			],
