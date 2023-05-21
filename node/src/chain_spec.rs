@@ -146,16 +146,16 @@ pub fn public_testnet_config() -> Result<ChainSpec, String> {
 				// Initial PoA authorities (Aura,Grandpa)
 				vec![
 					(
-					 hex!("da7c3f90a9ac2907026f909525fe59a36283e1a359c9cecf8a3e5d02a5b65a5c").unchecked_into(),
-					 hex!("2eccb1365ca32587759b52d709666d50ca7d6d5561925b1083acd338bf00c93c").unchecked_into()
+					 hex!("06c0cf3980869373aef29b4164425eb7371d76cde759dc8f5c68a11eeaf8f57e").unchecked_into(),
+					 hex!("a7ec58dda00f7aeee12c776a29a15f6ea41328ab55e169cbaca7d971e3b2a87b").unchecked_into()
 					),
 										(
-					 hex!("a65840c94f1bf99b95437300da9a93dd31655ac829dd46d098c31be1344ddd52").unchecked_into(),
-					 hex!("25b11bbbe7f08c80ef0b3dc2735a42b52d12711ec9e64b044c1dba11b3556e0a").unchecked_into()
+					 hex!("ea966d82672695cbd3a78a36e08cdc940f0b1085719ed5c5fe58a290fd4ba604").unchecked_into(),
+					 hex!("99b3c75736a01b3657a6802771adf4d64c732c492b9035328a08dee0a87e55a7").unchecked_into()
 					),
 										(
-					 hex!("604c1792783545e4f11bc95f9b69fb16baebb6734d8d42f3f29502e13a21835b").unchecked_into(),
-					 hex!("938f7aaf3689ed28699a4e5a46152793cb24a03a930f890025f984bd164eee35").unchecked_into()
+					 hex!("00a62c03cd3d554dbf48a0cce9bef680f0ac1bc06d4dc8b02868f8d199d0cd63").unchecked_into(),
+					 hex!("85fed304963bedb9232947f30ad39f5357e4842076ebb3275e2bfb72fec56767").unchecked_into()
 					)
 				],
 				// Sudo account
@@ -171,13 +171,13 @@ pub fn public_testnet_config() -> Result<ChainSpec, String> {
 		},
 		// Bootnodes
 		vec![
-            "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWFFQL6CAT7i8HkTmYgfZdG6yxdX9zWbtyFQPAMSBFRq8D"
+            "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWB8vQKy3di1vk9FmcXcCHdCrFbgrFNoUoy3hs94dBi6TU"
                 .parse()
                 .unwrap(),
-            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWAZ4ByetyuBBNuRJTfx1mc5ajZk5bu9zA5PoPPaJk5Z71"
+            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWGxSVjGui9huLCSkp8jh9Dbsr7sMFa9tJDjSCQDRTC51K"
                 .parse()
                 .unwrap(),
-            "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWF7Gn4wv1WKQZwR2cSfvr3f3vCg4DGuceKuCLypvDUxVY"
+            "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWQQYoPEvpodMDNhxhSzDh4V7pDWr9fdYYdPb8N1BdBEXg"
                 .parse()
                 .unwrap(),
 	        ],
