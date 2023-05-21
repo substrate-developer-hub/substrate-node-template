@@ -118,17 +118,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 			)
 		},
 		// Bootnodes
-		vec![
-            "/ip4/65.108.62.72/tcp/30333/p2p/12D3KooWPu79TFZHuZYU78mi72C1e8Dk37ot69Um8atNNiz9Hm2R"
-                .parse()
-                .unwrap(),
-            "/ip4/94.130.184.125/tcp/30333/p2p/12D3KooWJRVgD2b3NDf6Jph9Vt2VCubxkEbkLiGf6YLQsH1UeSiE"
-                .parse()
-                .unwrap(),
-            "/ip4/94.130.183.49/tcp/30333/p2p/12D3KooWSecRjwjJ6CFJLtCNacEzWBV2S46vrHD1DcC491fz13Ut"
-                .parse()
-                .unwrap(),
-        ],
+		vec![],
 		// Telemetry
 		None,
 		// Protocol ID
