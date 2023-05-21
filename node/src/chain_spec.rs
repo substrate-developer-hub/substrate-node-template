@@ -159,15 +159,15 @@ pub fn public_testnet_config() -> Result<ChainSpec, String> {
 				vec![
 					(
 					 hex!("da7c3f90a9ac2907026f909525fe59a36283e1a359c9cecf8a3e5d02a5b65a5c").unchecked_into(),
-					 hex!("bec120902cdf3e20fcb2155abedf422a127f61c4fa1ffe2b56a0a8b374cacc2d").unchecked_into()
+					 hex!("2eccb1365ca32587759b52d709666d50ca7d6d5561925b1083acd338bf00c93c").unchecked_into()
 					),
 										(
 					 hex!("a65840c94f1bf99b95437300da9a93dd31655ac829dd46d098c31be1344ddd52").unchecked_into(),
-					 hex!("35d9c81770177e172036b11560365088e23b4cf486b4814935eb396953277fa2").unchecked_into()
+					 hex!("25b11bbbe7f08c80ef0b3dc2735a42b52d12711ec9e64b044c1dba11b3556e0a").unchecked_into()
 					),
 										(
 					 hex!("604c1792783545e4f11bc95f9b69fb16baebb6734d8d42f3f29502e13a21835b").unchecked_into(),
-					 hex!("72a1bfc72dba31c0b91b3d2b8a07a569c758173325c943681c775730b0fde189").unchecked_into()
+					 hex!("938f7aaf3689ed28699a4e5a46152793cb24a03a930f890025f984bd164eee35").unchecked_into()
 					)
 				],
 				// Sudo account
@@ -238,15 +238,15 @@ fn testnet_genesis(
 		node_authorization: NodeAuthorizationConfig {
 			nodes: vec![
 			  (
-				OpaquePeerId(bs58::decode("12D3KooWJ4YEdFmRayeeXqdES4D6u4vQGHvYsxTsTvSB59STj8dz").into_vec().unwrap()),
+				OpaquePeerId(bs58::decode("12D3KooWSaStSZDjwJqp75uqf5gzvFXzRVsHmELmmUNYBky6u2em").into_vec().unwrap()),
 				endowed_accounts[0].clone()
 			  ),
 			  (
-				OpaquePeerId(bs58::decode("12D3KooWJRVgD2b3NDf6Jph9Vt2VCubxkEbkLiGf6YLQsH1UeSiE").into_vec().unwrap()),
+				OpaquePeerId(bs58::decode("12D3KooWMpXRsmX1JU1wwtnMHLQ22ai53G4uTDGHr2ZF3tMv6LHq").into_vec().unwrap()),
 				endowed_accounts[1].clone()
 			  ),
 			  (
-				OpaquePeerId(bs58::decode("12D3KooWRSNSv85rsJsoWQ3JgAAcQfDg6aGek1ygW3Eyed7u9W6L").into_vec().unwrap()),
+				OpaquePeerId(bs58::decode("12D3KooWSHdwqGgQKBGdRcZeHWdmMwxNvHnhuAovpYgih4VYBgJA").into_vec().unwrap()),
 				endowed_accounts[1].clone()
 			  ),
 			],
