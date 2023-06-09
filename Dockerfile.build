@@ -23,14 +23,6 @@ RUN chmod +x node-template && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Working directory
-WORKDIR /usr/local/bin
-
-# Copy your binary
-COPY ./target/debug/node-template .
-
-# Make the binary executable
-RUN chmod +x node-template
 
 # After building the Docker image, you can push it to Docker Hub by following these steps:
 # 1. Log in to Docker Hub from your command line using: docker login --username=your-username
