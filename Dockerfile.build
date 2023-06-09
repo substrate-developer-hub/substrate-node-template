@@ -17,8 +17,11 @@ RUN chmod +x node-template && \
 # Install dependencies
     apt-get update && apt-get install -y \
     ca-certificates \
-    libssl1.1 \
-    && rm -rf /var/lib/apt/lists/*
+    libssl1.1 && \
+# apt clean up
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Working directory
 WORKDIR /usr/local/bin
