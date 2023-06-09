@@ -1,8 +1,8 @@
-# Dockerfile.build
+# build.Dockerfile
 # This Dockerfile is used to build an image containing the Substrate binary.
 # The primary use for this binary is to setup GitHub Codespaces.
 # To build the image, navigate to the directory containing this file and run:
-# docker build -t your-image-name -f Dockerfile.build .
+# docker build -t your-image-name -f build.Dockerfile .
 
 # Using a base image
 FROM debian:stable-slim

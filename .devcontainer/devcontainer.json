@@ -7,5 +7,5 @@
     "ghcr.io/devcontainers/features/rust:1": {},
     "devwasm.azurecr.io/dev-wasm/dev-wasm-feature/rust-wasi:0": {}
   },
-  "postCreateCommand": "sudo sh -c 'docker run --rm hummusonrails/substrate-node-template-linux-binary cat /usr/local/bin/node-template > /usr/local/bin/node-template && chmod +x /usr/local/bin/node-template'"
+  "postCreateCommand": "sudo sh -c 'docker run --rm paritytech/codespace-substrate-node-template-linux-binary cat /usr/local/bin/node-template > /usr/local/bin/node-template && chmod +x /usr/local/bin/node-template'"
 }
