@@ -7,8 +7,15 @@
 # Using a base image
 FROM debian:stable-slim
 
+# Working directory
+WORKDIR /usr/local/bin
+
+# Copy your binary
+COPY ./target/debug/node-template .
+
+RUN chmod +x node-template && \
 # Install dependencies
-RUN apt-get update && apt-get install -y \
+    apt-get update && apt-get install -y \
     ca-certificates \
     libssl1.1 \
     && rm -rf /var/lib/apt/lists/*
