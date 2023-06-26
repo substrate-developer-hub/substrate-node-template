@@ -48,7 +48,7 @@ pub use sp_runtime::{Perbill, Permill};
 
 /// Import the market place pallet.
 pub use pallet_marketplace;
-
+pub use pallet_docusign;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -276,6 +276,12 @@ impl pallet_marketplace::Config for Runtime {
 	type WeightInfo = pallet_marketplace::weights::SubstrateWeight<Runtime>;
 }
 
+/// Configure the pallet-docusign
+impl pallet_docusign::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_docusign::weights::SubstrateWeight<Runtime>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub struct Runtime
@@ -293,6 +299,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic
 		MarketPlace: pallet_marketplace,
+		DocuSign: pallet_docusign,
 		
 	}
 );

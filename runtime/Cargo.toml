@@ -50,6 +50,8 @@ frame-system-benchmarking = { version = "4.0.0-dev", default-features = false, g
 
 # Local Dependencies
 pallet-marketplace = { version = "0.1.1", default-features = false, path = "../pallets/marketplace" }
+pallet-docusign = { version = "0.1.1", default-features = false, path = "../pallets/docusign" }
+
 
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", optional = true , branch = "polkadot-v0.9.42" }
