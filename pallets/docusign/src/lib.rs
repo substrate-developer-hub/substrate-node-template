@@ -76,10 +76,10 @@ pub mod pallet {
         DocumentAlreadyPresent,
         /// Document has been already signed from the sender
         DocumentAlreadySigned,
-        /// Email hash is too short
-        EmailHashTooShort,
-        /// Email hash is too long
-        EmailHashTooLong,
+        ///  hash is too short
+        HashTooShort,
+        ///  hash is too long
+        HashTooLong,
 	}
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
@@ -122,19 +122,19 @@ pub mod pallet {
 		  }
           #[pallet::call_index(3)]
 		  #[pallet::weight(T::WeightInfo::cause_error())]
-		  pub fn sign_document(origin:OriginFor<T>, id: u32,emailhash: Vec<u8>) -> DispatchResult {
+		  pub fn sign_document(origin:OriginFor<T>, id: u32,hash: Vec<u8>) -> DispatchResult {
 			  // check the request is signed
 			  let sender = ensure_signed(origin)?;
-			  //check email hash length
-		          ensure!(emailhash.len() < 128, Error::<T>::EmailHashTooLong);
-	                  ensure!(emailhash.len() > 10, Error::<T>::EmailHashTooShort);
+			  //check  hash length
+		          ensure!(hash.len() < 128, Error::<T>::HashTooLong);
+	                  ensure!(hash.len() > 2, Error::<T>::HashTooShort);
 		          ensure!(id>0,Error::<T>::IdCannotBeZero);
 		          ensure!(Documents::<T>::contains_key(&sender,&id),Error::<T>::DocumentNotFound);
 	                  ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
 			  // Insert Signature
-			  Signatures::<T>::insert(sender.clone(),id.clone(),emailhash.clone());
+			  Signatures::<T>::insert(sender.clone(),id.clone(),hash.clone());
 			  // Generate event
-			  Self::deposit_event(Event::DocumentSigned(sender,id,emailhash));
+			  Self::deposit_event(Event::DocumentSigned(sender,id,hash));
 			  // Return a successful DispatchResult
 			  Ok(())
 		  }
