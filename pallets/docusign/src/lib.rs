@@ -93,10 +93,10 @@ pub mod pallet {
 			  // check the request is signed
 			  let sender = ensure_signed(origin)?;
 			  //check document length
-              ensure!(document.len() < 32, Error::<T>::DocumentTooShort);
-			  ensure!(document.len() > 128, Error::<T>::DocumentTooLong);
-              ensure!(id>0,Error::<T>::IdCannotBeZero);
-              ensure!(!Documents::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadyPresent);
+		          ensure!(document.len() >= 32, Error::<T>::DocumentTooShort);
+		          ensure!(document.len() <= 128, Error::<T>::DocumentTooLong);
+		          ensure!(id>0,Error::<T>::IdCannotBeZero);
+		          ensure!(!Documents::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadyPresent);
 			  // Insert new Document
 			  Documents::<T>::insert(sender.clone(),id.clone(),document.clone());
 			  // Generate event
