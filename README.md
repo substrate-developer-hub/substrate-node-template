@@ -5,8 +5,9 @@ This is the new version where the validators are subject to authorisation
 # Aisland Node
 
 Aisland is a super-charged blockchain that facilitates multiple decentralized web application with minimum integration effort for the developers.  
-The main projet based on this blockchain is a decentralised market place:  
-[https://openmarket.ae](https://openmarket.ae)
+The main projets based on this blockchain are:
+[https://openmarket.ae](https://openmarket.ae) Decentralized Market Place for 
+[https://dex.aisland.io](https://dex.aisland.io) Cfosschain Decentralized Exchange
 
 Aisland Node is based on [Substrate Framework 3.0](https://www.substrate.dev), the same used from [Polkadot](https://polkadot.network). 
 
@@ -79,11 +80,12 @@ Please consider:
 ### Testnet Validator
 You can setup a validator on testnet. A validator is a node that writes the blocks of data and rewards in AISC.  
 Please follow [this guide](doc/validator.md).   
+The current network is permissioned, we need to enable your validator, please contact admin@aisland.io
 
 
 ### How to get AISC for Testnet
 You can get 100 free AISC on Testnet using our free minter available at:  
-[https://testnet.aislandi.io:8443](https://testnet.aisland.io:8443)  
+[https://testnet.aisland.io:8443](https://testnet.aisland.io:8443)  
 
 
 ### Bugs Reporting
