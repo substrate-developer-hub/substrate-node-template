@@ -231,7 +231,7 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 /// Existential deposit.
-pub const EXISTENTIAL_DEPOSIT: u128 = 500;
+pub const EXISTENTIAL_DEPOSIT: u128 = 1000;
 
 impl pallet_balances::Config for Runtime {
 	type MaxLocks = ConstU32<50>;
@@ -281,7 +281,13 @@ impl pallet_docusign::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_docusign::weights::SubstrateWeight<Runtime>;
 }
-
+//configure the utility pallet
+impl pallet_utility::Config for Runtime {
+  type RuntimeEvent = RuntimeEvent;
+  type RuntimeCall = RuntimeCall;
+  type PalletsOrigin = OriginCaller;
+  type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
+}
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub struct Runtime
@@ -300,6 +306,7 @@ construct_runtime!(
 		// Include the custom logic
 		MarketPlace: pallet_marketplace,
 		DocuSign: pallet_docusign,
+		Utility: pallet_utility,
 		
 	}
 );
