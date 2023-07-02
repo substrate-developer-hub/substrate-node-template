@@ -129,7 +129,6 @@ pub mod pallet {
 		          ensure!(hash.len() < 128, Error::<T>::HashTooLong);
 	                  ensure!(hash.len() > 2, Error::<T>::HashTooShort);
 		          ensure!(id>0,Error::<T>::IdCannotBeZero);
-		          ensure!(Documents::<T>::contains_key(&sender,&id),Error::<T>::DocumentNotFound);
 	                  ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
 			  // Insert Signature
 			  Signatures::<T>::insert(sender.clone(),id.clone(),hash.clone());
