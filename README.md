@@ -1,6 +1,11 @@
 # Aisland Node
 
-This is the new version where the validators are subject to authorisation
+The consensus is POA, Proof of Authority. The transactions throughput is very fast with blocks written every 6 seconds.
+The genesis is configured with 3 initial validators for the testnet.
+The 3 initial validators are active and running and there is one node usable as RPC point:  
+wss://testnet.aisland.io
+https://testnet.aisland.io
+The consensus will be probbably changed in POS (proof of stake) in the future.
 
 # Aisland Node
 
@@ -73,11 +78,13 @@ RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/aisland-node -lruntime=debug --
 ### Testnet Node
 You can run the node as part of the current Testnet:  
 ```bash
-./target/release/aisland-node --chain assets/chain_spec_testnet_raw.json --port 30333 --name yourpreferredname --rpc-cors all
+./target/release/aisland-node --chain chain-specifications/chain_spec_testnet_raw.json --port 30333 --name yourpreferredname --rpc-cors all
 ```
 Please consider:
 1) TESTNET can be reset to the genesis anytime; 
-2) the AIS coin on TESTNET has no value, they are just for testings.  
+2) the AISC coin on TESTNET has no value, they are just for testings.
+3) You can get some free AISC for testing  from our faucet at:
+[https://testnet.aisland.io:8443](https://testnet.aisland.io:8443)  
 
 ### Testnet Validator
 You can setup a validator on testnet. A validator is a node that writes the blocks of data and rewards in AISC.  
