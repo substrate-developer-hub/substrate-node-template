@@ -4,7 +4,7 @@ This is the new version where the validators are subject to authorisation
 
 # Aisland Node
 
-Aisland is a super-charged blockchain that facilitates multiple decentralized web application with minimum integration effort for the developers.  
+Aisland is a fast/reliable blockchain that facilitates multiple decentralized web application with minimum integration effort for the developers.  
 The main projets based on this blockchain are:
 [https://openmarket.ae](https://openmarket.ae) Decentralized Market Place for 
 [https://dex.aisland.io](https://dex.aisland.io) Cfosschain Decentralized Exchange
