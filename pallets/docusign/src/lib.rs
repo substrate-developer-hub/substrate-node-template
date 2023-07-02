@@ -126,11 +126,11 @@ pub mod pallet {
 			  // check the request is signed
 			  let sender = ensure_signed(origin)?;
 			  //check email hash length
-              ensure!(emailhash.len() < 32, Error::<T>::EmailHashTooShort);
-			  ensure!(emailhash.len() > 128, Error::<T>::EmailHashTooLong);
-              ensure!(id>0,Error::<T>::IdCannotBeZero);
-              ensure!(Documents::<T>::contains_key(&sender,&id),Error::<T>::DocumentNotFound);
-              ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
+		          ensure!(emailhash.len() < 128, Error::<T>::EmailHashTooLong);
+	                  ensure!(emailhash.len() > 10, Error::<T>::EmailHashTooShort);
+		          ensure!(id>0,Error::<T>::IdCannotBeZero);
+		          ensure!(Documents::<T>::contains_key(&sender,&id),Error::<T>::DocumentNotFound);
+	                  ensure!(!Signatures::<T>::contains_key(&sender,&id),Error::<T>::DocumentAlreadySigned);
 			  // Insert Signature
 			  Signatures::<T>::insert(sender.clone(),id.clone(),emailhash.clone());
 			  // Generate event
