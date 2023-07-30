@@ -1,0 +1,155 @@
+# This is an example GitHub action that will build and publish the binaries and a Docker image
+# You need to add the following secrets to your GitHub Repository or Organization to make this work
+# - DOCKERHUB_USERNAME: The username of the DockerHub account. E.g. parity
+# - DOCKERHUB_TOKEN: Access token for DockerHub, see https://docs.docker.com/docker-hub/access-tokens/.
+# The following is set up as an environment variable below
+# - DOCKER_REPO: The unique name of the DockerHub repository. E.g. parity/polkadot
+
+name: Release
+
+permissions:
+  contents: read
+
+# Controls when the action will run.
+on:
+  push:
+    # Triggers the workflow on tag push events
+    tags:
+      - v[0-9]+.*
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 10
+  RUSTFLAGS: -D warnings
+  RUSTUP_MAX_RETRIES: 10
+  CARGO_TERM_COLOR: always
+  # Set an environment variable (that can be overriden) for the Docker Repo
+  DOCKER_REPO: tripleight/node-template
+
+defaults:
+  run:
+    shell: bash
+
+
+jobs:
+  create-release:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          title: $version
+          branch: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-assets:
+    name: ${{ matrix.target }}
+    needs:
+      - create-release
+    strategy:
+      matrix:
+        # The list of architechture and OS to build for
+        # You can add or remove targets here if you want
+        #
+        # When updating this list, remember to update the target list in tests too
+        include:
+          # - target: aarch64-unknown-linux-gnu
+          - target: x86_64-unknown-linux-gnu
+          - target: aarch64-apple-darwin
+            os: macos-11
+          - target: x86_64-apple-darwin
+            os: macos-11
+          # - target: universal-apple-darwin
+          #   os: macos-11
+
+    # The type of runner that the job will run on
+    # Runs on Ubuntu if other os is not specified above
+    runs-on: ${{ matrix.os || 'ubuntu-22.04' }}
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Install Rust
+        run: |
+          rustup update stable --no-self-update
+          rustup target add wasm32-unknown-unknown
+
+      - name: Install linux dependencies
+        if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get install -y protobuf-compiler
+
+      - name: Install mac dependencies
+        if: startsWith(matrix.os, 'macos')
+        run: brew install protobuf
+      - uses: taiki-e/setup-cross-toolchain-action@v1
+        if: (matrix.os == '' || startsWith(matrix.os, 'ubuntu'))
+        with:
+          target: ${{ matrix.target }}
+
+      # Build and upload the binary to the new release
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: node-template
+          target: ${{ matrix.target }}
+          tar: all
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload x86_64 linux binary to workflow
+        if: (matrix.target == 'x86_64-unknown-linux-gnu')
+        uses: actions/upload-artifact@v3
+        with:
+          name: node-template
+          path: ${{ github.workspace }}/target/x86_64-unknown-linux-gnu/release/node-template
+
+  build-image:
+    # The type of runner that the job will run on
+    needs:
+      - upload-assets
+    runs-on: ubuntu-22.04
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Login to Docker hub using the credentials stored in the repository secrets
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2.1.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      # Download the binary from the previous job
+      - name: Download x86_64 linux binary
+        uses: actions/download-artifact@v3
+        with:
+          name: node-template
+          path: ${{ github.workspace }}
+
+      # Build and push 2 images, One with the version tag and the other with latest tag
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Containerfile
+          push: true
+          build-args: |
+            DOCKER_REPO=${{ env.DOCKER_REPO }}
+          tags: |
+            ${{ env.DOCKER_REPO }}:${{ github.ref_name }}
+            ${{ env.DOCKER_REPO }}:latest
