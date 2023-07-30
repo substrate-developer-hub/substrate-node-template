@@ -1,12 +1,19 @@
 # Aisland Node
 
-This is the new version where the validators are subject to authorisation
+This blockchain is base on Substrate framework and is configured with a consensus POA, Proof of Authority.  
+The transactions throughput is very fast with blocks written every 6 seconds.   
+The blockchain genesis is configured with 3 initial validators for the testnet that are active and running.
+There is one node usable as RPC point:
+wss://testnet.aisland.io
+https://testnet.aisland.io
+You can use this link for a simple explorer:  
+[https://polkadot.js.org/apps?rpc=wss://testnet.aisland.io](https://polkadot.js.org/apps?rpc=wss://testnet.aisland.io)  
+
+The consensus will be probbably changed in POS (proof of stake) in the future.
 
 # Aisland Node
 
-Aisland is a super-charged blockchain that facilitates multiple decentralized web application with minimum integration effort for the developers.  
-The main projet based on this blockchain is a decentralised market place:  
-[https://openmarket.ae](https://openmarket.ae)
+Aisland is a fast/reliable blockchain that facilitates multiple decentralized web application with minimum integration effort for the developers.  
 
 Aisland Node is based on [Substrate Framework 3.0](https://www.substrate.dev), the same used from [Polkadot](https://polkadot.network). 
 
@@ -70,22 +77,28 @@ Start the development chain with detailed logging:
 RUST_LOG=debug RUST_BACKTRACE=1 ./target/release/aisland-node -lruntime=debug --dev
 ```
 ### Testnet Node
-You can run the node as part of the current Testnet:  
+You can run a node as part of the current Testnet with the following command:  
 ```bash
-./target/release/aisland-node --chain assets/chain_spec_testnet_raw.json --port 30333 --name yourpreferredname --rpc-cors all
+./target/release/aisland-node --chain chain-specifications/testnetRaw.json --port 30333 --name yourpreferredname \
+--port 30333 --ws-port 9944 --rpc-port 9933 \
+--rpc-cors all --ws-external --discover-local \
+--name testnet --rpc-external
 ```
 Please consider:
 1) TESTNET can be reset to the genesis anytime; 
-2) the AIS coin on TESTNET has no value, they are just for testings.  
+2) the AISC coin on TESTNET has no value, they are just for testings.
+3) You can get some free AISC for testing  from our faucet at:
+[https://testnet.aisland.io:8443](https://testnet.aisland.io:8443)  
 
 ### Testnet Validator
 You can setup a validator on testnet. A validator is a node that writes the blocks of data and rewards in AISC.  
 Please follow [this guide](doc/validator.md).   
+The current network is permissioned, we need to enable your validator, please contact admin@aisland.io
 
 
 ### How to get AISC for Testnet
 You can get 100 free AISC on Testnet using our free minter available at:  
-[https://testnet.aislandi.io:8443](https://testnet.aisland.io:8443)  
+[https://testnet.aisland.io:8443](https://testnet.aisland.io:8443)  
 
 
 ### Bugs Reporting
