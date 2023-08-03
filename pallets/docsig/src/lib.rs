@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// Pallet to manage the state of the docusign
+/// Pallet to manage the state of the docsig
 pub use pallet::*;
 pub use core::str;
 pub use core::str::FromStr;

@@ -48,7 +48,7 @@ pub use sp_runtime::{Perbill, Permill};
 
 /// Import the market place pallet.
 pub use pallet_marketplace;
-pub use pallet_docusign;
+pub use pallet_docsig;
 pub use pallet_citizenship;
 
 
@@ -278,10 +278,10 @@ impl pallet_marketplace::Config for Runtime {
 	type WeightInfo = pallet_marketplace::weights::SubstrateWeight<Runtime>;
 }
 
-/// Configure the pallet-docusign
-impl pallet_docusign::Config for Runtime {
+/// Configure the pallet-docsig
+impl pallet_docsig::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = pallet_docusign::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = pallet_docsig::weights::SubstrateWeight<Runtime>;
 }
 /// Configure the pallet-citizenship
 impl pallet_citizenship::Config for Runtime {
@@ -315,7 +315,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic
 		MarketPlace: pallet_marketplace,
-		DocuSign: pallet_docusign,
+		DocSig: pallet_docsig,
 		Citizenship: pallet_citizenship,
 		Utility: pallet_utility,
 		

@@ -49,7 +49,7 @@ frame-system-benchmarking = { version = "4.0.0-dev", default-features = false, g
 
 # Local Dependencies
 pallet-marketplace = { version = "0.1.1", default-features = false, path = "../pallets/marketplace" }
-pallet-docusign = { version = "0.1.1", default-features = false, path = "../pallets/docusign" }
+pallet-docsig = { version = "0.1.1", default-features = false, path = "../pallets/docsig" }
 pallet-citizenship = { version = "0.1.1", default-features = false, path = "../pallets/citizenship" }
 
 

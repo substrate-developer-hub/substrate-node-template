@@ -1,7 +1,7 @@
 [package]
-name = "pallet-docusign"
+name = "pallet-docsig"
 version = "0.1.1"
-description = "Pallet for the docusign functions"
+description = "Pallet for the docsig functions"
 homepage = "https://aisland.io"
 edition = "2021"
 license = "MIT-0"
