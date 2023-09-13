@@ -20,10 +20,12 @@ pub mod pallet {
         ///the max length of claim that can be added
         #[pallet::constant]
         type MaxClaimLength: Get<u32>;
+        
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
     }
 
     #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(_);
 
     #[pallet::storage]
@@ -39,6 +41,7 @@ pub mod pallet {
     pub enum Event<T: Config> {
         ClaimCreated(T::AccountId, BoundedVec<u8, T::MaxClaimLength>),
         ClaimRevoked(T::AccountId, BoundedVec<u8, T::MaxClaimLength>),
+        ClaimTransferred(T::AccountId, BoundedVec<u8, T::MaxClaimLength>,T::AccountId),
     }
 
     #[pallet::error]
@@ -93,9 +96,9 @@ pub mod pallet {
                 Proofs::<T>::get(&bounded_claim).ok_or(Error::<T>::ClaimNotExist)?;
             ensure!(owner == sender, Error::<T>::NotClaimOwner);
 
-            Proofs::<T>::insert(&bounded_claim, (dest, frame_system::Pallet::<T>::block_number()));
+            Proofs::<T>::insert(&bounded_claim, (dest.clone(), frame_system::Pallet::<T>::block_number()));
 
-            Self::deposit_event(Event::ClaimRevoked(sender, claim));
+            Self::deposit_event(Event::ClaimTransferred(sender, claim,dest));
 
             Ok(().into())
         }
