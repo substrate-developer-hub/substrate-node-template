@@ -20,6 +20,7 @@ name = "node-template"
 clap = { version = "4.4.2", features = ["derive"] }
 futures = { version = "0.3.21", features = ["thread-pool"]}
 
+
 sc-cli = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sp-core = { version = "21.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sc-executor = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
