@@ -1,6 +1,7 @@
 # Substrate Node Template
 
-A fresh [Substrate](https://substrate.io/) node, ready for hacking :rocket:
+A fresh [Substrate](https://substrate.io/) ![image](https://github.com/substrate-developer-hub/substrate-node-template/assets/127110010/c0149508-017d-4a7a-8339-fbb96ca47543)
+
 
 A standalone version of this template is available for each release of Polkadot in the [Substrate Developer Hub Parachain Template](https://github.com/substrate-developer-hub/substrate-parachain-template/) repository.
 The parachain template is generated directly at each Polkadot release branch from the [Node Template in Substrate](https://github.com/paritytech/substrate/tree/master/bin/node-template) upstream
