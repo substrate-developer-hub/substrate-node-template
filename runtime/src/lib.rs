@@ -214,6 +214,7 @@ impl pallet_grandpa::Config for Runtime {
 
 	type WeightInfo = ();
 	type MaxAuthorities = ConstU32<32>;
+	type MaxNominators = ConstU32<0>;
 	type MaxSetIdSessionEntries = ConstU64<0>;
 
 	type KeyOwnerProof = sp_core::Void;
@@ -247,6 +248,7 @@ impl pallet_balances::Config for Runtime {
 	type MaxFreezes = ();
 	type RuntimeHoldReason = ();
 	type MaxHolds = ();
+	type RuntimeFreezeReason = RuntimeFreezeReason;
 }
 
 parameter_types! {
@@ -527,8 +529,8 @@ impl_runtime_apis! {
 		fn dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-			use frame_benchmarking::{baseline, Benchmarking, BenchmarkBatch, TrackedStorageKey};
-
+			use frame_benchmarking::{baseline, Benchmarking, BenchmarkBatch};
+			use sp_storage::TrackedStorageKey;
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use baseline::Pallet as BaselineBench;
 
