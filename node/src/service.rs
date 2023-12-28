@@ -72,12 +72,15 @@ pub fn new_partial(
 		.transpose()?;
 
 	let executor = sc_service::new_native_or_wasm_executor(config);
-	let (client, backend, keystore_container, task_manager) =
-		sc_service::new_full_parts::<Block, RuntimeApi, _>(
-			config,
-			telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
-			executor,
-		)?;
+	let (client, backend, keystore_container, task_manager) = sc_service::new_full_parts::<
+		Block,
+		RuntimeApi,
+		_,
+	>(
+		config,
+		telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
+		executor,
+	)?;
 	let client = Arc::new(client);
 
 	let telemetry = telemetry.map(|(worker, telemetry)| {
@@ -158,9 +161,9 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 		&client.block_hash(0).ok().flatten().expect("Genesis block exists; qed"),
 		&config.chain_spec,
 	);
-	net_config.add_notification_protocol(sc_consensus_grandpa::grandpa_peers_set_config(
-		grandpa_protocol_name.clone(),
-	));
+	net_config.add_notification_protocol(
+		sc_consensus_grandpa::grandpa_peers_set_config(grandpa_protocol_name.clone())
+	);
 
 	let warp_sync = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
 		backend.clone(),
@@ -189,9 +192,9 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 				is_validator: config.role.is_authority(),
 				keystore: Some(keystore_container.keystore()),
 				offchain_db: backend.offchain_storage(),
-				transaction_pool: Some(OffchainTransactionPoolFactory::new(
-					transaction_pool.clone(),
-				)),
+				transaction_pool: Some(
+					OffchainTransactionPoolFactory::new(transaction_pool.clone())
+				),
 				network_provider: network.clone(),
 				enable_http_requests: true,
 				custom_extensions: |_| vec![],
