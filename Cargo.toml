@@ -3,6 +3,7 @@ members = [
     "node",
     "pallets/template",
     "pallets/poe",
+    "pallets/kitties",
     "runtime",
 ]
 resolver = "2"
