@@ -4599,10 +4599,10 @@ dependencies = [
  "sc-offchain",
  "sc-rpc-api",
  "sc-service",
- "sc-statement-store",
  "sc-telemetry",
  "sc-transaction-pool",
  "sc-transaction-pool-api",
+ "serde_json",
  "sp-api",
  "sp-block-builder",
  "sp-blockchain",
@@ -4640,16 +4640,19 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "parity-scale-codec",
  "scale-info",
+ "serde_json",
  "sp-api",
  "sp-block-builder",
  "sp-consensus-aura",
  "sp-consensus-grandpa",
  "sp-core",
+ "sp-genesis-builder",
  "sp-inherents",
  "sp-offchain",
  "sp-runtime",
  "sp-session",
  "sp-std 8.0.0",
+ "sp-storage 13.0.0",
  "sp-transaction-pool",
  "sp-version",
  "substrate-wasm-builder",
@@ -4939,6 +4942,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
+ "sp-std 8.0.0",
 ]
 
 [[package]]
@@ -6941,25 +6945,6 @@ dependencies = [
  "parity-scale-codec",
  "parking_lot 0.12.1",
  "sp-core",
-]
-
-[[package]]
-name = "sc-statement-store"
-version = "4.0.0-dev"
-source = "git+https://github.com/paritytech/polkadot-sdk.git?tag=polkadot-v1.6.0#481165d92297d7dfd5eaf9c7f442441761fc0a12"
-dependencies = [
- "log",
- "parity-db",
- "parking_lot 0.12.1",
- "sc-client-api",
- "sc-keystore",
- "sp-api",
- "sp-blockchain",
- "sp-core",
- "sp-runtime",
- "sp-statement-store",
- "substrate-prometheus-endpoint",
- "tokio",
 ]
 
 [[package]]
