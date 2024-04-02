@@ -11,6 +11,7 @@ members = [
     "pallets/template",
     "runtime",
 ]
+resolver = "2"
 [profile.release]
 panic = "unwind"
 
