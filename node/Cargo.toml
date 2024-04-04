@@ -18,8 +18,8 @@ workspace = true
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-clap = { version = "4.5.1", features = ["derive"] }
-futures = { version = "0.3.21", features = ["thread-pool"] }
+clap = { version = "4.5.3", features = ["derive"] }
+futures = { version = "0.3.30", features = ["thread-pool"] }
 serde_json = { version = "1.0.114", default-features = true }
 jsonrpsee = { version = "0.22", features = ["server"] }
 
@@ -62,7 +62,7 @@ substrate-frame-rpc-system = { git = "https://github.com/paritytech/polkadot-sdk
 frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
 
 # Local Dependencies
-solochain-template-runtime = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
+node-template-runtime = { path = "../runtime" }
 
 # CLI-specific dependencies
 try-runtime-cli = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", optional = true }
@@ -77,7 +77,7 @@ runtime-benchmarks = [
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
 	"sc-service/runtime-benchmarks",
-	"solochain-template-runtime/runtime-benchmarks",
+	"node-template-runtime/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 ]
 # Enable features that allow the runtime to be tried and debugged. Name might be subject to change
@@ -85,7 +85,7 @@ runtime-benchmarks = [
 try-runtime = [
 	"frame-system/try-runtime",
 	"pallet-transaction-payment/try-runtime",
-	"solochain-template-runtime/try-runtime",
+	"node-template-runtime/try-runtime",
 	"sp-runtime/try-runtime",
 	"try-runtime-cli/try-runtime",
 ]
