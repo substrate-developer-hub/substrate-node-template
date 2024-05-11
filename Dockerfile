@@ -14,8 +14,9 @@ RUN apt-get update && apt-get install -y \
     libudev-dev \
     make \
     protobuf-compiler && \
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    source $HOME/.cargo/env
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+RUN . $HOME/.cargo/env
 
 RUN rustup default stable && update && update nightly && target add wasm32-unknown-unknown --toolchain nightly
 
