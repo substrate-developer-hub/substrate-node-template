@@ -7,7 +7,6 @@ COPY . /plenitud
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
-    cmake \
     clang \
     curl \
     libssl-dev \
