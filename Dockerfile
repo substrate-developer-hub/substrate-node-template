@@ -8,9 +8,8 @@ RUN apt-get update && apt-get install -y \
     git build-essential cmake clang curl libssl-dev llvm libudev-dev make protobuf-compiler \
     && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
     && . $HOME/.cargo/env \
-    && rustup default stable \
+    && rustup default nightly \
     && rustup update \
-    && rustup target add nightly-x86_64-unknown-linux-gnu --toolchain nightly \
     && cargo build --release
 
 # Use the same Debian Bullseye image for runtime to avoid library mismatches
