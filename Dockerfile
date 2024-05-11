@@ -2,7 +2,8 @@
 FROM ubuntu:22.04 as builder
 WORKDIR /plenitud
 COPY . /plenitud
-
+ENV CARGO_INCREMENTAL=1
+ENV RUSTFLAGS="-C link-args=-Wl,--threads=1"
 # Install dependencies and build the project
 RUN apt-get update && apt-get install -y \
     git build-essential cmake clang curl libssl-dev llvm libudev-dev make protobuf-compiler \
