@@ -11,3 +11,5 @@
 .direnv
 
 .vscode/settings.json
+
+.env

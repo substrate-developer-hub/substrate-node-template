@@ -1,0 +1,38 @@
+version: '3.3'
+services:
+  plenitud:
+    build: .
+    container_name: plenitud
+    command: ./init-node-server.sh
+    ports:
+      - "30333:30333"
+      - "9933:9933"
+      - "9944:9944"
+      - "9615:9615"
+    restart: always
+    volumes:
+      - blockchain-data:/data/node01
+    networks:
+      - plenitud-net
+
+  https-portal:
+    image: steveltn/https-portal:1
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - plenitud
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - https-portal-data:/var/lib/https-portal
+    networks:
+      - plenitud-net
+
+volumes:
+  https-portal-data:
+  blockchain-data:
+
+networks:
+  plenitud-net:
