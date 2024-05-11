@@ -1,31 +1,20 @@
-# Use Parity's official CI image as the builder
+# Use Debian Bullseye for the builder to ensure compatibility with newer libraries
 FROM debian:bullseye as builder
-LABEL description="Plenitud Node"
-
 WORKDIR /plenitud
 COPY . /plenitud
 
-# Set non-interactive installation mode and configure timezone
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=UTC
-
-# Install dependencies in one RUN to reduce layer size and avoid cache issues
+# Install dependencies and build the project
 RUN apt-get update && apt-get install -y \
-    git \
-    build-essential \
-    cmake \
-    clang \
-    curl \
-    libssl-dev \
-    llvm \
-    libudev-dev \
-    make \
-    protobuf-compiler && \
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    . $HOME/.cargo/env && rustup update && cargo build --release
+    git build-essential cmake clang curl libssl-dev llvm libudev-dev make protobuf-compiler \
+    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+    && . $HOME/.cargo/env \
+    && rustup default stable \
+    && rustup update \
+    && rustup target add wasm32-unknown-unknown --toolchain nightly \
+    && cargo build --release
 
-# Start from a minimal Ubuntu image for the runtime environment
-FROM docker.io/library/ubuntu:20.04
+# Use the same Debian Bullseye image for runtime to avoid library mismatches
+FROM debian:bullseye
 LABEL description="Plenitud Node"
 
 # Copy the build artifact from the builder stage
