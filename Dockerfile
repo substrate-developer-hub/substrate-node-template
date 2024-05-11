@@ -1,5 +1,5 @@
 # Use Debian Bullseye for the builder to ensure compatibility with newer libraries
-FROM debian:bullseye as builder
+FROM ubuntu:22.04 as builder
 WORKDIR /plenitud
 COPY . /plenitud
 
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     && cargo build --release
 
 # Use the same Debian Bullseye image for runtime to avoid library mismatches
-FROM debian:bullseye
+FROM ubuntu:22.04
 LABEL description="Plenitud Node"
 
 # Copy the build artifact from the builder stage
