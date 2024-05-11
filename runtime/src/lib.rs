@@ -3,6 +3,19 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+// Contracts price units.
+pub const MILLICENTS: Balance = 1_000_000_000;
+pub const CENTS: Balance = 1_000 * MILLICENTS;
+pub const DOLLARS: Balance = 100 * CENTS;
+
+const fn deposit(items: u32, bytes: u32) -> Balance {
+    items as Balance * 15 * CENTS + (bytes as Balance) * 6 * CENTS
+}
+
+/// We assume that ~10% of the block weight is consumed by `on_initalize` handlers.
+/// This is used to limit the maximal weight of a single extrinsic.
+const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
+
 use pallet_grandpa::AuthorityId as GrandpaId;
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -17,6 +30,9 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
+use pallet_contracts::weights::WeightInfo;
+
+Contracts: pallet_contracts::{Module, Call, Config<T>, Storage, Event<T>},
 
 use frame_support::genesis_builder_helper::{build_config, create_default_config};
 pub use frame_support::{
@@ -143,6 +159,11 @@ parameter_types! {
 	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
 		::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
 	pub const SS58Prefix: u8 = 42;
+
+	pub DeletionQueueDepth: u32 = ((DeletionWeightLimit::get() / (
+            <Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(1) -
+            <Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(0)
+        )) / 5) as u32;
 }
 
 /// The default types are being injected by [`derive_impl`](`frame_support::derive_impl`) from
@@ -226,6 +247,25 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 }
 
+impl pallet_contracts::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type Currency = pallet_balances::Pallet<Runtime>;
+    type Time = pallet_timestamp::Pallet<Runtime>;
+    type Randomness = RandomnessCollectiveFlip;
+    type DepositPerItem = ConstU128<1_000>;
+    type DepositPerByte = ConstU128<10>;
+    type WeightPrice = pallet_transaction_payment::Pallet<Runtime>;
+    type WeightInfo = pallet_contracts::weights::SubstrateWeight<Runtime>;
+    type ChainExtension = (); // Si no utilizas extensiones de cadena, configúralo como ()
+    type Call = RuntimeCall;
+    type CallFilter = Everything;
+    type ContractAccessWeight = DefaultContractAccessWeight<RuntimeBlockWeights>;
+    type MaxCodeSize = ConstU32<128 * 1024>; // Ajusta según las necesidades de tu proyecto
+    type MaxStorageKeyLen = ConstU32<128>;
+    type MaxValueSize = ConstU32<16_384>; // 16 KB
+    type RuntimeSchedule = pallet_contracts::DefaultSchedule<Runtime>;
+}
+
 parameter_types! {
 	pub FeeMultiplier: Multiplier = Multiplier::one();
 }
@@ -292,6 +332,9 @@ mod runtime {
 	// Include the custom logic from the pallet-template in the runtime.
 	#[runtime::pallet_index(7)]
 	pub type TemplateModule = pallet_template;
+
+	#[runtime::pallet_index(8)]
+	pub type Contracts = pallet_contracts;
 }
 
 /// The address format for describing accounts.
@@ -331,6 +374,7 @@ pub type Executive = frame_executive::Executive<
 	Runtime,
 	AllPalletsWithSystem,
 	Migrations,
+	pallet_contracts::Migration<Runtime>,
 >;
 
 #[cfg(feature = "runtime-benchmarks")]

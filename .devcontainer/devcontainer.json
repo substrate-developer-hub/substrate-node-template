@@ -1,5 +1,5 @@
 {
-  "name": "Substrate Node template",
+  "name": "Plenitud Node template",
   "context": "..",
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash",
