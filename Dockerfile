@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     protobuf-compiler && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     . $HOME/.cargo/env && \
-    rustup target add wasm32-unknown-unknown --toolchain nightly && \
+    rustup target add nightly-x86_64-unknown-linux-gnu --toolchain nightly && \
     cargo build --release
 
 # Start from a minimal Ubuntu image for the runtime environment
