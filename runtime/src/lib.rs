@@ -227,25 +227,6 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 }
 
-impl pallet_contracts::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type Currency = pallet_balances::Pallet<Runtime>;
-    type Time = pallet_timestamp::Pallet<Runtime>;
-    type Randomness = RandomnessCollectiveFlip;
-    type DepositPerItem = ConstU128<1_000>;
-    type DepositPerByte = ConstU128<10>;
-    type WeightPrice = pallet_transaction_payment::Pallet<Runtime>;
-    type WeightInfo = pallet_contracts::weights::SubstrateWeight<Runtime>;
-    type ChainExtension = (); // Si no utilizas extensiones de cadena, configúralo como ()
-    type Call = RuntimeCall;
-    type CallFilter = Everything;
-    type ContractAccessWeight = DefaultContractAccessWeight<RuntimeBlockWeights>;
-    type MaxCodeSize = ConstU32<128 * 1024>; // Ajusta según las necesidades de tu proyecto
-    type MaxStorageKeyLen = ConstU32<128>;
-    type MaxValueSize = ConstU32<16_384>; // 16 KB
-    type RuntimeSchedule = pallet_contracts::DefaultSchedule<Runtime>;
-}
-
 parameter_types! {
 	pub FeeMultiplier: Multiplier = Multiplier::one();
 }
@@ -354,7 +335,6 @@ pub type Executive = frame_executive::Executive<
 	Runtime,
 	AllPalletsWithSystem,
 	Migrations,
-	pallet_contracts::Migration<Runtime>,
 >;
 
 #[cfg(feature = "runtime-benchmarks")]
