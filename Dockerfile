@@ -1,5 +1,7 @@
 # Use Parity's official CI image as the builder
-FROM docker.io/library/ubuntu:20.04 as builder
+FROM debian:bullseye as builder
+LABEL description="Plenitud Node"
+
 WORKDIR /plenitud
 COPY . /plenitud
 
