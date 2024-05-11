@@ -32,7 +32,6 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use pallet_contracts::weights::WeightInfo;
 
-Contracts: pallet_contracts::{Module, Call, Config<T>, Storage, Event<T>},
 
 use frame_support::genesis_builder_helper::{build_config, create_default_config};
 pub use frame_support::{
