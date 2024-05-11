@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && . $HOME/.cargo/env \
     && rustup default stable \
     && rustup update \
-    && rustup target add wasm32-unknown-unknown --toolchain nightly \
+    && rustup target add nightly-x86_64-unknown-linux-gnu --toolchain nightly \
     && cargo build --release
 
 # Use the same Debian Bullseye image for runtime to avoid library mismatches
