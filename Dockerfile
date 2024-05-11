@@ -3,6 +3,10 @@ FROM docker.io/library/ubuntu:20.04 as builder
 WORKDIR /plenitud
 COPY . /plenitud
 
+# Set non-interactive installation mode and configure timezone
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
 # Install dependencies in one RUN to reduce layer size and avoid cache issues
 RUN apt-get update && apt-get install -y \
     git \
