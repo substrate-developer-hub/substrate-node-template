@@ -1,42 +1,51 @@
-# This is a multi-stage docker file. See https://docs.docker.com/build/building/multi-stage/
-# for details about this pattern.
-# It is largely copied from Substrate
-# https://github.com/paritytech/substrate/blob/master/docker/substrate_builder.Dockerfile
-
-# For the build stage, we use an image provided by Parity
+# Use Parity's official CI image as the builder
 FROM docker.io/paritytech/ci-linux:production as builder
 WORKDIR /plenitud
 COPY . /plenitud
-RUN apt install --assume-yes git build-essential cmake clang curl libssl-dev llvm libudev-dev make protobuf-compiler
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-RUN source $HOME/.cargo/env
-RUN rustup target add wasm32-unknown-unknown --toolchain nightly
-RUN cargo build --release
-CMD ls
 
-# For the second stage, we use a minimal Ubuntu image
-# Alpine does't work as explained https://stackoverflow.com/a/66974607/4184410
-# Also, surprisingly, `ubuntu:latest` doesn't work and leads to "OS can't spawn worker thread: Operation not permitted"
+# Install dependencies in one RUN to reduce layer size and avoid cache issues
+RUN apt-get update && apt-get install -y \
+    git \
+    build-essential \
+    cmake \
+    clang \
+    curl \
+    libssl-dev \
+    llvm \
+    libudev-dev \
+    make \
+    protobuf-compiler && \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    . $HOME/.cargo/env && \
+    rustup target add wasm32-unknown-unknown --toolchain nightly && \
+    cargo build --release
+
+# Start from a minimal Ubuntu image for the runtime environment
 FROM docker.io/library/ubuntu:20.04
 LABEL description="Plenitud Node"
 
+# Copy the build artifact from the builder stage
 COPY --from=builder /plenitud/target/release/plenitud /usr/local/bin
-COPY --from=builder /plenitud/init-node-server.sh /init-node-server.sh
-COPY --from=builder /plenitud/spec.json /spec.json
-RUN chmod +x /init-node-server.sh
+COPY --from=builder /plenitud/init-node-server.sh /usr/local/bin
+COPY --from=builder /plenitud/spec.json /usr/local/bin
 
-RUN useradd -m -u 1000 -U -s /bin/sh -d /node-dev node-dev && \
-  mkdir -p /chain-data /node-dev/.local/share && \
-  chown -R node-dev:node-dev /chain-data && \
-  ln -s /chain-data /node-dev/.local/share/academy-pow && \
-  # unclutter and minimize the attack surface
-  # rm -rf /usr/bin /usr/sbin && \
-  # check if executable works in this container
-  /usr/local/bin/plenitud --version
+# Make scripts executable
+RUN chmod +x /usr/local/bin/init-node-server.sh /usr/local/bin/plenitud
 
-RUN mkdir -p /data/node01 && chown -R node-dev:node-dev /data/node01
+# Setup user and directories
+RUN useradd -m -u 1000 -U -s /bin/bash -d /node-dev node-dev && \
+    mkdir -p /chain-data /node-dev/.local/share /data/node01 && \
+    chown -R node-dev:node-dev /chain-data /data/node01 && \
+    ln -s /chain-data /node-dev/.local/share/academy-pow
 
+# Switch to user
 USER node-dev
 
+# Expose necessary ports
 EXPOSE 30333 9933 9944 9615
+
+# Define volume for chain data
 VOLUME ["/chain-data"]
+
+# Set the container's main command
+CMD ["/usr/local/bin/init-node-server.sh"]
