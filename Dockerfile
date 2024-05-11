@@ -7,7 +7,7 @@
 FROM docker.io/paritytech/ci-linux:production as builder
 WORKDIR /plenitud
 COPY . /plenitud
-RUN cargo build --release
+RUN cargo build --locked --release
 CMD ls
 
 # For the second stage, we use a minimal Ubuntu image
