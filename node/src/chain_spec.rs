@@ -4,11 +4,11 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use std::collections::Map;
+use std::collections::HashMap;
 
 /// Returns common properties for the chain specifications.
-fn common_properties() -> Map<String, serde_json::Value> {
-    let mut properties = Map::new();
+fn common_properties() -> HashMap<String, serde_json::Value> {
+    let mut properties = HashMap::new();
     properties.insert("tokenSymbol".into(), serde_json::json!("PLN"));
     properties.insert("tokenDecimals".into(), serde_json::json!(18));
     properties.insert("ss58Format".into(), serde_json::json!(42));
