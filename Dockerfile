@@ -34,7 +34,7 @@ RUN chmod +x /usr/local/bin/init-node-server.sh /usr/local/bin/node-template
 RUN useradd -m -u 1000 -U -s /bin/bash -d /node-dev node-dev && \
     mkdir -p /chain-data /node-dev/.local/share /data/node01 && \
     chown -R node-dev:node-dev /chain-data /data/node01 && \
-    ln -s /chain-data /node-dev/.local/share/academy-pow
+    ln -s /chain-data /node-dev/.local/share/node-template
 
 # Switch to user
 USER node-dev
