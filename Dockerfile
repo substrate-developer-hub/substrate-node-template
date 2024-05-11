@@ -1,5 +1,5 @@
 # Use Parity's official CI image as the builder
-FROM docker.io/paritytech/ci-linux:production as builder
+FROM docker.io/library/ubuntu:20.04 as builder
 WORKDIR /plenitud
 COPY . /plenitud
 
