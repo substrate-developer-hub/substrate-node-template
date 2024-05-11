@@ -7,7 +7,11 @@
 FROM docker.io/paritytech/ci-linux:production as builder
 WORKDIR /plenitud
 COPY . /plenitud
-RUN cargo build --locked --release
+RUN apt install --assume-yes git build-essential cmake clang curl libssl-dev llvm libudev-dev make protobuf-compiler
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+RUN source $HOME/.cargo/env
+RUN rustup target add wasm32-unknown-unknown --toolchain nightly
+RUN cargo build --release
 CMD ls
 
 # For the second stage, we use a minimal Ubuntu image
