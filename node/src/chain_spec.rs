@@ -103,45 +103,6 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	.build())
 }
 
-fn mainnet_genesis() -> node_template_runtime::GenesisConfig {
-    let aura_authority_1: AuraId = get_authority_from_seed("SomeSecureSeed1");
-    let aura_authority_2: AuraId = get_authority_from_seed("SomeSecureSeed2");
-
-    let root_key: AccountId = get_account_from_public_key(hex!("some_hex_public_key"));
-
-    node_template_runtime::GenesisConfig {
-        system: SystemConfig {
-            // Add system configuration here if needed
-        },
-        balances: BalancesConfig {
-            balances: vec![
-                (get_account_from_public_key(hex!("public_key_for_foundation")), 1_000_000_000_000_000),
-                (get_account_from_public_key(hex!("public_key_for_treasury")), 500_000_000_000_000),
-            ],
-        },
-        aura: AuraConfig {
-            authorities: vec![aura_authority_1, aura_authority_2],
-        },
-        grandpa: GrandpaConfig {
-            authorities: vec![(aura_authority_1, 1), (aura_authority_2, 1)],
-        },
-        sudo: SudoConfig {
-            key: Some(root_key),
-        },
-        // Add other module configurations as necessary
-    }
-}
-
-fn get_authority_from_seed(seed: &str) -> AuraId {
-    sr25519::Pair::from_string(&format!("//{}", seed), None)
-        .expect("static values are valid; qed")
-        .public()
-}
-
-fn get_account_from_public_key(key: [u8; 32]) -> AccountId {
-    AccountId::from(key)
-}
-
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	initial_authorities: Vec<(AuraId, GrandpaId)>,
