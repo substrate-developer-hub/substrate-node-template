@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     && rustup default nightly \
     && rustup update \
     && rustup target add wasm32-unknown-unknown --toolchain stable-x86_64-unknown-linux-gnu \
-    && cargo build --release
+    && cargo build --locked --release
 
 # Use the same Debian Bullseye image for runtime to avoid library mismatches
 FROM ubuntu:22.04
