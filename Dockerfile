@@ -22,12 +22,12 @@ FROM docker.io/library/ubuntu:20.04
 LABEL description="Plenitud Node"
 
 # Copy the build artifact from the builder stage
-COPY --from=builder /plenitud/target/release/plenitud /usr/local/bin
+COPY --from=builder /plenitud/target/release/node-template /usr/local/bin
 COPY --from=builder /plenitud/init-node-server.sh /usr/local/bin
 COPY --from=builder /plenitud/spec.json /usr/local/bin
 
 # Make scripts executable
-RUN chmod +x /usr/local/bin/init-node-server.sh /usr/local/bin/plenitud
+RUN chmod +x /usr/local/bin/init-node-server.sh /usr/local/bin/node-template
 
 # Setup user and directories
 RUN useradd -m -u 1000 -U -s /bin/bash -d /node-dev node-dev && \
