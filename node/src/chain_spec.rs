@@ -4,7 +4,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use std::collections::HashMap;
+use std::collections::Map;
 
 /// Returns common properties for the chain specifications.
 fn common_properties() -> Map<String, serde_json::Value> {
