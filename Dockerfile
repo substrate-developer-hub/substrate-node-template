@@ -15,8 +15,9 @@ RUN apt-get update && apt-get install -y \
     make \
     protobuf-compiler && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    . $HOME/.cargo/env && \
-    cargo build --release
+    . $HOME/.cargo/env
+
+RUN cargo build --release
 
 # Start from a minimal Ubuntu image for the runtime environment
 FROM docker.io/library/ubuntu:20.04
