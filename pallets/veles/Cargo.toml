@@ -1,7 +1,7 @@
 [package]
-name = "pallet-template"
-description = "FRAME pallet template for defining custom runtime logic."
-version = "0.0.0"
+name = "pallet-veles"
+description = "Veles is a carbon credit monitoring/verifying/trading platform which is able to run on any Substrate based blockchain"
+version = "0.1.0"
 license = "MIT-0"
 authors.workspace = true
 homepage.workspace = true
@@ -23,7 +23,6 @@ scale-info = { version = "2.10.0", default-features = false, features = [
 	"derive",
 ] }
 
-# frame deps
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false, optional = true }
 frame-support = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
 frame-system = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
