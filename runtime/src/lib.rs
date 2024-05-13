@@ -18,13 +18,17 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
-
 use frame_support::genesis_builder_helper::{build_config, create_default_config};
+
+use pallet_contracts::migration::v10;
+use frame_support::traits::Get;
+use frame_system::EnsureSigned;
+
 pub use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{
 		ConstBool, ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness,
-		StorageInfo,
+		StorageInfo, Nothing,
 	},
 	weights::{
 		constants::{
@@ -124,6 +128,15 @@ pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
 
+pub const MILLICENTS: Balance = 1_000_000_000;
+pub const CENTS: Balance = 1_000 * MILLICENTS;
+
+const fn deposit(items: u32, bytes: u32) -> Balance {
+	items as Balance * 15 * CENTS + (bytes as Balance) * 6 * CENTS
+}
+
+const AVERAGE_ON_INITIALIZE_RATION: Perbill = Perbill::from_percent(10);
+
 /// The version information used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
@@ -176,6 +189,75 @@ impl frame_system::Config for Runtime {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
+pub struct RandomnessCollectiveFlip;
+
+impl frame_support::traits::Randomness<Hash, u32> for RandomnessCollectiveFlip {
+    fn random(_subject: &[u8]) -> (Hash, u32) {
+        // Generar un valor de hash aleatorio como dummy
+        let random_hash = Hash::default();
+        // Retornar el hash y un número aleatorio u32 como dummy
+        (random_hash, 42) // Ejemplo de número aleatorio, puedes generar uno de manera adecuada
+    }
+}
+
+pub struct GetDefaultCodeHashLockupDepositPercent;
+
+impl sp_core::Get<Perbill> for GetDefaultCodeHashLockupDepositPercent {
+    fn get() -> Perbill {
+        // Aquí defines el valor por defecto de CodeHashLockupDepositPercent
+        Perbill::from_percent(20) // Por ejemplo, 20%
+    }
+}
+
+pub struct GetDefaultDepositLimitU128;
+
+impl Get<u128> for GetDefaultDepositLimitU128 {
+    fn get() -> u128 {
+        // Define el valor por defecto para DefaultDepositLimit
+        1000000000 // Por ejemplo, 1_000_000_000
+    }
+}
+
+parameter_types! {
+	pub const DepositPerItem: Balance = deposit(1, 0);
+	pub const DepositPerByte: Balance = deposit(0, 1); 
+	pub const DeletionQueueDepth: u32 = 128;
+	pub DeletionWeightLimit: Weight = AVERAGE_ON_INITIALIZE_RATION * BlockWeights::get().max_block;
+	pub Schedule: pallet_contracts::Schedule<Runtime> = Default::default();
+}
+
+impl pallet_contracts::Config for Runtime {
+	type Time = Timestamp;
+	type Randomness = RandomnessCollectiveFlip;
+	type Currency = Balances;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type CallFilter = frame_support::traits::Nothing;
+	type WeightPrice = pallet_transaction_payment::Pallet<Self>;
+	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
+	type ChainExtension = ();
+	type Schedule = Schedule;
+	type CallStack = [pallet_contracts::Frame<Self>; 31];
+	type DepositPerByte = DepositPerByte;
+	type DefaultDepositLimit = GetDefaultDepositLimitU128;
+	type DepositPerItem = DepositPerItem;
+	type CodeHashLockupDepositPercent = GetDefaultCodeHashLockupDepositPercent;
+	type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
+	type MaxCodeLen = ConstU32<{256 * 1024}>;
+	type MaxStorageKeyLen = ConstU32<{512 * 1024}>;
+    type MaxDelegateDependencies= ConstU32<{512 * 1024}>;
+    type UnsafeUnstableInterface= ConstBool<false>;
+    type MaxDebugBufferLen= ConstU32<{512 * 1024}>;
+	type UploadOrigin = EnsureSigned<AccountId>;
+    type InstantiateOrigin = EnsureSigned<AccountId>;
+    type Migrations= (v10::Migration<Runtime, Self::Currency>,);
+    type Debug = ();
+    type Environment = ();
+    type ApiVersion = ();
+    type Xcm=();
+}
+
 impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 	type DisabledValidators = ();
@@ -223,7 +305,7 @@ impl pallet_balances::Config for Runtime {
 	type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
-	type RuntimeHoldReason = ();
+	type RuntimeHoldReason = RuntimeHoldReason;
 	type RuntimeFreezeReason = ();
 }
 
@@ -293,6 +375,9 @@ mod runtime {
 	// Include the custom logic from the pallet-template in the runtime.
 	#[runtime::pallet_index(7)]
 	pub type TemplateModule = pallet_template;
+
+	#[runtime::pallet_index(8)]
+	pub type Contracts = pallet_contracts;
 }
 
 /// The address format for describing accounts.
