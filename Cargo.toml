@@ -10,6 +10,7 @@ members = [
     "node",
     "pallets/veles",
     "runtime",
+    "common",
 ]
 resolver = "2"
 [profile.release]

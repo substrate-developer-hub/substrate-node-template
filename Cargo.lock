@@ -1195,6 +1195,18 @@ dependencies = [
 [[package]]
 name = "common"
 version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+ "static_assertions",
+]
+
+[[package]]
+name = "common"
+version = "0.1.0"
 source = "git+https://github.com/w3f/ring-proof#b273d33f9981e2bb3375ab45faeb537f7ee35224"
 dependencies = [
  "ark-ec",
@@ -2879,6 +2891,12 @@ name = "hex-conservative"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "30ed443af458ccb6d81c1e7e661545f94d3176752fb1df2f543b902a1e0f51e2"
+
+[[package]]
+name = "hex-literal"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ebdb29d2ea9ed0083cd8cece49bbd968021bd99b0849edb4a9a7ee0fdf6a4e0"
 
 [[package]]
 name = "hkdf"
@@ -4980,14 +4998,17 @@ dependencies = [
 name = "pallet-veles"
 version = "0.1.0"
 dependencies = [
+ "common 0.1.0",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "hex-literal",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
  "sp-io",
  "sp-runtime",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk.git?tag=polkadot-v1.9.0)",
 ]
 
 [[package]]
@@ -6060,7 +6081,7 @@ dependencies = [
  "ark-serialize",
  "ark-std",
  "blake2 0.10.6",
- "common",
+ "common 0.1.0 (git+https://github.com/w3f/ring-proof)",
  "fflonk",
  "merlin",
 ]
