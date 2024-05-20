@@ -53,6 +53,7 @@ pub struct CFReportInfo<AccountIdOf, IPFSLength: Get<u32>> {
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
+	use frame_support::traits::Time;
 	use frame_system::pallet_prelude::*;
 	// use hex_literal::hex;
 	use sp_std::collections::btree_set::BTreeSet;
@@ -67,6 +68,7 @@ pub mod pallet {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		type IPFSLength: Get<u32>;
 		type CarboCreditDecimal: Get<u8>;
+		type Time: Time;
 	}
 
 	/// Pallet types and constants

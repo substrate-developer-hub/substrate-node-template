@@ -256,6 +256,7 @@ impl pallet_veles::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type IPFSLength = IPFSLength;
 	type CarboCreditDecimal = CarboCreditDecimal;
+	type Time = Timestamp;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
