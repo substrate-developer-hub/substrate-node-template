@@ -1,0 +1,29 @@
+[package]
+name = "common"
+version = "0.1.0"
+authors = { workspace = true }
+license = "BSD-4-Clause"
+edition = "2021"
+
+[dependencies]
+codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = [
+	"derive",
+] }
+scale-info = { version = "2.10.0", default-features = false, features = [
+	"derive",
+] }
+frame-support = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
+frame-system = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false}
+
+static_assertions = "1.1.0"
+
+[features]
+default = ['std']
+std = [
+    'codec/std',
+    "scale-info/std",
+    'frame-support/std',
+    'frame-system/std',
+    "sp-runtime/std",
+]
