@@ -3,6 +3,7 @@
 pub use codec::{Decode, Encode};
 pub use common::BoundedString;
 pub use frame_support::pallet_prelude::Get;
+pub use pallet::*;
 pub use sp_core::H256;
 pub use sp_std::collections::btree_set::BTreeSet;
 
