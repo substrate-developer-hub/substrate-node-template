@@ -1,9 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use codec::{Decode, Encode};
-pub use pallet::*;
-pub use frame_support::pallet_prelude::Get;
 pub use common::BoundedString;
+pub use frame_support::pallet_prelude::Get;
+pub use sp_core::H256;
+pub use sp_std::collections::btree_set::BTreeSet;
 
 /// Global data structures
 // Project Validator / Project Owner data structure
@@ -30,6 +31,21 @@ pub struct CFAInfo<BlockNumber, IPFSLength: Get<u32>> {
 	carbon_credit_balance: i128,
 	// Creation date
 	creation_date: BlockNumber,
+}
+
+// Carbon Footprint report data structure
+#[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
+#[cfg_attr(feature = "std", derive(Debug))]
+#[scale_info(skip_type_params(IPFSLength))]
+pub struct CFReportInfo<AccountIdOf, IPFSLength: Get<u32>> {
+	// IPFS link to carbon footprint deficit report
+	deficit_report_ipfs: BoundedString<IPFSLength>,
+	// Carbon deficit (aka Carbon footprint)
+	carbon_deficit: i128,
+	// Votes for
+	votes_for: BTreeSet<AccountIdOf>,
+	// Votes against
+	votes_against: BTreeSet<AccountIdOf>,
 }
 
 #[frame_support::pallet]
@@ -87,8 +103,13 @@ pub mod pallet {
 	// Carbon Footprint accounts
 	#[pallet::storage]
 	#[pallet::getter(fn carbon_footprint_accounts)]
-	pub(super) type CarbonFootprintAccounts<T: Config> =
-		StorageMap<_, Identity, AccountIdOf<T>, CFAInfo<BlockNumber<T>, T::IPFSLength>, OptionQuery>;
+	pub(super) type CarbonFootprintAccounts<T: Config> = StorageMap<
+		_,
+		Identity,
+		AccountIdOf<T>,
+		CFAInfo<BlockNumber<T>, T::IPFSLength>,
+		OptionQuery,
+	>;
 
 	// Trader accounts
 	#[pallet::storage]
@@ -99,14 +120,24 @@ pub mod pallet {
 	// Project Validator accounts
 	#[pallet::storage]
 	#[pallet::getter(fn project_validators)]
-	pub(super) type ProjectValidators<T: Config> =
-		StorageMap<_, Identity, AccountIdOf<T>, PVoPOInfo<BlockNumber<T>, T::IPFSLength>, OptionQuery>;
+	pub(super) type ProjectValidators<T: Config> = StorageMap<
+		_,
+		Identity,
+		AccountIdOf<T>,
+		PVoPOInfo<BlockNumber<T>, T::IPFSLength>,
+		OptionQuery,
+	>;
 
 	// Project Owner accounts
 	#[pallet::storage]
 	#[pallet::getter(fn project_owners)]
-	pub(super) type ProjectOwners<T: Config> =
-		StorageMap<_, Identity, AccountIdOf<T>, PVoPOInfo<BlockNumber<T>, T::IPFSLength>, OptionQuery>;
+	pub(super) type ProjectOwners<T: Config> = StorageMap<
+		_,
+		Identity,
+		AccountIdOf<T>,
+		PVoPOInfo<BlockNumber<T>, T::IPFSLength>,
+		OptionQuery,
+	>;
 
 	// Penalty timeouts
 	#[pallet::storage]
@@ -114,11 +145,25 @@ pub mod pallet {
 	pub(super) type PenaltyTimeouts<T: Config> =
 		StorageMap<_, Identity, BlockNumber<T>, BTreeSet<AccountIdOf<T>>, OptionQuery>;
 
+	// Carbon deficit reports
+	#[pallet::storage]
+	#[pallet::getter(fn carbon_deficit_reports)]
+	pub(super) type CarbonDeficitReports<T: Config> = StorageNMap<
+		_,
+		(
+			NMapKey<Blake2_128Concat, H256>,
+			NMapKey<Blake2_128Concat, BlockNumber<T>>,
+			NMapKey<Blake2_128Concat, AccountIdOf<T>>,
+		),
+		CFReportInfo<AccountIdOf<T>, T::IPFSLength>,
+		OptionQuery,
+	>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Dummy Event
-        DummyEvents(),
+		DummyEvents(),
 	}
 
 	#[pallet::error]
