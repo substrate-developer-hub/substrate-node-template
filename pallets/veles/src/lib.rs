@@ -165,13 +165,89 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// Dummy Event
-		DummyEvents(),
+		/// Successful Vote
+		SuccessfulVote(AccountIdOf<T>, bool),
 	}
 
 	#[pallet::error]
-	pub enum Error<T> {}
+	pub enum Error<T> {
+		/// Report not found
+		ReportNotFound,
+		/// Not Authorized
+		NotAuthorized,
+		/// Vote already submitted
+		VoteAlreadySubmitted,
+	}
 
 	#[pallet::call]
-	impl<T: Config> Pallet<T> {}
+	impl<T: Config> Pallet<T> {
+		// Vote for/against Carbon Deficit Reports
+		#[pallet::call_index(0)]
+		#[pallet::weight(0)]
+		pub fn cdr_vote(
+			origin: OriginFor<T>,
+			hash: Option<H256>,
+			block_number: Option<BlockNumber<T>>,
+			account_id: Option<AccountIdOf<T>>,
+			vote: bool,
+		) -> DispatchResultWithPostInfo {
+			let who = ensure_signed(origin)?;
+
+			// Check if caller is Project Validator account
+			ensure!(ProjectValidators::<T>::contains_key(who.clone()), Error::<T>::NotAuthorized);
+
+			let keys_iter = CarbonDeficitReports::<T>::iter_keys();
+			let mut report = None;
+			let mut report_key = None;
+
+			// Iterate through reports's keys and match with either provided hash or account_id and block_number
+			for key in keys_iter {
+				// Access the current key and perform check/processing here
+				let current_key = key;
+
+				if let Some(hash) = hash {
+					if current_key.0 == hash {
+						report = CarbonDeficitReports::<T>::get(current_key.clone());
+						report_key = Some(current_key);
+						break;
+					}
+				} else if let Some(block_number) = block_number {
+					if let Some(ref account_id) = account_id {
+					  if current_key.1 == block_number && current_key.2 == *account_id {
+						report = CarbonDeficitReports::<T>::get(current_key.clone());
+						report_key = Some(current_key);
+						break;
+					}
+				}
+			}
+				
+			}
+
+			// If report_info exists submit vote
+			if report.is_some() {
+				let mut report_info = report.unwrap();
+				// Check if vote already exists
+				ensure!(
+					!report_info.votes_for.contains(&who)
+						&& !report_info.votes_against.contains(&who),
+					Error::<T>::VoteAlreadySubmitted
+				);
+
+				if vote {
+					report_info.votes_for.insert(who.clone());
+				} else {
+					report_info.votes_against.insert(who.clone());
+				};
+
+				// Write to a storage
+				CarbonDeficitReports::<T>::insert(report_key.unwrap(), report_info);
+
+				Self::deposit_event(Event::SuccessfulVote(who.clone(), vote));
+			} else {
+				return Err(Error::<T>::ReportNotFound.into());
+			}
+
+			Ok(().into())
+		}
+	}
 }
