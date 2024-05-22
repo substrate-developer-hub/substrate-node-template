@@ -51,6 +51,20 @@ pub struct CFReportInfo<AccountIdOf, BlockNumber> {
 	votes_against: BTreeSet<AccountIdOf>,
 }
 
+// Project Proposal info structure
+#[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct PProposalInfo<AccountIdOf, BlockNumber> {
+	 // Project hash 
+	 project_hash: H256,
+     // Timestamp
+	 timestamp: BlockNumber,
+	 // Votes for
+	 votes_for: BTreeSet<AccountIdOf>,
+	 // Votes against
+	 votes_against: BTreeSet<AccountIdOf>,
+}
+
 // Penalty level structure for carbon footprint
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
@@ -172,6 +186,17 @@ pub mod pallet {
 		CFReportInfo<AccountIdOf<T>, BlockNumber<T>>,
 		OptionQuery,
 	>;
+
+	// Projects proposals
+	#[pallet::storage]
+    #[pallet::getter(fn project_proposals)]
+    pub(super) type ProjectProposals<T: Config> = StorageMap<
+        _,
+        Identity,
+		IPFSHash, 
+		PProposalInfo<AccountIdOf<T>, BlockNumber<T>>,
+        OptionQuery,
+    >;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
