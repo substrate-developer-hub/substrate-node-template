@@ -38,15 +38,25 @@ pub struct CFAInfo<BlockNumber, IPFSLength: Get<u32>> {
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
 #[scale_info(skip_type_params(IPFSLength))]
-pub struct CFReportInfo<AccountIdOf, IPFSLength: Get<u32>> {
-	// IPFS link to carbon footprint deficit report
-	deficit_report_ipfs: BoundedString<IPFSLength>,
+pub struct CFReportInfo<AccountIdOf, BlockNumber> {
+	// Account
+	account_id: AccountIdOf,
+	// Timestamp
+	timestamp: BlockNumber,
 	// Carbon deficit (aka Carbon footprint)
 	carbon_deficit: i128,
 	// Votes for
 	votes_for: BTreeSet<AccountIdOf>,
 	// Votes against
 	votes_against: BTreeSet<AccountIdOf>,
+}
+
+// Penalty level structure for carbon footprint
+#[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct PenaltyLevelConfig {
+	pub level: u8,
+	pub base: i32, // Balance
 }
 
 #[frame_support::pallet]
@@ -69,11 +79,15 @@ pub mod pallet {
 		type IPFSLength: Get<u32>;
 		type CarboCreditDecimal: Get<u8>;
 		type Time: Time;
+
+		#[pallet::constant]
+		type PenaltyLevelsConfiguration: Get<[PenaltyLevelConfig; 5]>;
 	}
 
 	/// Pallet types and constants
 	type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
 	type BlockNumber<T> = BlockNumberFor<T>;
+	type IPFSHash = H256;
 
 	/// Helper functions
 	// Default authority accounts
@@ -151,14 +165,11 @@ pub mod pallet {
 	// Carbon deficit reports
 	#[pallet::storage]
 	#[pallet::getter(fn carbon_deficit_reports)]
-	pub(super) type CarbonDeficitReports<T: Config> = StorageNMap<
+	pub(super) type CarbonDeficitReports<T: Config> = StorageMap<
 		_,
-		(
-			NMapKey<Blake2_128Concat, H256>,
-			NMapKey<Blake2_128Concat, BlockNumber<T>>,
-			NMapKey<Blake2_128Concat, AccountIdOf<T>>,
-		),
-		CFReportInfo<AccountIdOf<T>, T::IPFSLength>,
+		Identity,
+		IPFSHash,
+		CFReportInfo<AccountIdOf<T>, BlockNumber<T>>,
 		OptionQuery,
 	>;
 
@@ -166,7 +177,7 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Successful Vote
-		SuccessfulVote(AccountIdOf<T>, bool),
+		SuccessfulVote(AccountIdOf<T>, IPFSHash),
 	}
 
 	#[pallet::error]
@@ -186,9 +197,7 @@ pub mod pallet {
 		#[pallet::weight(0)]
 		pub fn cdr_vote(
 			origin: OriginFor<T>,
-			hash: Option<H256>,
-			block_number: Option<BlockNumber<T>>,
-			account_id: Option<AccountIdOf<T>>,
+			ipfs: IPFSHash,
 			vote: bool,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
@@ -196,32 +205,11 @@ pub mod pallet {
 			// Check if caller is Project Validator account
 			ensure!(ProjectValidators::<T>::contains_key(who.clone()), Error::<T>::NotAuthorized);
 
-			let keys_iter = CarbonDeficitReports::<T>::iter_keys();
-			let mut report = None;
-			let mut report_key = None;
+			// Check if report exists
+			ensure!(CarbonDeficitReports::<T>::contains_key(ipfs), Error::<T>::ReportNotFound);
 
-			// Iterate through reports's keys and match with either provided hash or account_id and block_number
-			for key in keys_iter {
-				// Access the current key and perform check/processing here
-				let current_key = key;
-
-				if let Some(hash) = hash {
-					if current_key.0 == hash {
-						report = CarbonDeficitReports::<T>::get(current_key.clone());
-						report_key = Some(current_key);
-						break;
-					}
-				} else if let Some(block_number) = block_number {
-					if let Some(ref account_id) = account_id {
-					  if current_key.1 == block_number && current_key.2 == *account_id {
-						report = CarbonDeficitReports::<T>::get(current_key.clone());
-						report_key = Some(current_key);
-						break;
-					}
-				}
-			}
-				
-			}
+			// Get report info
+			let report = CarbonDeficitReports::<T>::get(ipfs);
 
 			// If report_info exists submit vote
 			if report.is_some() {
@@ -240,9 +228,9 @@ pub mod pallet {
 				};
 
 				// Write to a storage
-				CarbonDeficitReports::<T>::insert(report_key.unwrap(), report_info);
+				CarbonDeficitReports::<T>::insert(ipfs, report_info);
 
-				Self::deposit_event(Event::SuccessfulVote(who.clone(), vote));
+				Self::deposit_event(Event::SuccessfulVote(who.clone(), ipfs));
 			} else {
 				return Err(Error::<T>::ReportNotFound.into());
 			}
