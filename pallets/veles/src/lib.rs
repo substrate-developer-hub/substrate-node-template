@@ -12,37 +12,37 @@ pub use sp_std::collections::btree_set::BTreeSet;
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
 #[scale_info(skip_type_params(IPFSLength))]
-pub struct PVoPOInfo<BlockNumber, IPFSLength: Get<u32>> {
+pub struct PVoPOInfo<MomentOf, IPFSLength: Get<u32>> {
 	// IPFS link to PV/PO documentation
 	documentation_ipfs: BoundedString<IPFSLength>,
 	// Penalty level
 	penalty_level: u8,
 	// Penalty timeout
-	penalty_timeout: BlockNumber,
+	penalty_timeout: MomentOf,
 }
 
 // Carbon Footprint account data structure
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
 #[scale_info(skip_type_params(IPFSLength))]
-pub struct CFAInfo<BlockNumber, IPFSLength: Get<u32>> {
+pub struct CFAInfo<MomentOf, IPFSLength: Get<u32>> {
 	// IPFS link to CFA documentation
 	documentation_ipfs: BoundedString<IPFSLength>,
 	// Carbon credit balance
 	carbon_credit_balance: i128,
 	// Creation date
-	creation_date: BlockNumber,
+	creation_date: MomentOf,
 }
 
 // Carbon Footprint report data structure
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
 #[scale_info(skip_type_params(IPFSLength))]
-pub struct CFReportInfo<AccountIdOf, BlockNumber> {
+pub struct CFReportInfo<AccountIdOf, MomentOf> {
 	// Account
 	account_id: AccountIdOf,
-	// Timestamp
-	timestamp: BlockNumber,
+	// Creation date
+	creation_date: MomentOf,
 	// Carbon deficit (aka Carbon footprint)
 	carbon_deficit: i128,
 	// Votes for
@@ -54,11 +54,13 @@ pub struct CFReportInfo<AccountIdOf, BlockNumber> {
 // Project Proposal info structure
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
-pub struct PProposalInfo<AccountIdOf, BlockNumber> {
+pub struct PProposalInfo<AccountIdOf, MomentOf> {
+	 // Project Owner
+	 project_owner: AccountIdOf,
+     // Creation date
+	 creation_date: MomentOf,
 	 // Project hash 
 	 project_hash: H256,
-     // Timestamp
-	 timestamp: BlockNumber,
 	 // Votes for
 	 votes_for: BTreeSet<AccountIdOf>,
 	 // Votes against
@@ -100,7 +102,7 @@ pub mod pallet {
 
 	/// Pallet types and constants
 	type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
-	type BlockNumber<T> = BlockNumberFor<T>;
+	type MomentOf<T> = <<T as Config>::Time as Time>::Moment;
 	type IPFSHash = H256;
 
 	/// Helper functions
@@ -138,7 +140,7 @@ pub mod pallet {
 		_,
 		Identity,
 		AccountIdOf<T>,
-		CFAInfo<BlockNumber<T>, T::IPFSLength>,
+		CFAInfo<MomentOf<T>, T::IPFSLength>,
 		OptionQuery,
 	>;
 
@@ -155,7 +157,7 @@ pub mod pallet {
 		_,
 		Identity,
 		AccountIdOf<T>,
-		PVoPOInfo<BlockNumber<T>, T::IPFSLength>,
+		PVoPOInfo<MomentOf<T>, T::IPFSLength>,
 		OptionQuery,
 	>;
 
@@ -166,7 +168,7 @@ pub mod pallet {
 		_,
 		Identity,
 		AccountIdOf<T>,
-		PVoPOInfo<BlockNumber<T>, T::IPFSLength>,
+		PVoPOInfo<MomentOf<T>, T::IPFSLength>,
 		OptionQuery,
 	>;
 
@@ -174,7 +176,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn penalty_timeouts)]
 	pub(super) type PenaltyTimeouts<T: Config> =
-		StorageMap<_, Identity, BlockNumber<T>, BTreeSet<AccountIdOf<T>>, OptionQuery>;
+		StorageMap<_, Identity, MomentOf<T>, BTreeSet<AccountIdOf<T>>, OptionQuery>;
 
 	// Carbon deficit reports
 	#[pallet::storage]
@@ -183,7 +185,7 @@ pub mod pallet {
 		_,
 		Identity,
 		IPFSHash,
-		CFReportInfo<AccountIdOf<T>, BlockNumber<T>>,
+		CFReportInfo<AccountIdOf<T>, MomentOf<T>>,
 		OptionQuery,
 	>;
 
@@ -194,7 +196,7 @@ pub mod pallet {
         _,
         Identity,
 		IPFSHash, 
-		PProposalInfo<AccountIdOf<T>, BlockNumber<T>>,
+		PProposalInfo<AccountIdOf<T>, MomentOf<T>>,
         OptionQuery,
     >;
 
