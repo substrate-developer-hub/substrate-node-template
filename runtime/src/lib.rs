@@ -37,6 +37,7 @@ pub use frame_system::Call as SystemCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier};
+pub use pallet_veles::PenaltyLevelConfig;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
@@ -249,6 +250,13 @@ impl pallet_sudo::Config for Runtime {
 parameter_types! {
 	pub const IPFSLength: u32 = 64;
 	pub const CarboCreditDecimal: u8 = 4;
+	pub const PenaltyLevelsConfiguration: [PenaltyLevelConfig; 5] = [
+		PenaltyLevelConfig { level: 0, base: 1 },
+		PenaltyLevelConfig { level: 1, base: 2 },
+		PenaltyLevelConfig { level: 2, base: 3 },
+		PenaltyLevelConfig { level: 3, base: 4 },
+		PenaltyLevelConfig { level: 4, base: 5 }, // TODO base into Balance
+	];
 }
 
 /// Configure the Veles pallet
@@ -257,6 +265,7 @@ impl pallet_veles::Config for Runtime {
 	type IPFSLength = IPFSLength;
 	type CarboCreditDecimal = CarboCreditDecimal;
 	type Time = Timestamp;
+	type PenaltyLevelsConfiguration = PenaltyLevelsConfiguration;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

@@ -38,15 +38,39 @@ pub struct CFAInfo<BlockNumber, IPFSLength: Get<u32>> {
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
 #[scale_info(skip_type_params(IPFSLength))]
-pub struct CFReportInfo<AccountIdOf, IPFSLength: Get<u32>> {
-	// IPFS link to carbon footprint deficit report
-	deficit_report_ipfs: BoundedString<IPFSLength>,
+pub struct CFReportInfo<AccountIdOf, BlockNumber> {
+	// Account
+	account_id: AccountIdOf,
+	// Timestamp
+	timestamp: BlockNumber,
 	// Carbon deficit (aka Carbon footprint)
 	carbon_deficit: i128,
 	// Votes for
 	votes_for: BTreeSet<AccountIdOf>,
 	// Votes against
 	votes_against: BTreeSet<AccountIdOf>,
+}
+
+// Project Proposal info structure
+#[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct PProposalInfo<AccountIdOf, BlockNumber> {
+	 // Project hash 
+	 project_hash: H256,
+     // Timestamp
+	 timestamp: BlockNumber,
+	 // Votes for
+	 votes_for: BTreeSet<AccountIdOf>,
+	 // Votes against
+	 votes_against: BTreeSet<AccountIdOf>,
+}
+
+// Penalty level structure for carbon footprint
+#[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct PenaltyLevelConfig {
+	pub level: u8,
+	pub base: i32, // Balance
 }
 
 #[frame_support::pallet]
@@ -69,11 +93,15 @@ pub mod pallet {
 		type IPFSLength: Get<u32>;
 		type CarboCreditDecimal: Get<u8>;
 		type Time: Time;
+
+		#[pallet::constant]
+		type PenaltyLevelsConfiguration: Get<[PenaltyLevelConfig; 5]>;
 	}
 
 	/// Pallet types and constants
 	type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
 	type BlockNumber<T> = BlockNumberFor<T>;
+	type IPFSHash = H256;
 
 	/// Helper functions
 	// Default authority accounts
@@ -151,27 +179,88 @@ pub mod pallet {
 	// Carbon deficit reports
 	#[pallet::storage]
 	#[pallet::getter(fn carbon_deficit_reports)]
-	pub(super) type CarbonDeficitReports<T: Config> = StorageNMap<
+	pub(super) type CarbonDeficitReports<T: Config> = StorageMap<
 		_,
-		(
-			NMapKey<Blake2_128Concat, H256>,
-			NMapKey<Blake2_128Concat, BlockNumber<T>>,
-			NMapKey<Blake2_128Concat, AccountIdOf<T>>,
-		),
-		CFReportInfo<AccountIdOf<T>, T::IPFSLength>,
+		Identity,
+		IPFSHash,
+		CFReportInfo<AccountIdOf<T>, BlockNumber<T>>,
 		OptionQuery,
 	>;
+
+	// Projects proposals
+	#[pallet::storage]
+    #[pallet::getter(fn project_proposals)]
+    pub(super) type ProjectProposals<T: Config> = StorageMap<
+        _,
+        Identity,
+		IPFSHash, 
+		PProposalInfo<AccountIdOf<T>, BlockNumber<T>>,
+        OptionQuery,
+    >;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// Dummy Event
-		DummyEvents(),
+		/// Successful Vote
+		SuccessfulVote(AccountIdOf<T>, IPFSHash),
 	}
 
 	#[pallet::error]
-	pub enum Error<T> {}
+	pub enum Error<T> {
+		/// Report not found
+		ReportNotFound,
+		/// Not Authorized
+		NotAuthorized,
+		/// Vote already submitted
+		VoteAlreadySubmitted,
+	}
 
 	#[pallet::call]
-	impl<T: Config> Pallet<T> {}
+	impl<T: Config> Pallet<T> {
+		// Vote for/against Carbon Deficit Reports
+		#[pallet::call_index(0)]
+		#[pallet::weight(0)]
+		pub fn cdr_vote(
+			origin: OriginFor<T>,
+			ipfs: IPFSHash,
+			vote: bool,
+		) -> DispatchResultWithPostInfo {
+			let who = ensure_signed(origin)?;
+
+			// Check if caller is Project Validator account
+			ensure!(ProjectValidators::<T>::contains_key(who.clone()), Error::<T>::NotAuthorized);
+
+			// Check if report exists
+			ensure!(CarbonDeficitReports::<T>::contains_key(ipfs), Error::<T>::ReportNotFound);
+
+			// Get report info
+			let report = CarbonDeficitReports::<T>::get(ipfs);
+
+			// If report_info exists submit vote
+			if report.is_some() {
+				let mut report_info = report.unwrap();
+				// Check if vote already exists
+				ensure!(
+					!report_info.votes_for.contains(&who)
+						&& !report_info.votes_against.contains(&who),
+					Error::<T>::VoteAlreadySubmitted
+				);
+
+				if vote {
+					report_info.votes_for.insert(who.clone());
+				} else {
+					report_info.votes_against.insert(who.clone());
+				};
+
+				// Write to a storage
+				CarbonDeficitReports::<T>::insert(ipfs, report_info);
+
+				Self::deposit_event(Event::SuccessfulVote(who.clone(), ipfs));
+			} else {
+				return Err(Error::<T>::ReportNotFound.into());
+			}
+
+			Ok(().into())
+		}
+	}
 }
