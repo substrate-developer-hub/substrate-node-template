@@ -188,6 +188,8 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Successful Vote
 		SuccessfulVote(AccountIdOf<T>, IPFSHash),
+		/// Successful Project Proposal
+		ProjectProposalCreated(AccountIdOf<T>, IPFSHash),
 	}
 
 	#[pallet::error]
@@ -198,6 +200,8 @@ pub mod pallet {
 		NotAuthorized,
 		/// Vote already submitted
 		VoteAlreadySubmitted,
+		/// Project proposal already exists
+		ProjectProposalAlreadyExists,
 		/// Project Proposal not found
 		ProjectProposalNotFound,
 		/// Wrong vote type
@@ -265,6 +269,41 @@ pub mod pallet {
 			}
 
 			Self::deposit_event(Event::SuccessfulVote(who.clone(), ipfs));
+
+			Ok(().into())
+		}
+
+		// Propose project
+		#[pallet::call_index(1)]
+		#[pallet::weight(0)]
+		pub fn propose_project(origin: OriginFor<T>, ipfs: IPFSHash) -> DispatchResultWithPostInfo {
+			let who = ensure_signed(origin)?;
+
+			// Check if caller is Project Owner account
+			ensure!(ProjectOwners::<T>::contains_key(who.clone()), Error::<T>::NotAuthorized);
+
+			// Ensure project does not exist
+			ensure!(
+				!ProjectProposals::<T>::contains_key(ipfs),
+				Error::<T>::ProjectProposalAlreadyExists
+			);
+
+			// Get time
+			let creation_date = T::Time::now();
+
+			// Project Proposal info
+			let project_proposal_info = PProposalInfo {
+				project_owner: who.clone(),
+				creation_date,
+				project_hash: ipfs,
+				votes_for: BTreeSet::<AccountIdOf<T>>::new(),
+				votes_against: BTreeSet::<AccountIdOf<T>>::new(),
+			};
+
+			// Write to a storage
+			ProjectProposals::<T>::insert(ipfs, project_proposal_info);
+
+			Self::deposit_event(Event::ProjectProposalCreated(who.clone(), ipfs));
 
 			Ok(().into())
 		}
