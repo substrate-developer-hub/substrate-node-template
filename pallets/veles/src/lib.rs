@@ -7,6 +7,14 @@ pub use pallet::*;
 pub use sp_core::H256;
 pub use sp_std::collections::btree_set::BTreeSet;
 
+// This module contains a mock runtime specific for testing this pallet's functionality.
+#[cfg(test)]
+mod mock;
+
+// This module contains the unit tests for this pallet.
+#[cfg(test)]
+mod tests;
+
 /// Global data structures
 // Project Validator / Project Owner data structure
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
@@ -52,7 +60,7 @@ pub struct CFReportInfo<AccountIdOf, MomentOf> {
 }
 
 // Project Proposal info structure
-#[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
+#[derive(Encode, Decode, Clone, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct PProposalInfo<AccountIdOf, MomentOf> {
 	// Project Owner

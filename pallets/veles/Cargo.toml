@@ -29,6 +29,7 @@ frame-support = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = 
 frame-system = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
 sp-std = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
 sp-core = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
+pallet-timestamp = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
 
 [dev-dependencies]
 sp-io = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0" }
