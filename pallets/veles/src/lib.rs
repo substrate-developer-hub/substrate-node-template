@@ -4,7 +4,7 @@ pub use codec::{Decode, Encode};
 pub use common::BoundedString;
 pub use frame_support::pallet_prelude::Get;
 pub use pallet::*;
-pub use sp_core::{H256, blake2_256};
+pub use sp_core::{blake2_256, H256};
 pub use sp_std::collections::btree_set::BTreeSet;
 
 // This module contains a mock runtime specific for testing this pallet's functionality.
@@ -93,8 +93,8 @@ pub struct ProjectInfo<IPFSLength: Get<u32>, MomentOf, BlockNumber> {
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct PenaltyLevelConfig {
-	pub level: u8,	// Penalty level
-	pub base: i32, 	// Balance
+	pub level: u8, // Penalty level
+	pub base: i32, // Balance
 }
 
 // Vote type enum
@@ -178,20 +178,35 @@ pub mod pallet {
 	// Project Validator accounts
 	#[pallet::storage]
 	#[pallet::getter(fn project_validators)]
-	pub(super) type ProjectValidators<T: Config> =
-		StorageMap<_, Identity, AccountIdOf<T>, PVoPOInfo<T::IPFSLength, BlockNumber<T>>, OptionQuery>;
+	pub(super) type ProjectValidators<T: Config> = StorageMap<
+		_,
+		Identity,
+		AccountIdOf<T>,
+		PVoPOInfo<T::IPFSLength, BlockNumber<T>>,
+		OptionQuery,
+	>;
 
 	// Project Owner accounts
 	#[pallet::storage]
 	#[pallet::getter(fn project_owners)]
-	pub(super) type ProjectOwners<T: Config> =
-		StorageMap<_, Identity, AccountIdOf<T>, PVoPOInfo<T::IPFSLength, BlockNumber<T>>, OptionQuery>;
+	pub(super) type ProjectOwners<T: Config> = StorageMap<
+		_,
+		Identity,
+		AccountIdOf<T>,
+		PVoPOInfo<T::IPFSLength, BlockNumber<T>>,
+		OptionQuery,
+	>;
 
 	// Projects
 	#[pallet::storage]
 	#[pallet::getter(fn projects)]
-	pub(super) type Projects<T: Config> =
-		StorageMap<_, Identity, H256, ProjectInfo<T::IPFSLength, MomentOf<T>, BlockNumber<T>>, OptionQuery>;
+	pub(super) type Projects<T: Config> = StorageMap<
+		_,
+		Identity,
+		H256,
+		ProjectInfo<T::IPFSLength, MomentOf<T>, BlockNumber<T>>,
+		OptionQuery,
+	>;
 
 	// Penalty timeouts
 	#[pallet::storage]
@@ -202,16 +217,25 @@ pub mod pallet {
 	// Carbon deficit reports
 	#[pallet::storage]
 	#[pallet::getter(fn carbon_deficit_reports)]
-	pub(super) type CarbonDeficitReports<T: Config> =
-		StorageMap<_, Identity, BoundedString<T::IPFSLength>, CFReportInfo<AccountIdOf<T>, MomentOf<T>>, OptionQuery>;
+	pub(super) type CarbonDeficitReports<T: Config> = StorageMap<
+		_,
+		Identity,
+		BoundedString<T::IPFSLength>,
+		CFReportInfo<AccountIdOf<T>, MomentOf<T>>,
+		OptionQuery,
+	>;
 
 	// Projects proposals
 	#[pallet::storage]
 	#[pallet::getter(fn project_proposals)]
-	pub(super) type ProjectProposals<T: Config> =
-		StorageMap<_, Identity, BoundedString<T::IPFSLength>, PProposalInfo<AccountIdOf<T>, MomentOf<T>>, OptionQuery>;
+	pub(super) type ProjectProposals<T: Config> = StorageMap<
+		_,
+		Identity,
+		BoundedString<T::IPFSLength>,
+		PProposalInfo<AccountIdOf<T>, MomentOf<T>>,
+		OptionQuery,
+	>;
 
- 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -238,7 +262,7 @@ pub mod pallet {
 	}
 
 	#[pallet::call]
-	impl<T: Config> Pallet<T> { 
+	impl<T: Config> Pallet<T> {
 		// Vote for/against Carbon Deficit Reports or for/against project Proposals
 		#[pallet::call_index(0)]
 		#[pallet::weight(0)]
@@ -256,8 +280,8 @@ pub mod pallet {
 			match vote_type {
 				VoteType::CDRVote => {
 					// Get report info and return error if it does not exist
-					let mut report =
-						CarbonDeficitReports::<T>::get(ipfs.clone()).ok_or(Error::<T>::ReportNotFound)?;
+					let mut report = CarbonDeficitReports::<T>::get(ipfs.clone())
+						.ok_or(Error::<T>::ReportNotFound)?;
 
 					// Check if vote already exists
 					ensure!(
@@ -291,7 +315,7 @@ pub mod pallet {
 					};
 
 					ProjectProposals::<T>::insert(ipfs.clone(), report);
-				}
+				},
 			}
 
 			Self::deposit_event(Event::SuccessfulVote(user.clone(), ipfs.clone()));
@@ -302,7 +326,10 @@ pub mod pallet {
 		// Propose project
 		#[pallet::call_index(1)]
 		#[pallet::weight(0)]
-		pub fn propose_project(origin: OriginFor<T>, ipfs: BoundedString<T::IPFSLength>) -> DispatchResultWithPostInfo {
+		pub fn propose_project(
+			origin: OriginFor<T>,
+			ipfs: BoundedString<T::IPFSLength>,
+		) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
 
 			// Check if caller is Project Owner account
@@ -319,8 +346,8 @@ pub mod pallet {
 
 			// Create project hash
 			let nonce = frame_system::Pallet::<T>::account_nonce(&user);
-            let encoded: [u8; 32] = (&user, nonce).using_encoded(blake2_256);
-            let project_hash = H256::from(encoded);
+			let encoded: [u8; 32] = (&user, nonce).using_encoded(blake2_256);
+			let project_hash = H256::from(encoded);
 
 			// Project Proposal info
 			let project_proposal_info = PProposalInfo {
