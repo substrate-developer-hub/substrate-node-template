@@ -20,13 +20,13 @@ mod tests;
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
 #[scale_info(skip_type_params(IPFSLength))]
-pub struct PVoPOInfo<MomentOf, IPFSLength: Get<u32>> {
+pub struct PVoPOInfo<IPFSLength: Get<u32>, BlockNumber> {
 	// IPFS link to PV/PO documentation
 	documentation_ipfs: BoundedString<IPFSLength>,
 	// Penalty level
 	penalty_level: u8,
 	// Penalty timeout
-	penalty_timeout: MomentOf,
+	penalty_timeout: BlockNumber,
 }
 
 // Carbon Footprint account data structure
@@ -45,7 +45,6 @@ pub struct CFAInfo<MomentOf, IPFSLength: Get<u32>> {
 // Carbon Footprint report data structure
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
-#[scale_info(skip_type_params(IPFSLength))]
 pub struct CFReportInfo<AccountIdOf, MomentOf> {
 	// Account
 	account_id: AccountIdOf,
@@ -73,6 +72,21 @@ pub struct PProposalInfo<AccountIdOf, MomentOf> {
 	votes_for: BTreeSet<AccountIdOf>,
 	// Votes against
 	votes_against: BTreeSet<AccountIdOf>,
+}
+
+// Projects info structure
+#[derive(Encode, Decode, Clone, Default, PartialEq, Eq, scale_info::TypeInfo)]
+#[cfg_attr(feature = "std", derive(Debug))]
+#[scale_info(skip_type_params(IPFSLength))]
+pub struct ProjectInfo<IPFSLength: Get<u32>, MomentOf, BlockNumber> {
+	// IPFS link to CFA documentation
+	documentation_ipfs: BoundedString<IPFSLength>,
+	// Creation date
+	creation_date: MomentOf,
+	// Penalty level
+	penalty_level: u8,
+	// Penalty timeout
+	penalty_timeout: BlockNumber,
 }
 
 // Penalty level structure for carbon footprint
@@ -119,6 +133,7 @@ pub mod pallet {
 	/// Pallet types and constants
 	type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
 	type MomentOf<T> = <<T as Config>::Time as Time>::Moment;
+	type BlockNumber<T> = BlockNumberFor<T>;
 	type IPFSHash = H256;
 
 	/// Helper functions
@@ -165,25 +180,25 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn project_validators)]
 	pub(super) type ProjectValidators<T: Config> =
-		StorageMap<_, Identity, AccountIdOf<T>, PVoPOInfo<MomentOf<T>, T::IPFSLength>, OptionQuery>;
+		StorageMap<_, Identity, AccountIdOf<T>, PVoPOInfo<T::IPFSLength, BlockNumber<T>>, OptionQuery>;
 
 	// Project Owner accounts
 	#[pallet::storage]
 	#[pallet::getter(fn project_owners)]
 	pub(super) type ProjectOwners<T: Config> =
-		StorageMap<_, Identity, AccountIdOf<T>, PVoPOInfo<MomentOf<T>, T::IPFSLength>, OptionQuery>;
+		StorageMap<_, Identity, AccountIdOf<T>, PVoPOInfo<T::IPFSLength, BlockNumber<T>>, OptionQuery>;
 
 	// Penalty timeouts
 	#[pallet::storage]
 	#[pallet::getter(fn penalty_timeouts)]
 	pub(super) type PenaltyTimeouts<T: Config> =
-		StorageMap<_, Identity, MomentOf<T>, BTreeSet<AccountIdOf<T>>, OptionQuery>;
+		StorageMap<_, Identity, BlockNumber<T>, BTreeSet<AccountIdOf<T>>, OptionQuery>;
 
 	// Carbon deficit reports
 	#[pallet::storage]
 	#[pallet::getter(fn carbon_deficit_reports)]
 	pub(super) type CarbonDeficitReports<T: Config> =
-		StorageMap<_, Identity, IPFSHash, CFReportInfo<AccountIdOf<T>, MomentOf<T>>, OptionQuery>;
+		StorageMap<_, Identity, BoundedString<T::IPFSLength>, CFReportInfo<AccountIdOf<T>, MomentOf<T>>, OptionQuery>;
 
 	// Projects proposals
 	#[pallet::storage]
@@ -191,6 +206,12 @@ pub mod pallet {
 	pub(super) type ProjectProposals<T: Config> =
 		StorageMap<_, Identity, IPFSHash, PProposalInfo<AccountIdOf<T>, MomentOf<T>>, OptionQuery>;
 
+	// Projects
+	#[pallet::storage]
+	#[pallet::getter(fn projects)]
+	pub(super) type Projects<T: Config> =
+		StorageMap<_, Identity, H256, ProjectInfo<T::IPFSLength, MomentOf<T>, BlockNumber<T>>, OptionQuery>;
+ 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -217,7 +238,7 @@ pub mod pallet {
 	}
 
 	#[pallet::call]
-	impl<T: Config> Pallet<T> {
+	impl<T: Config> Pallet<T> { 
 		// Vote for/against Carbon Deficit Reports or for/against project Proposals
 		#[pallet::call_index(0)]
 		#[pallet::weight(0)]
