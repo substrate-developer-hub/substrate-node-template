@@ -101,7 +101,7 @@ pub struct PenaltyLevelConfig {
 #[derive(Encode, Decode, PartialEq, Eq, scale_info::TypeInfo, Clone)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum VoteType {
-	CdrVote,
+	CDRVote,
 	ProposalVote,
 }
 
@@ -253,7 +253,7 @@ pub mod pallet {
 			ensure!(ProjectValidators::<T>::contains_key(user.clone()), Error::<T>::NotAuthorized);
 
 			match vote_type {
-				VoteType::CdrVote => {
+				VoteType::CDRVote => {
 					// Get report info and return error if it does not exist
 					let mut report =
 						CarbonDeficitReports::<T>::get(ipfs.clone()).ok_or(Error::<T>::ReportNotFound)?;
