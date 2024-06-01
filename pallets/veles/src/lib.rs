@@ -187,6 +187,12 @@ pub mod pallet {
 	pub(super) type ProjectOwners<T: Config> =
 		StorageMap<_, Identity, AccountIdOf<T>, PVoPOInfo<T::IPFSLength, BlockNumber<T>>, OptionQuery>;
 
+	// Projects
+	#[pallet::storage]
+	#[pallet::getter(fn projects)]
+	pub(super) type Projects<T: Config> =
+		StorageMap<_, Identity, H256, ProjectInfo<T::IPFSLength, MomentOf<T>, BlockNumber<T>>, OptionQuery>;
+
 	// Penalty timeouts
 	#[pallet::storage]
 	#[pallet::getter(fn penalty_timeouts)]
@@ -205,11 +211,6 @@ pub mod pallet {
 	pub(super) type ProjectProposals<T: Config> =
 		StorageMap<_, Identity, BoundedString<T::IPFSLength>, PProposalInfo<AccountIdOf<T>, MomentOf<T>>, OptionQuery>;
 
-	// Projects
-	#[pallet::storage]
-	#[pallet::getter(fn projects)]
-	pub(super) type Projects<T: Config> =
-		StorageMap<_, Identity, H256, ProjectInfo<T::IPFSLength, MomentOf<T>, BlockNumber<T>>, OptionQuery>;
  
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
