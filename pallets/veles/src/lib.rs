@@ -93,7 +93,7 @@ pub struct ProjectInfo<IPFSLength: Get<u32>, MomentOf, BlockNumber> {
 #[derive(Encode, Decode, Default, PartialEq, Eq, scale_info::TypeInfo)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct PenaltyLevelConfig {
-	pub level: u8,	// Base penalty level
+	pub level: u8,	// Penalty level
 	pub base: i32, 	// Balance
 }
 
