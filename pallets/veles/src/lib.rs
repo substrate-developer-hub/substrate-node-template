@@ -4,7 +4,7 @@ pub use codec::{Decode, Encode};
 pub use common::BoundedString;
 pub use frame_support::pallet_prelude::Get;
 pub use pallet::*;
-pub use sp_core::H256;
+pub use sp_core::{H256, blake2_256};
 pub use sp_std::collections::btree_set::BTreeSet;
 
 // This module contains a mock runtime specific for testing this pallet's functionality.
@@ -134,7 +134,6 @@ pub mod pallet {
 	type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
 	type MomentOf<T> = <<T as Config>::Time as Time>::Moment;
 	type BlockNumber<T> = BlockNumberFor<T>;
-	type IPFSHash = H256;
 
 	/// Helper functions
 	// Default authority accounts
@@ -204,7 +203,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn project_proposals)]
 	pub(super) type ProjectProposals<T: Config> =
-		StorageMap<_, Identity, IPFSHash, PProposalInfo<AccountIdOf<T>, MomentOf<T>>, OptionQuery>;
+		StorageMap<_, Identity, BoundedString<T::IPFSLength>, PProposalInfo<AccountIdOf<T>, MomentOf<T>>, OptionQuery>;
 
 	// Projects
 	#[pallet::storage]
@@ -216,9 +215,9 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Successful Vote
-		SuccessfulVote(AccountIdOf<T>, IPFSHash),
+		SuccessfulVote(AccountIdOf<T>, BoundedString<T::IPFSLength>),
 		/// Successful Project Proposal
-		ProjectProposalCreated(AccountIdOf<T>, IPFSHash),
+		ProjectProposalCreated(AccountIdOf<T>, BoundedString<T::IPFSLength>),
 	}
 
 	#[pallet::error]
@@ -245,59 +244,56 @@ pub mod pallet {
 		pub fn cast_vote(
 			origin: OriginFor<T>,
 			vote_type: VoteType,
-			ipfs: IPFSHash,
+			ipfs: BoundedString<T::IPFSLength>,
 			vote: bool,
 		) -> DispatchResultWithPostInfo {
-			let who = ensure_signed(origin)?;
+			let user = ensure_signed(origin)?;
 
 			// Check if caller is Project Validator account
-			ensure!(ProjectValidators::<T>::contains_key(who.clone()), Error::<T>::NotAuthorized);
+			ensure!(ProjectValidators::<T>::contains_key(user.clone()), Error::<T>::NotAuthorized);
 
 			match vote_type {
 				VoteType::CdrVote => {
 					// Get report info and return error if it does not exist
 					let mut report =
-						CarbonDeficitReports::<T>::get(ipfs).ok_or(Error::<T>::ReportNotFound)?;
+						CarbonDeficitReports::<T>::get(ipfs.clone()).ok_or(Error::<T>::ReportNotFound)?;
 
 					// Check if vote already exists
 					ensure!(
-						!report.votes_for.contains(&who) && !report.votes_against.contains(&who),
+						!report.votes_for.contains(&user) && !report.votes_against.contains(&user),
 						Error::<T>::VoteAlreadySubmitted
 					);
 
 					if vote {
-						report.votes_for.insert(who.clone());
+						report.votes_for.insert(user.clone());
 					} else {
-						report.votes_against.insert(who.clone());
+						report.votes_against.insert(user.clone());
 					};
 
-					CarbonDeficitReports::<T>::insert(ipfs, report);
+					CarbonDeficitReports::<T>::insert(ipfs.clone(), report);
 				},
 				VoteType::ProposalVote => {
 					// Get report info or return error if it does not exist
-					let mut report = ProjectProposals::<T>::get(ipfs)
+					let mut report = ProjectProposals::<T>::get(ipfs.clone())
 						.ok_or(Error::<T>::ProjectProposalNotFound)?;
 
 					// Check if vote already exists
 					ensure!(
-						!report.votes_for.contains(&who) && !report.votes_against.contains(&who),
+						!report.votes_for.contains(&user) && !report.votes_against.contains(&user),
 						Error::<T>::VoteAlreadySubmitted
 					);
 
 					if vote {
-						report.votes_for.insert(who.clone());
+						report.votes_for.insert(user.clone());
 					} else {
-						report.votes_against.insert(who.clone());
+						report.votes_against.insert(user.clone());
 					};
 
-					ProjectProposals::<T>::insert(ipfs, report);
-				},
-				_ => {
-					return Err(Error::<T>::WrongVoteType.into());
-				},
+					ProjectProposals::<T>::insert(ipfs.clone(), report);
+				}
 			}
 
-			Self::deposit_event(Event::SuccessfulVote(who.clone(), ipfs));
+			Self::deposit_event(Event::SuccessfulVote(user.clone(), ipfs.clone()));
 
 			Ok(().into())
 		}
@@ -305,34 +301,39 @@ pub mod pallet {
 		// Propose project
 		#[pallet::call_index(1)]
 		#[pallet::weight(0)]
-		pub fn propose_project(origin: OriginFor<T>, ipfs: IPFSHash) -> DispatchResultWithPostInfo {
-			let who = ensure_signed(origin)?;
+		pub fn propose_project(origin: OriginFor<T>, ipfs: BoundedString<T::IPFSLength>) -> DispatchResultWithPostInfo {
+			let user = ensure_signed(origin)?;
 
 			// Check if caller is Project Owner account
-			ensure!(ProjectOwners::<T>::contains_key(who.clone()), Error::<T>::NotAuthorized);
+			ensure!(ProjectOwners::<T>::contains_key(user.clone()), Error::<T>::NotAuthorized);
 
 			// Ensure project does not exist
 			ensure!(
-				!ProjectProposals::<T>::contains_key(ipfs),
+				!ProjectProposals::<T>::contains_key(ipfs.clone()),
 				Error::<T>::ProjectProposalAlreadyExists
 			);
 
 			// Get time
 			let creation_date = T::Time::now();
 
+			// Create project hash
+			let nonce = frame_system::Pallet::<T>::account_nonce(&user);
+            let encoded: [u8; 32] = (&user, nonce).using_encoded(blake2_256);
+            let project_hash = H256::from(encoded);
+
 			// Project Proposal info
 			let project_proposal_info = PProposalInfo {
-				project_owner: who.clone(),
+				project_owner: user.clone(),
 				creation_date,
-				project_hash: ipfs,
+				project_hash,
 				votes_for: BTreeSet::<AccountIdOf<T>>::new(),
 				votes_against: BTreeSet::<AccountIdOf<T>>::new(),
 			};
 
 			// Write to a storage
-			ProjectProposals::<T>::insert(ipfs, project_proposal_info);
+			ProjectProposals::<T>::insert(ipfs.clone(), project_proposal_info);
 
-			Self::deposit_event(Event::ProjectProposalCreated(who.clone(), ipfs));
+			Self::deposit_event(Event::ProjectProposalCreated(user.clone(), ipfs));
 
 			Ok(().into())
 		}
