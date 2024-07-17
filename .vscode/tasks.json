@@ -7,7 +7,7 @@
             "label": "Run ",
             "type": "shell",
             "command": "cargo",
-            "args": ["run", "--release", "--", "--dev"],
+            "args": ["run", "--release", "--", "--dev", "--tmp", "--features", "runtime-benchmarks"],
             "group": {
                 "kind": "build",
                 "isDefault": true
