@@ -81,7 +81,8 @@ pub mod pallet {
 
 	#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 	pub struct ShippingAgent {
-		pub license: Vec<u8>
+		pub license: Vec<u8>,
+		// pub manifests: Vec<ShippingManifest<T>>,
 	}
 
 	#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo)]
@@ -92,15 +93,16 @@ pub mod pallet {
 		pub purchase_quantity: u32,
 		pub amount: u32,
 		pub status: OrderStatus,
+		pub shipping_manifests: Vec<ShippingManifest<T>>,
 	}
 
 	#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 	pub struct ShippingManifest<T: Config> {
-		pub order_id: Vec<u8>,
 		pub status: ShippingStatus,
 		pub shipping_agent: T::AccountId,
-		// pub details: Vec<u8>,
-		pub location: Vec<u8>,
+		pub source_location: Vec<u8>,
+		pub destination_location: Vec<u8>,
+		pub current_location: Vec<u8>,
 		pub cost: u32,
 	}
 
@@ -144,6 +146,12 @@ pub mod pallet {
 	#[pallet::getter(fn shipping_agent)]
 	pub type ShippingAgents<T: Config> = StorageMap<
 		_, Blake2_128Concat, T::AccountId, ShippingAgent, OptionQuery
+	>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn order)]
+	pub type Orders<T: Config> = StorageMap<
+		_, Blake2_128Concat, Vec<u8>, Order<T> , OptionQuery
 	>;
 
 
@@ -193,7 +201,16 @@ pub mod pallet {
 		ShippingAgentRegistered {
 			account: T::AccountId,
 			license: Vec<u8>,
-		}
+		},
+
+		OrderPlaced {
+			producer: T::AccountId,
+			manufacturer: T::AccountId,
+			material_identifier: Vec<u8>,
+			order_id: Vec<u8>,
+			quantity: u32,
+			amount: u32,
+		},
 	}
 
 
@@ -221,30 +238,6 @@ pub mod pallet {
 	/// Dispatchables
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-	//
-		/// - If no value has been set ([`Error::NoneValue`])
-		/// - If incrementing the value in storage causes an arithmetic overflow
-		///   ([`Error::StorageOverflow`])
-		// #[pallet::call_index(0)]
-		// #[pallet::weight(T::WeightInfo::cause_error())]
-		// pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
-		// 	let _who = ensure_signed(origin)?;
-		//
-		// 	// Read a value from storage.
-		// 	match Something::<T>::get() {
-		// 		// Return an error if the value has not been set.
-		// 		None => Err(Error::<T>::NoneValue.into()),
-		// 		Some(old) => {
-		// 			// Increment the value read from storage. This will cause an error in the event
-		// 			// of overflow.
-		// 			let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-		// 			// Update the value in storage with the incremented result.
-		// 			Something::<T>::put(new);
-		// 			Ok(())
-		// 		},
-		// 	}
-		// }
-
 		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::do_something())]
 		pub fn register_manufacturer(
@@ -391,7 +384,7 @@ pub mod pallet {
 
 			Ok(())
 		}
-	//
+
 		#[pallet::call_index(6)]
 		#[pallet::weight(T::WeightInfo::do_something())]
 		pub fn producer_place_order(
@@ -423,6 +416,24 @@ pub mod pallet {
 
 			// // Calculate order price
 			let order_amount = material_advert.price * quantity;
+			let shipping_cost = order_amount.checked_mul(6).and_then(|v| v.checked_div(100)).ok_or(
+				Error::<T>::NoneValue
+			)?;
+
+			let manufacturer_obj = Manufacturers::<T>::get(&manufacturer).ok_or(
+				Error::<T>::NoneValue)?;
+			let producer_obj = Producers::<T>::get(&who).ok_or(
+				Error::<T>::NoneValue
+			)?;
+
+			let manifest = ShippingManifest::<T> {
+				status: ShippingStatus::Accepted,
+				shipping_agent: shipping_agent.clone(),
+				source_location: manufacturer_obj.location.clone(),
+				destination_location: producer_obj.location,
+				current_location: manufacturer_obj.location.clone(),
+				cost: shipping_cost,
+			};
 
 			let order = Order::<T> {
 				producer: who.clone(),
@@ -430,76 +441,50 @@ pub mod pallet {
 				material_identifier: material_identifier.clone(),
 				purchase_quantity: quantity,
 				amount: order_amount.clone(),
-				status: OrderStatus::Pending
+				status: OrderStatus::Pending,
+				shipping_manifests: vec![manifest],
 			};
 
 			// update to a more efficient nonce
-			let nonce: u32 = 5;
+			let _nonce: u32 = 5;
 			// let order_id = T::Hashing::hash(
 			// 	&( &order, &who, &manufacturer, &material_identifier)
 			// );
-			let order_id= b"Chan".into();
+			let order_id: Vec<u8> = b"Chan".into();
 
-			let manufacturer_obj = Manufacturers::<T>::get(&manufacturer).ok_or(
-				Error::<T>::NoneValue)?;
-			let shipping_cost = order.amount.checked_mul(6).and_then(|v| v.checked_div(100)).ok_or(
-				Error::<T>::NoneValue
-			)?;
-			let manifest = ShippingManifest::<T> {
-				order_id: order_id,
-				status: ShippingStatus::Accepted,
-				shipping_agent: shipping_agent.clone(),
-				location: manufacturer_obj.location,
-				// details: format!(
-				// 	"Shipping {} of material {} from {} to {}",
-				// 	quantity, material_identifier.into(), manufacturer, who
-				// ).into_bytes(),
-				cost: shipping_cost,
-			};
+			Materials::<T>::insert(&manufacturer, &material_identifier, material_advert.clone());
 
-			// Materials::<T>::insert(&manufacturer, &material_identifier, material_advert.clone());
-
-				//
-				// // Add the manifest to the shipping agent list of manifests
-				// ShippingAgentManifests::<T>::mutate(&shipping_agent, |manifests| {
-				// 	manifests.push(manifest.id.clone());
-			// });
+			// Store the manifest identifier in order
+			Orders::<T>::insert(&order_id, order.clone());
 			//
-			// // Store the manifest identifier in order
-			// Orders::<T>::insert(&order.id, order.clone());
-			//
-			// // Store order in orders storage map
-			// ManufacturerOrderRequests::<T>::mutate(&manufacturer, |orders| {
-			// 	if let Some(ref mut orders) = orders {
-			// 		orders.push(order.clone());
-			// 	} else {
-			// 		*orders = Some(vec![order.clone()]);
-			// 	}
-			// });
+
+			// Store order in orders storage map
+			ManufacturerOrderRequests::<T>::mutate(&manufacturer, |orders| {
+				if let Some(ref mut orders) = orders {
+					orders.push(order.clone());
+				} else {
+					*orders = Some(vec![order.clone()]);
+				}
+			});
+
+			ProducerOrders::<T>::mutate(&who, |orders| {
+				if let Some(ref mut orders) = orders {
+					orders.push(order.clone());
+				} else {
+					*orders = Some(vec![order.clone()]);
+				}
+			});
 			//
 			// // Emit success event
-			// Self::deposit_event(Event::OrderPlaced {
-			// 	producer: who,
-			// 	manufacturer,
-			// 	material_identifier,
-			// 	quantity,
-			// 	price: order_price,
-			// });
+			Self::deposit_event(Event::OrderPlaced {
+				producer: who,
+				manufacturer,
+				material_identifier,
+				order_id,
+				quantity,
+				amount: order_amount,
+			});
 
-			// extract material
-			// ensure the requested quantity is not above available quantity
-			// ensure shipping agent is in list of materials shipping agent
-			// calculate order price
-			// update material by deducting quantity
-			// create Order object
-			// calculate shipping fee (private method that returns 10% of order price)
-			// extract shipping agent
-			// create shipping manifest
-			// update the shipping manifest to accepted
-			// add the manifest to the shipping agent list of manifests
-			// store the manifest identifier in order
-			// store order in orders storage map
-			// emit success event
 			Ok(())
 		}
 	//
