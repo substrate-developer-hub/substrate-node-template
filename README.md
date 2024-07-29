@@ -1,223 +1,346 @@
-# Substrate Node Template
+```commandline             _      _
+███████╗██╗   ██╗██████╗ ████████╗███████╗███╗   ██╗███████╗ ██████╗ ██████╗
+██╔════╝██║   ██║██╔══██╗╚══██╔══╝██╔════╝████╗  ██║██╔════╝██╔═══██╗██╔══██╗
+███████╗██║   ██║██████╔╝   ██║   █████╗  ██╔██╗ ██║███████╗██║   ██║██████╔╝
+╚════██║██║   ██║██╔══██╗   ██║   ██╔══╝  ██║╚██╗██║╚════██║██║   ██║██╔══██╗
+███████║╚██████╔╝██████╔╝   ██║   ███████╗██║ ╚████║███████║╚██████╔╝██║  ██║
+╚══════╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝
 
-A fresh [Substrate](https://substrate.io/) node, ready for hacking :rocket:
+```
 
-A standalone version of this template is available for each release of Polkadot
-in the [Substrate Developer Hub Parachain
-Template](https://github.com/substrate-developer-hub/substrate-parachain-template/)
-repository. The parachain template is generated directly at each Polkadot
-release branch from the [Node Template in
-Substrate](https://github.com/paritytech/polkadot-sdk/tree/master/substrate/bin/node-template)
-upstream
+# **Subtensor** <!-- omit in toc -->
+[![Discord Chat](https://img.shields.io/discord/308323056592486420.svg)](https://discord.gg/bittensor)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-It is usually best to use the stand-alone version to start a new project. All
-bugs, suggestions, and feature requests should be made upstream in the
-[Substrate](https://github.com/paritytech/polkadot-sdk/tree/master/substrate)
-repository.
+This repository contains Bittensor's substrate-chain. Subtensor contains the trusted logic which:
 
-## Getting Started
+1. Runs Bittensor's [consensus mechanism](./docs/consensus.md);
+2. Advertises neuron information, IPs, etc., and
+3. Facilitates value transfer via TAO.
 
-Depending on your operating system and Rust version, there might be additional
-packages required to compile this template. Check the
-[Install](https://docs.substrate.io/install/) instructions for your platform for
-the most common dependencies. Alternatively, you can use one of the [alternative
-installation](#alternatives-installations) options.
+## System Requirements
 
-### Build
+* The binaries in ./bin/release are x86_64 binaries to be used with the Linux kernel.
+* Subtensor needs ~286 MiB to run.
+* Architectures other than x86_64 are currently not supported.
+* OSs other than Linux and MacOS are currently not supported.
 
-Use the following command to build the node without launching it:
+## Architectures
+Subtensor support the following architectures:
+
+## Linux x86_64
+Requirements:
+* Linux kernel 2.6.32+,
+* glibc 2.11+
+A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
+
+## MacOS x86_64
+Requirements:
+* MacOS 10.7+ (Lion+)
+
+## Network requirements
+* Subtensor needs access to the public internet
+* Subtensor runs on ipv4
+* Subtensor listens on the following ports:
+  1) 9944 - Websocket. This port is used by bittensor. It only accepts connections from localhost. Make sure this port is firewalled off from the public domain.
+  2) 9933 - RPC. This port is opened, but not used.
+  3) 30333 - p2p socket. This port accepts connections from other subtensor nodes. Make sure your firewall(s) allow incoming traffic to this port.
+* It is assumed your default outgoing traffic policy is ACCEPT. If not, make sure outbound traffic to port 30333 is allowed.
+
+---
+
+## For Subnet Development 
+
+If you are developing and testing subnet incentive mechanism, you will need to run a local subtensor node. Follow the detailed step-by-step instructions provided in the [**Subtensor Nodes** section in Bittensor Developer Documentation](https://docs.bittensor.com/subtensor-nodes).
+
+### Lite node vs Archive node
+
+For an explanation of lite node, archive node and how you can run your local subtensor node in these modes, see [Lite node vs archive node](https://docs.bittensor.com/subtensor-nodes#lite-node-vs-archive-node) section on [Bittensor Developer Docs](https://docs.bittensor.com/).
+
+---
+
+## For Subtensor Development
+
+### Installation
+First, complete the [basic Rust setup instructions](./docs/rust-setup.md).
+
+**Build and Run**
+
+Use Rust's native `cargo` command to build and launch the template node:
+
+```sh
+cargo run --release -- --dev
+```
+
+**Build only**
+
+The above `cargo run` command will perform an initial build and launch the node. Use the following command to build the node
+without launching it:
 
 ```sh
 cargo build --release
 ```
 
+<!--
+
+/** When I ran "cargo doc" it gave me a bunch of errors. And when I did "cargo doc --open" it gave same bunch of errors, and did not open. Also, I don't think the binary is "subtensor". It is "node-subtensor". We should uncomment this section after testing and validating and fixing this section.
+*/
+
 ### Embedded Docs
 
-After you build the project, you can use the following command to explore its
-parameters and subcommands:
+Once the project has been built, the following command can be used to explore all parameters and
+subcommands:
 
 ```sh
-./target/release/node-template -h
+./target/release/subtensor -h
 ```
+-->
 
-You can generate and view the [Rust
-Docs](https://doc.rust-lang.org/cargo/commands/cargo-doc.html) for this template
-with this command:
+## Other ways to launch the node
 
-```sh
-cargo +nightly doc --open
-```
+The above `cargo run` command will launch a temporary node and its state will be discarded after
+you terminate the process. After the project has been built, there are other ways to launch the
+node.
 
 ### Single-Node Development Chain
 
-The following command starts a single-node development chain that doesn't
-persist state:
+This command will start the single-node development chain with non-persistent state:
 
-```sh
-./target/release/node-template --dev
+```bash
+./target/release/subtensor --dev
 ```
 
-To purge the development chain's state, run the following command:
+Purge the development chain's state:
 
-```sh
-./target/release/node-template purge-chain --dev
+```bash
+./target/release/subtensor purge-chain --dev
 ```
 
-To start the development chain with detailed logging, run the following command:
+Start the development chain with detailed logging:
 
-```sh
-RUST_BACKTRACE=1 ./target/release/node-template -ldebug --dev
+```bash
+RUST_BACKTRACE=1 ./target/release/subtensor-ldebug --dev
 ```
 
-Development chains:
-
-- Maintain state in a `tmp` folder while the node is running.
-- Use the **Alice** and **Bob** accounts as default validator authorities.
-- Use the **Alice** account as the default `sudo` account.
-- Are preconfigured with a genesis state (`/node/src/chain_spec.rs`) that
-  includes several prefunded development accounts.
-
-To persist chain state between runs, specify a base path by running a command
-similar to the following:
-
-```sh
-// Create a folder to use as the db base path
-$ mkdir my-chain-state
-
-// Use of that folder to store the chain state
-$ ./target/release/node-template --dev --base-path ./my-chain-state/
-
-// Check the folder structure created inside the base path after running the chain
-$ ls ./my-chain-state
-chains
-$ ls ./my-chain-state/chains/
-dev
-$ ls ./my-chain-state/chains/dev
-db keystore network
+Running debug with logs.
+```bash
+SKIP_WASM_BUILD=1 RUST_LOG=runtime=debug -- --nocapture
 ```
 
-### Connect with Polkadot-JS Apps Front-End
+Running individual tests
+```bash
+SKIP_WASM_BUILD=1 \
+  RUST_LOG=runtime=debug \
+  cargo test <your test name> \
+  -- --nocapture --color always
+```
 
-After you start the node template locally, you can interact with it using the
-hosted version of the [Polkadot/Substrate
-Portal](https://polkadot.js.org/apps/#/explorer?rpc=ws://localhost:9944)
-front-end by connecting to the local node endpoint. A hosted version is also
-available on [IPFS (redirect) here](https://dotapps.io/) or [IPNS (direct)
-here](ipns://dotapps.io/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer). You can
-also find the source code and instructions for hosting your own instance on the
-[`polkadot-js/apps`](https://github.com/polkadot-js/apps) repository.
+<details>
+  <summary>testing `tests/` tips</summary>
+
+  **`<package-name>`**
+  Available members are found within the project root [`./cargo.toml`](./cargo.toml) file, each
+  point to a sub-directory containing a `cargo.toml` file with a `name` defined.  for example,
+  [`node/cargo.toml`](./node/cargo.toml) has a name of `node-subtensor`
+
+
+  **`<test-name>`**
+  Available tests are often found within either a `tests/` sub-directory or within the relevant
+  `src/` file.  for example [`./node/tests/chain_spec.rs`](./node/tests/chain_spec.rs) has a test
+  named `chain_spec`
+
+  **example**
+  All together we can run all tests in `chain_spec` file from `node-subtensor` project via
+
+  ```bash
+  skip_wasm_build=1 \
+    rust_log=runtime=debug \
+    cargo test \
+    --package node-subtensor \
+    --test chain_spec \
+    -- --color always --nocapture
+  ```
+</details>
+
+
+Running code coverage
+```bash
+bash scripts/code-coverage.sh
+```
+
+> Note: They above requires `cargo-tarpaulin` is installed to the host, eg. `cargo install cargo-tarpaulin`
+> Development chain means that the state of our chain will be in a tmp folder while the nodes are
+> running. Also, **alice** account will be authority and sudo account as declared in the
+> [genesis state](https://github.com/substrate-developer-hub/substrate-node-template/blob/main/node/src/chain_spec.rs#L49).
+> At the same time the following accounts will be pre-funded:
+> - Alice
+> - Bob
+> - Alice//stash
+> - Bob//stash
+
+If we want to maintain the chain state between runs, a base path must be added
+so the db can be stored in the provided folder instead of a temporal one. We could use this folder
+to store different chain databases, as a different folder will be created per different chain that
+is ran. The following commands show how to use a newly created folder as our db base path:
+
+```bash
+# Create a folder to use as the db base path
+mkdir my-chain-state
+
+# Use of that folder to store the chain state
+./target/release/node-template --dev --base-path ./my-chain-state/
+
+# Check the folder structure created inside the base path after running the chain
+ls ./my-chain-state
+#> chains
+ls ./my-chain-state/chains/
+#> dev
+ls ./my-chain-state/chains/dev
+#> db keystore network
+```
+
+**Connect with Polkadot-JS Apps Front-end**
+
+Once the node template is running locally, you can connect it with **Polkadot-JS Apps** front-end
+to interact with your chain. [Click
+here](https://polkadot.js.org/apps/#/explorer?rpc=ws://localhost:9944) connecting the Apps to your
+local node template.
 
 ### Multi-Node Local Testnet
 
-If you want to see the multi-node consensus algorithm in action, see [Simulate a
-network](https://docs.substrate.io/tutorials/build-a-blockchain/simulate-network/).
+If you want to see the multi-node consensus algorithm in action, refer to our
+[Simulate a network tutorial](https://docs.substrate.io/tutorials/build-a-blockchain/simulate-network/).
 
 ## Template Structure
 
-A Substrate project such as this consists of a number of components that are
-spread across a few directories.
+A Substrate project such as this consists of a number of components that are spread across a few
+directories.
 
-### Node
+### Node Capabilities 
 
-A blockchain node is an application that allows users to participate in a
-blockchain network. Substrate-based blockchain nodes expose a number of
-capabilities:
+A blockchain node is an application that allows users to participate in a blockchain network.
+Substrate-based blockchain nodes expose a number of capabilities:
 
-- Networking: Substrate nodes use the [`libp2p`](https://libp2p.io/) networking
-  stack to allow the nodes in the network to communicate with one another.
+- Networking: Substrate nodes use the [`libp2p`](https://libp2p.io/) networking stack to allow the
+  nodes in the network to communicate with one another.
 - Consensus: Blockchains must have a way to come to
-  [consensus](https://docs.substrate.io/fundamentals/consensus/) on the state of
-  the network. Substrate makes it possible to supply custom consensus engines
-  and also ships with several consensus mechanisms that have been built on top
-  of [Web3 Foundation
-  research](https://research.web3.foundation/en/latest/polkadot/NPoS/index.html).
-- RPC Server: A remote procedure call (RPC) server is used to interact with
-  Substrate nodes.
+  [consensus](https://docs.substrate.io/main-docs/fundamentals/consensus/) on the state of the
+  network. Substrate makes it possible to supply custom consensus engines and also ships with
+  several consensus mechanisms that have been built on top of
+  [Web3 Foundation research](https://research.web3.foundation/en/latest/polkadot/NPoS/index.html).
+- RPC Server: A remote procedure call (RPC) server is used to interact with Substrate nodes.
 
-There are several files in the `node` directory. Take special note of the
-following:
+**Directory structure**
 
-- [`chain_spec.rs`](./node/src/chain_spec.rs): A [chain
-  specification](https://docs.substrate.io/build/chain-spec/) is a source code
-  file that defines a Substrate chain's initial (genesis) state. Chain
-  specifications are useful for development and testing, and critical when
-  architecting the launch of a production chain. Take note of the
-  `development_config` and `testnet_genesis` functions,. These functions are
-  used to define the genesis state for the local development chain
-  configuration. These functions identify some [well-known
-  accounts](https://docs.substrate.io/reference/command-line-tools/subkey/) and
-  use them to configure the blockchain's initial state.
-- [`service.rs`](./node/src/service.rs): This file defines the node
-  implementation. Take note of the libraries that this file imports and the
-  names of the functions it invokes. In particular, there are references to
-  consensus-related topics, such as the [block finalization and
-  forks](https://docs.substrate.io/fundamentals/consensus/#finalization-and-forks)
-  and other [consensus
-  mechanisms](https://docs.substrate.io/fundamentals/consensus/#default-consensus-models)
+There are several files in the [`node`](./node/) directory. Make a note of the following important files: 
+
+- [`chain_spec.rs`](./node/src/chain_spec.rs): A
+  [chain specification](https://docs.substrate.io/main-docs/build/chain-spec/) is a
+  source code file that defines a Substrate chain's initial (genesis) state. Chain specifications
+  are useful for development and testing, and critical when architecting the launch of a
+  production chain. Take note of the `development_config` and `testnet_genesis` functions, which
+  are used to define the genesis state for the local development chain configuration. These
+  functions identify some
+  [well-known accounts](https://docs.substrate.io/reference/command-line-tools/subkey/)
+  and use them to configure the blockchain's initial state.
+- [`service.rs`](./node/src/service.rs): This file defines the node implementation. Take note of
+  the libraries that this file imports and the names of the functions it invokes. In particular,
+  there are references to consensus-related topics, such as the
+  [block finalization and forks](https://docs.substrate.io/main-docs/fundamentals/consensus/#finalization-and-forks)
+  and other [consensus mechanisms](https://docs.substrate.io/main-docs/fundamentals/consensus/#default-consensus-models)
   such as Aura for block authoring and GRANDPA for finality.
+
+### CLI help
+
+After the node has been [built](#build), refer to the embedded documentation to learn more about the
+capabilities and configuration parameters that it exposes:
+
+```shell
+./target/release/node-subtensor --help
+```
 
 ### Runtime
 
-In Substrate, the terms "runtime" and "state transition function" are analogous.
-Both terms refer to the core logic of the blockchain that is responsible for
-validating blocks and executing the state changes they define. The Substrate
-project in this repository uses
-[FRAME](https://docs.substrate.io/learn/runtime-development/#frame) to construct
-a blockchain runtime. FRAME allows runtime developers to declare domain-specific
-logic in modules called "pallets". At the heart of FRAME is a helpful [macro
-language](https://docs.substrate.io/reference/frame-macros/) that makes it easy
-to create pallets and flexibly compose them to create blockchains that can
-address [a variety of needs](https://substrate.io/ecosystem/projects/).
+In Substrate, the terms
+"runtime" and "state transition function"
+are analogous - they refer to the core logic of the blockchain that is responsible for validating
+blocks and executing the state changes they define. The Substrate project in this repository uses
+[FRAME](https://docs.substrate.io/main-docs/fundamentals/runtime-intro/#frame) to construct a
+blockchain runtime. FRAME allows runtime developers to declare domain-specific logic in modules
+called "pallets". At the heart of FRAME is a helpful
+[macro language](https://docs.substrate.io/reference/frame-macros/) that makes it easy to
+create pallets and flexibly compose them to create blockchains that can address
+[a variety of needs](https://substrate.io/ecosystem/projects/).
 
-Review the [FRAME runtime implementation](./runtime/src/lib.rs) included in this
-template and note the following:
+Review the [FRAME runtime implementation](./runtime/src/lib.rs) included in this template and note
+the following:
 
-- This file configures several pallets to include in the runtime. Each pallet
-  configuration is defined by a code block that begins with `impl
-$PALLET_NAME::Config for Runtime`.
+- This file configures several pallets to include in the runtime. Each pallet configuration is
+  defined by a code block that begins with `impl $PALLET_NAME::Config for Runtime`.
 - The pallets are composed into a single runtime by way of the
-  [`construct_runtime!`](https://paritytech.github.io/substrate/master/frame_support/macro.construct_runtime.html)
-  macro, which is part of the [core FRAME pallet
-  library](https://docs.substrate.io/reference/frame-pallets/#system-pallets).
+  [`construct_runtime!`](https://crates.parity.io/frame_support/macro.construct_runtime.html)
+  macro, which is part of the core
+  FRAME Support [system](https://docs.substrate.io/reference/frame-pallets/#system-pallets) library.
 
 ### Pallets
 
-The runtime in this project is constructed using many FRAME pallets that ship
-with [the Substrate
-repository](https://github.com/paritytech/polkadot-sdk/tree/master/substrate/frame) and a
-template pallet that is [defined in the
-`pallets`](./pallets/template/src/lib.rs) directory.
+The runtime in this project is constructed using many FRAME pallets that ship with the
+[core Substrate repository](https://github.com/paritytech/substrate/tree/master/frame) and a
+template pallet that is [defined in the `pallets`](./pallets/template/src/lib.rs) directory.
 
-A FRAME pallet is comprised of a number of blockchain primitives, including:
+A FRAME pallet is compromised of a number of blockchain primitives:
 
-- Storage: FRAME defines a rich set of powerful [storage
-  abstractions](https://docs.substrate.io/build/runtime-storage/) that makes it
-  easy to use Substrate's efficient key-value database to manage the evolving
-  state of a blockchain.
-- Dispatchables: FRAME pallets define special types of functions that can be
-  invoked (dispatched) from outside of the runtime in order to update its state.
-- Events: Substrate uses
-  [events](https://docs.substrate.io/build/events-and-errors/) to notify users
-  of significant state changes.
+- Storage: FRAME defines a rich set of powerful
+  [storage abstractions](https://docs.substrate.io/main-docs/build/runtime-storage/) that makes
+  it easy to use Substrate's efficient key-value database to manage the evolving state of a
+  blockchain.
+- Dispatchables: FRAME pallets define special types of functions that can be invoked (dispatched)
+  from outside of the runtime in order to update its state.
+- Events: Substrate uses [events and errors](https://docs.substrate.io/main-docs/build/events-errors/)
+  to notify users of important changes in the runtime.
 - Errors: When a dispatchable fails, it returns an error.
+- Config: The `Config` configuration interface is used to define the types and parameters upon
+  which a FRAME pallet depends.
 
-Each pallet has its own `Config` trait which serves as a configuration interface
-to generically define the types and parameters it depends on.
+<!--
+### Run in Docker
 
-## Alternatives Installations
+First, install [Docker](https://docs.docker.com/get-docker/) and
+[Docker Compose](https://docs.docker.com/compose/install/).
 
-Instead of installing dependencies and building this source directly, consider
-the following alternatives.
+Then run the following command to start a single node development chain.
 
-### Nix
+```bash
+./scripts/docker_run.sh
+```
 
-Install [nix](https://nixos.org/) and
-[nix-direnv](https://github.com/nix-community/nix-direnv) for a fully
-plug-and-play experience for setting up the development environment. To get all
-the correct dependencies, activate direnv `direnv allow`.
+This command will firstly compile your code, and then start a local development network. You can
+also replace the default command
+(`cargo build --release && ./target/release/node-template --dev --ws-external`)
+by appending your own. A few useful ones are as follow.
 
-### Docker
+```bash
+# Run Substrate node without re-compiling
+./scripts/docker_run.sh ./target/release/node-template --dev --ws-external
 
-Please follow the [Substrate Docker instructions
-here](https://github.com/paritytech/polkadot-sdk/blob/master/substrate/docker/README.md) to
-build the Docker container with the Substrate Node Template binary.
+# Purge the local dev chain
+./scripts/docker_run.sh ./target/release/node-template purge-chain --dev
+
+# Check whether the code is compilable
+./scripts/docker_run.sh cargo check
+```
+-->
+
+## License
+The MIT License (MIT)
+Copyright © 2021 Yuma Rao
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+## Acknowledgments
+**parralax**

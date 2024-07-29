@@ -1,0 +1,5 @@
+.devcontainer
+.github
+.vscode
+!scripts/init.sh
+target
