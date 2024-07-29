@@ -1,0 +1,17 @@
+name: devnet-companion Label Check
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+    branches: [devnet-ready]
+jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: mheap/github-action-required-labels@v5
+        with:
+          mode: minimum
+          count: 1
+          labels: devnet-companion

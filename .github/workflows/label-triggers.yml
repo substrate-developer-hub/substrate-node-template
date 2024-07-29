@@ -1,0 +1,25 @@
+name: Label Triggers
+on:
+  pull_request:
+    types:
+      - labeled
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  comment_on_breaking_change:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if 'breaking change' label is added
+        if: github.event.label.name == 'breaking-change'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '@opentensor/cerebrum / @opentensor/gyrus / @opentensor/cortex breaking change detected! Please prepare accordingly!'
+            })

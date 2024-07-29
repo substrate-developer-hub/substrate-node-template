@@ -1,0 +1,71 @@
+name: Update Chainspecs
+
+concurrency:
+  group: update-chainspec-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main, testnet, staging, staging-ready]
+
+  workflow_dispatch:
+    inputs:
+      verbose:
+        description: "Output more information when triggered manually"
+        required: false
+        default: ""
+
+env:
+  CARGO_TERM_COLOR: always
+  VERBOSE: ${{ github.events.input.verbose }}
+
+jobs:
+  update-chainspecs:
+    runs-on: SubtensorCI
+    permissions:
+      contents: write
+
+    strategy:
+      matrix:
+        rust-branch:
+          - nightly-2024-03-05
+        rust-target:
+          - x86_64-unknown-linux-gnu
+        os:
+          - ubuntu-latest
+        include:
+          - os: ubuntu-latest
+    env:
+      RELEASE_NAME: development
+      RUSTV: ${{ matrix.rust-branch }}
+      RUST_BACKTRACE: full
+      RUST_BIN_DIR: target/${{ matrix.rust-target }}
+      TARGET: ${{ matrix.rust-target }}
+    steps:
+      - name: Check-out repository under $GITHUB_WORKSPACE
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update &&
+          sudo apt-get install -y clang curl libssl-dev llvm libudev-dev protobuf-compiler
+
+      - name: Install Rust ${{ matrix.rust-branch }}
+        uses: actions-rs/toolchain@v1.0.6
+        with:
+          toolchain: ${{ matrix.rust-branch }}
+          components: rustfmt, clippy
+          profile: minimal
+
+      - name: Utilize Shared Rust Cache
+        uses: Swatinem/rust-cache@v2.2.1
+        with:
+          key: ${{ matrix.os }}-${{ env.RUST_BIN_DIR }}
+
+      - name: Build chainspecs
+        run: ./scripts/build_all_chainspecs.sh
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        name: Commit any updated chainspecs
+        with:
+          commit_message: Update chainspecs

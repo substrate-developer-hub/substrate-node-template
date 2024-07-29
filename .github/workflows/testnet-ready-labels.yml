@@ -1,0 +1,17 @@
+name: testnet-companion Label Check
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+    branches: [testnet-ready]
+jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: mheap/github-action-required-labels@v5
+        with:
+          mode: minimum
+          count: 1
+          labels: testnet-companion

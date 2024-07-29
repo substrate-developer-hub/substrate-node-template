@@ -1,0 +1,54 @@
+name: Testnet Deploy Check
+
+on:
+  pull_request:
+    branches: [testnet]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-spec-version:
+    name: Check spec_version bump
+    runs-on: SubtensorCI
+    steps:
+      - name: Dependencies
+        run: |
+          sudo apt-get update &&
+          sudo apt-get install -y curl clang curl libssl-dev llvm \
+                                  libudev-dev protobuf-compiler
+
+      - name: Set up Rust Toolchain
+        run: curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+      - name: Install substrate-spec-version
+        run: cargo install substrate-spec-version
+
+      - name: Check-out repository under $GITHUB_WORKSPACE
+        uses: actions/checkout@v4
+
+      - name: Check that spec_version has been bumped
+        run: |
+          spec_version=$(PATH=$PATH:$HOME/.cargo/.bin substrate-spec-version wss://test.finney.opentensor.ai:443 | tr -d '\n')
+          echo "network spec_version: $spec_version"
+          : ${spec_version:?bad spec version}
+          local_spec_version=$(cargo run -p node-subtensor-runtime --bin spec_version | tr -d '\n')
+          echo "local spec_version: $local_spec_version"
+          echo "network spec_version: $spec_version"
+          if (( $(echo "$local_spec_version <= $spec_version" | bc -l) )); then echo "$local_spec_version ≯ $spec_version ❌"; exit 1; fi
+          echo "$local_spec_version > $spec_version ✅"
+
+  check-testnet-migrations:
+    name: check testnet migrations
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Run Try Runtime Checks
+        uses: "paritytech/try-runtime-gha@v0.1.0"
+        with:
+          runtime-package: "node-subtensor-runtime"
+          node-uri: "wss://test.chain.opentensor.ai:443"
+          checks: "pre-and-post"
+          extra-args: "--disable-spec-version-check --no-weight-warnings"
