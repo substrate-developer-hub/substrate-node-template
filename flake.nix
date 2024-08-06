@@ -1,17 +1,30 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }: flake-utils.lib.eachDefaultSystem (system:
+  outputs = { self, nixpkgs, flake-utils, rust-overlay, ... }: flake-utils.lib.eachDefaultSystem (system:
     let
-      pkgs = import nixpkgs { inherit system; };
+      overlays = [ (import rust-overlay) ];
+      pkgs = import nixpkgs {
+        inherit system overlays;
+      };
+      toolchainToml = builtins.fromTOML (builtins.readFile ./rust-toolchain.toml);
+      toolchainBasedRust = pkgs.rust-bin."${toolchainToml.toolchain.channel}".latest."${toolchainToml.toolchain.profile}".override {
+            extensions = toolchainToml.toolchain.components;
+            inherit (toolchainToml.toolchain) targets;
+      };
     in
     {
       devShells.default = pkgs.mkShell {
         packages = with pkgs; [
-          rustup
+          toolchainBasedRust
           clang
           protobuf
         ];
